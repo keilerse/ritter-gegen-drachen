@@ -265,21 +265,23 @@ body::after{
 .burg-kopf{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 .burg-tafel{padding:10px}
 .burg-raster{
-  display:grid;grid-template-columns:repeat(5,1fr);gap:6px;
-  padding:10px;border-radius:16px;
+  display:grid;grid-template-columns:repeat(5,1fr);gap:1px;
+  padding:6px;border-radius:16px;
   background:linear-gradient(#2b3a63 0%,var(--nacht) 60%,#2a3a2a 100%);
   border:3px solid var(--gold-tief);box-shadow:inset 0 0 0 2px rgba(255,255,255,.12);
   position:relative;
 }
 .burg-zelle{
   aspect-ratio:1;display:flex;align-items:center;justify-content:center;
-  font-size:clamp(1.4rem,6vw,2rem);line-height:1;cursor:pointer;
-  border-radius:10px;border:2px dashed rgba(255,255,255,.18);
-  background:rgba(255,255,255,.04);transition:transform .08s,box-shadow .15s,background .15s;
+  font-size:clamp(1.5rem,6vw,2.1rem);line-height:1;cursor:pointer;
+  border-radius:2px;
+  background:rgba(0,0,0,.18);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);
+  transition:transform .08s,box-shadow .15s,background .15s;
 }
-.burg-zelle.kann{border-color:var(--gold);background:rgba(245,181,60,.14);box-shadow:0 0 0 2px rgba(245,181,60,.35)}
+.burg-zelle.kann{background:rgba(245,181,60,.16);box-shadow:inset 0 0 0 3px var(--gold)}
 .burg-zelle:active{transform:scale(.94)}
-.burg-zelle.besetzt{border-style:solid;border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.1)}
+.burg-zelle.besetzt{background:rgba(255,255,255,.16);box-shadow:inset 0 0 0 1px rgba(255,255,255,.22)}
 .burg-zelle.neu{animation:burgAuf .5s ease-out}
 .burg-palette{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .burg-werkzeug{
@@ -1260,17 +1262,16 @@ body::after{
   const BURG_ZELLEN = BURG_SPALTEN*BURG_REIHEN;
   const BURG_TEILE = [
     {id:"mauer",   bild:"🧱", name:"Mauer",   preis:100, erlaubt:(z,s)=>true},
-    {id:"turm",    bild:"🗼", name:"Turm",    preis:250, erlaubt:(z,s)=>s===0||s===BURG_SPALTEN-1},
     {id:"tor",     bild:"🚪", name:"Tor",     preis:300, erlaubt:(z,s)=>z===BURG_REIHEN-1},
     {id:"fenster", bild:"🪟", name:"Fenster", preis:80,  erlaubt:(z,s)=>z===1||z===2},
     {id:"flagge",  bild:"🚩", name:"Flagge",  preis:200, erlaubt:(z,s)=>z===0},
     {id:"wappen",  bild:"🛡️", name:"Wappen",  preis:150, erlaubt:(z,s)=>true}
   ];
   const BURG_ZIEL = [
-    {id:"tor",     min:1, text:"🚪 Tor"},
-    {id:"turm",    min:2, text:"🗼 2 Türme"},
-    {id:"flagge",  min:1, text:"🚩 Flagge"},
-    {id:"mauer",   min:4, text:"🧱 4 Mauern"}
+    {text:"🚪 Tor",             min:1, n:()=>burgZaehlen("tor")},
+    {text:"🗼 Turm (3 Mauern)",  min:1, n:()=>burgTuerme()},
+    {text:"🚩 Flagge",          min:1, n:()=>burgZaehlen("flagge")},
+    {text:"🧱 4 Mauern",        min:4, n:()=>burgZaehlen("mauer")}
   ];
 
   const burg = { feld:new Array(BURG_ZELLEN).fill(""), auswahl:null, geloest:false };
@@ -1304,8 +1305,20 @@ body::after{
     return burg.feld.filter(v=>v===id).length;
   }
 
+  function burgTuerme(){
+    let n = 0;
+    for(let s=0;s<BURG_SPALTEN;s++){
+      let mauern = 0;
+      for(let z=0;z<BURG_REIHEN;z++){
+        if(burg.feld[z*BURG_SPALTEN+s]==="mauer") mauern++;
+      }
+      if(mauern>=3) n++;
+    }
+    return n;
+  }
+
   function burgCheckliste(){
-    return BURG_ZIEL.map(z => ({ ...z, ok: burgZaehlen(z.id)>=z.min }));
+    return BURG_ZIEL.map(z => ({ text:z.text, ok: z.n()>=z.min }));
   }
 
   function burgFertig(){
