@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rechen-Ritter – Plus und Minus bis 20</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --nacht:#141d38;
+  --nacht-tief:#0b1122;
+  --stein:#26314f;
+  --pergament:#f7e8c8;
+  --pergament-tief:#e6cfa2;
+  --gold:#f5b53c;
+  --gold-tief:#b97d1c;
+  --herz:#ff4d6d;
+  --drache:#57c07d;
+  --feuer:#ef5a35;
+  --tinte:#2a1c0e;
+  --r-gross:22px;
+  --r-klein:12px;
+  --schrift-display:"Luckiest Guy","Trebuchet MS",Verdana,sans-serif;
+  --schrift-text:"Fredoka","Trebuchet MS",Verdana,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:var(--schrift-text);
+  color:var(--pergament);
+  background:radial-gradient(120% 80% at 50% 0%, #2b3a63 0%, var(--nacht) 45%, var(--nacht-tief) 100%);
+  min-height:100dvh;display:flex;justify-content:center;padding:12px;overflow-x:hidden;
+}
+body::after{
+  content:"";position:fixed;left:0;right:0;bottom:0;height:70px;
+  background:
+    repeating-linear-gradient(90deg,var(--nacht-tief) 0 26px,transparent 26px 52px) top/auto 18px no-repeat,
+    linear-gradient(var(--nacht-tief),var(--nacht-tief)) bottom/100% 54px no-repeat;
+  opacity:.9;pointer-events:none;z-index:0;
+}
+#app{width:100%;max-width:560px;position:relative;z-index:1;display:flex;flex-direction:column}
+.screen{display:none;flex-direction:column;gap:12px;flex:1}
+.screen.is-active{display:flex}
+
+/* ---------- Bausteine ---------- */
+.tafel{
+  background:linear-gradient(var(--pergament),var(--pergament-tief));
+  color:var(--tinte);border-radius:var(--r-gross);border:3px solid var(--gold-tief);
+  box-shadow:0 10px 0 rgba(0,0,0,.35),inset 0 2px 0 rgba(255,255,255,.6);padding:18px;
+}
+.knopf{
+  font-family:var(--schrift-display);font-size:1.35rem;letter-spacing:.5px;color:var(--tinte);
+  background:linear-gradient(var(--gold),#d99420);border:3px solid var(--gold-tief);
+  border-radius:var(--r-gross);padding:14px 26px;cursor:pointer;
+  box-shadow:0 6px 0 var(--gold-tief);transition:transform .08s,box-shadow .08s;
+}
+.knopf:active{transform:translateY(5px);box-shadow:0 1px 0 var(--gold-tief)}
+.mini{
+  font-family:var(--schrift-text);font-weight:600;font-size:.95rem;
+  background:rgba(255,255,255,.08);color:var(--pergament);
+  border:2px solid rgba(255,255,255,.16);border-radius:999px;padding:8px 16px;cursor:pointer;
+}
+.mini:active{transform:translateY(2px)}
+:focus-visible{outline:4px solid #7fd4ff;outline-offset:3px}
+
+/* ---------- Start ---------- */
+.titel{font-family:var(--schrift-display);text-align:center;line-height:1;margin-top:4px}
+.titel .zeile1{display:block;font-size:clamp(2rem,9vw,2.9rem);color:var(--gold);text-shadow:0 4px 0 var(--gold-tief),0 8px 14px rgba(0,0,0,.5)}
+.titel .zeile2{display:block;font-size:clamp(.9rem,4vw,1.2rem);color:var(--pergament);opacity:.85;margin-top:6px}
+.frage-block{margin-bottom:16px}
+.frage-block:last-child{margin-bottom:0}
+.frage{font-family:var(--schrift-display);font-size:1.15rem;color:var(--tinte);margin-bottom:8px;text-align:center}
+.wahl{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.wahl button{
+  font-family:var(--schrift-text);font-weight:700;font-size:1rem;color:var(--tinte);
+  background:#fffdf5;border:3px solid #c7ad7c;border-radius:var(--r-klein);
+  padding:12px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;
+  box-shadow:0 4px 0 rgba(0,0,0,.18);transition:transform .08s,box-shadow .08s;
+}
+.wahl button .zeichen{font-size:1.9rem;line-height:1}
+.wahl button[aria-pressed="true"]{
+  background:linear-gradient(#ffe9ae,var(--gold));border-color:var(--gold-tief);
+  box-shadow:0 4px 0 var(--gold-tief),inset 0 0 0 2px #fff8;
+}
+.wahl button[aria-pressed="true"]::after{content:"✓ ausgewählt";font-size:.7rem;letter-spacing:.5px;opacity:.75}
+.wahl button:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.18)}
+.spielwahl{display:grid;grid-template-columns:1fr;gap:12px}
+.spielkarte{
+  display:flex;align-items:center;gap:14px;text-align:left;cursor:pointer;
+  background:linear-gradient(var(--pergament),var(--pergament-tief));color:var(--tinte);
+  border:3px solid var(--gold-tief);border-radius:var(--r-gross);padding:14px 16px;
+  box-shadow:0 8px 0 rgba(0,0,0,.35);transition:transform .08s,box-shadow .08s;font-family:var(--schrift-text);
+}
+.spielkarte:active{transform:translateY(5px);box-shadow:0 3px 0 rgba(0,0,0,.35)}
+.spielkarte .bild{font-size:2.6rem;line-height:1;flex-shrink:0}
+.spielkarte h3{font-family:var(--schrift-display);font-size:1.25rem;line-height:1.1}
+.spielkarte p{font-size:.92rem;font-weight:500;opacity:.85;margin-top:3px}
+
+/* ---------- Kampfleiste ---------- */
+.kampfleiste{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px}
+.partei{background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.12);border-radius:var(--r-klein);padding:8px 10px}
+.partei--drache{text-align:right}
+.partei .name{font-size:.8rem;text-transform:uppercase;letter-spacing:1.5px;opacity:.7;font-weight:600}
+.leben{display:flex;gap:4px;font-size:1.35rem;margin-top:2px;min-height:1.6em}
+.partei--drache .leben{justify-content:flex-end}
+.leben span{transition:transform .25s,opacity .25s,filter .25s}
+.leben span.weg{filter:grayscale(1);opacity:.28;transform:scale(.75)}
+.leben span.verliert{animation:verlust .5s ease-out}
+.runde{font-family:var(--schrift-display);background:var(--stein);border:2px solid var(--gold-tief);
+  color:var(--gold);border-radius:999px;padding:6px 12px;font-size:.9rem;white-space:nowrap}
+
+/* ---------- Schatz-/Truhenleiste ---------- */
+.schatzleiste{background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.12);
+  border-radius:var(--r-klein);padding:9px 12px;display:flex;align-items:center;gap:9px}
+.schatzleiste .schild{font-size:1.4rem;line-height:1}
+.goldbox{display:flex;align-items:center;gap:5px;font-family:var(--schrift-display);
+  color:var(--gold);font-size:1.15rem;min-width:3.4em}
+.goldbox.puls{animation:puls .45s ease-out}
+.goldbox.minus{animation:ruettel .45s ease-out}
+.goldbox.minus .js-gold{color:var(--feuer)}
+.balken{flex:1;height:16px;background:rgba(0,0,0,.35);border-radius:999px;overflow:hidden;border:2px solid rgba(255,255,255,.15)}
+.balken i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffd77a,var(--gold));
+  border-radius:999px;transition:width .45s cubic-bezier(.2,.9,.3,1.2)}
+.schatzleiste .zaehler{font-weight:700;font-size:.88rem;min-width:2.6em;text-align:right}
+
+/* ---------- Arena ---------- */
+.arena{position:relative;height:118px;display:flex;align-items:flex-end;justify-content:space-between;
+  padding:0 6px;border-bottom:4px solid rgba(255,255,255,.08)}
+.figur{font-size:clamp(3rem,14vw,4.2rem);line-height:1;filter:drop-shadow(0 6px 6px rgba(0,0,0,.5))}
+.figur--drache{transform:scaleX(-1)}
+.figur.angriff{animation:angriff .45s ease-out}
+.figur.getroffen{animation:getroffen .45s ease-out}
+.figur.faellt{animation:faellt .9s forwards}
+.effekt{position:absolute;top:35%;left:10%;font-size:2.6rem;opacity:0;pointer-events:none}
+.effekt.schlag{animation:schlag .55s ease-out}
+.effekt.flamme{animation:flamme .7s ease-in}
+.funken{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.funke{position:absolute;font-size:1.4rem;animation:funke 1.1s ease-out forwards}
+
+/* ---------- Aufgabe ---------- */
+.aufgabe-tafel{text-align:center;padding:16px 14px}
+.aufgabe{font-family:var(--schrift-display);font-size:clamp(2.2rem,12vw,3.2rem);line-height:1.1;
+  letter-spacing:2px;color:var(--tinte)}
+.aufgabe .luecke{display:inline-block;min-width:1.1em;border-bottom:6px solid var(--feuer);color:var(--feuer)}
+.rueckmeldung{font-weight:600;font-size:1.05rem;margin-top:8px;min-height:1.5em;color:#5b4a2e}
+.rueckmeldung.gut{color:#1f7a45}
+.rueckmeldung.schlecht{color:#b1341f}
+.tipp-feld{display:none;margin-top:14px}
+.tipp-feld.is-offen{display:block}
+.zahlenfeldpunkte{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;max-width:340px;margin:0 auto}
+.zahlenfeldpunkte i{aspect-ratio:1;border-radius:50%;border:2px solid #b9a074;background:#fffdf5;display:block;position:relative}
+.zahlenfeldpunkte i:nth-child(5n){margin-right:8px}
+.zahlenfeldpunkte i:nth-child(10n){margin-right:0}
+.zahlenfeldpunkte i.a{background:#3f7fd1;border-color:#2b5a97}
+.zahlenfeldpunkte i.b{background:var(--feuer);border-color:#b23c1f}
+.zahlenfeldpunkte i.dazu{background:#fffdf5;border:3px dashed var(--feuer)}
+.zahlenfeldpunkte i.weg{background:#ded3bb;border-color:#b9a074}
+.zahlenfeldpunkte i.weg::after{content:"";position:absolute;inset:15%;
+  background:linear-gradient(45deg,transparent 44%,#8a6f43 44% 56%,transparent 56%),
+             linear-gradient(-45deg,transparent 44%,#8a6f43 44% 56%,transparent 56%)}
+
+/* ---------- Zahlenfeld ---------- */
+.zahlenfeld{display:grid;grid-template-columns:repeat(7,1fr);gap:7px}
+.zahlenfeld--klein{grid-template-columns:repeat(6,1fr)}
+.zahl{font-family:var(--schrift-text);font-weight:700;font-size:clamp(1.05rem,4.6vw,1.4rem);aspect-ratio:1;
+  color:var(--tinte);background:linear-gradient(var(--pergament),var(--pergament-tief));
+  border:2px solid var(--gold-tief);border-radius:var(--r-klein);box-shadow:0 4px 0 rgba(0,0,0,.4);
+  cursor:pointer;transition:transform .07s,box-shadow .07s,background .15s}
+.zahl:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.4)}
+.zahl.richtig{background:linear-gradient(#7de2a2,var(--drache));border-color:#2f7d4e}
+.zahl.falsch{background:linear-gradient(#ff9d8c,#e2483d);border-color:#a12b1e;color:#fff}
+.zahlenfeld.gesperrt .zahl{pointer-events:none;opacity:.75}
+.fusszeile{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding-bottom:8px}
+
+/* ---------- Ergebnis ---------- */
+.ergebnis{text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center;justify-content:center;flex:1}
+.ergebnis .grossfigur{font-size:clamp(3.6rem,18vw,5.4rem);line-height:1;animation:schweben 2.4s ease-in-out infinite}
+.ergebnis h2{font-family:var(--schrift-display);font-size:clamp(1.7rem,7.5vw,2.4rem);color:var(--gold);line-height:1.1}
+.ergebnis p{font-size:1.05rem;font-weight:500;max-width:26ch}
+.sterne{font-size:2.2rem;letter-spacing:6px}
+.beute{font-family:var(--schrift-display);font-size:1.5rem;color:var(--gold)}
+.bilanz{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.bilanz div{background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.14);border-radius:var(--r-klein);padding:10px 14px;min-width:88px}
+.bilanz b{display:block;font-family:var(--schrift-display);font-size:1.5rem;color:var(--gold)}
+.bilanz span{font-size:.78rem;text-transform:uppercase;letter-spacing:1px;opacity:.75}
+
+/* ---------- Schatzjagd ---------- */
+.hort-kopf{display:flex;gap:8px;align-items:stretch}
+.anzeige{flex:1;background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.12);
+  border-radius:var(--r-klein);padding:8px 10px;text-align:center}
+.anzeige .kopf{font-size:.72rem;text-transform:uppercase;letter-spacing:1.4px;opacity:.7;font-weight:600}
+.anzeige .wert{font-family:var(--schrift-display);font-size:1.3rem;color:var(--gold);line-height:1.2}
+.anzeige--serie .wert{color:var(--feuer)}
+.anzeige--serie.aus .wert{color:#8b93a8}
+.anzeige .goldbox{justify-content:center;min-width:0}
+.hort-buehne{position:relative;height:120px;display:flex;align-items:flex-end;justify-content:center;
+  border-bottom:4px solid rgba(255,255,255,.08)}
+.hort-buehne .haufen{font-size:clamp(2.6rem,12vw,3.6rem);line-height:1;filter:drop-shadow(0 6px 6px rgba(0,0,0,.5))}
+.hort-buehne .haufen.huepft{animation:huepfen .5s ease-out}
+.hort-buehne .haufen.schrumpft{animation:schrumpfen .5s ease-out}
+.hort-buehne .rang{position:absolute;top:6px;left:50%;transform:translateX(-50%);
+  font-family:var(--schrift-display);font-size:.95rem;color:var(--gold);
+  background:var(--stein);border:2px solid var(--gold-tief);border-radius:999px;padding:4px 14px;white-space:nowrap}
+
+/* ---------- Overlay ---------- */
+.overlay{position:fixed;inset:0;background:rgba(6,10,22,.88);z-index:20;
+  display:none;align-items:center;justify-content:center;padding:16px}
+.overlay.is-offen{display:flex}
+.overlay-karte{width:100%;max-width:440px;text-align:center;display:flex;flex-direction:column;gap:14px;align-items:center}
+.truhe{font-size:clamp(5rem,26vw,7.5rem);line-height:1;cursor:pointer;animation:wackeln 1s ease-in-out infinite}
+.belohnung{font-size:clamp(4rem,22vw,6rem);line-height:1;animation:aufpoppen .6s ease-out}
+.overlay h2{font-family:var(--schrift-display);font-size:clamp(1.6rem,7vw,2.2rem);color:var(--gold);line-height:1.15}
+.overlay p{font-weight:500;font-size:1.05rem;max-width:28ch}
+.gold-plus{font-family:var(--schrift-display);font-size:1.6rem;color:var(--gold)}
+.album-gitter{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%}
+.sammelstueck{background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.14);
+  border-radius:var(--r-klein);padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.sammelstueck .bild{font-size:1.9rem;line-height:1}
+.sammelstueck .titel-klein{font-size:.65rem;line-height:1.15;opacity:.85}
+.sammelstueck.fehlt{opacity:.45}
+.sammelstueck.fehlt .bild{filter:grayscale(1) brightness(.4)}
+
+/* ---------- Bewegung ---------- */
+@keyframes schweben{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes angriff{0%{transform:translateX(0)}45%{transform:translateX(46px) rotate(-12deg)}100%{transform:translateX(0)}}
+@keyframes getroffen{0%,100%{transform:scaleX(-1) translateX(0)}25%{transform:scaleX(-1) translateX(12px) rotate(8deg);filter:brightness(2.4)}60%{transform:scaleX(-1) translateX(-8px)}}
+@keyframes faellt{to{transform:scaleX(-1) translateY(60px) rotate(80deg);opacity:0}}
+@keyframes schlag{0%{opacity:0;transform:translateX(0) rotate(-40deg) scale(.6)}30%{opacity:1}100%{opacity:0;transform:translateX(190px) rotate(30deg) scale(1.3)}}
+@keyframes flamme{0%{opacity:0;transform:translateX(190px) scale(.5)}30%{opacity:1}100%{opacity:0;transform:translateX(0) scale(1.4)}}
+@keyframes funke{0%{opacity:1;transform:translate(0,0) rotate(0)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--dr))}}
+@keyframes verlust{0%{transform:scale(1)}40%{transform:scale(1.7) rotate(12deg)}100%{transform:scale(.75)}}
+@keyframes puls{0%{transform:scale(1)}45%{transform:scale(1.3)}100%{transform:scale(1)}}
+@keyframes ruettel{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+@keyframes huepfen{0%,100%{transform:translateY(0)}40%{transform:translateY(-18px) scale(1.08)}}
+@keyframes schrumpfen{0%,100%{transform:scale(1)}45%{transform:scale(.82) rotate(-6deg)}}
+@keyframes wackeln{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg) scale(1.04)}}
+@keyframes aufpoppen{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.18)}100%{transform:scale(1);opacity:1}}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001s !important;animation-iteration-count:1 !important}}
+@media (max-width:360px){.zahlenfeld{grid-template-columns:repeat(5,1fr)}.zahlenfeld--klein{grid-template-columns:repeat(4,1fr)}}
+@media (min-height:780px){.arena{height:145px}.hort-buehne{height:140px}}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ START ============ -->
+  <section class="screen is-active" id="screen-start">
+    <h1 class="titel">
+      <span class="zeile1">Rechen-Ritter</span>
+      <span class="zeile2">Plus und Minus – zwei Spiele, eine Schatzkammer</span>
+    </h1>
+
+    <div class="tafel">
+      <div class="frage-block">
+        <div class="frage">Wie weit rechnen wir?</div>
+        <div class="wahl" id="wahl-raum">
+          <button type="button" data-wert="10" aria-pressed="false"><span class="zeichen">🖐️</span>bis 10</button>
+          <button type="button" data-wert="20" aria-pressed="true"><span class="zeichen">🙌</span>bis 20</button>
+        </div>
+      </div>
+      <div class="frage-block">
+        <div class="frage">Was üben wir?</div>
+        <div class="wahl" id="wahl-art">
+          <button type="button" data-wert="plus" aria-pressed="false"><span class="zeichen">➕</span>nur Plus</button>
+          <button type="button" data-wert="beides" aria-pressed="true"><span class="zeichen">➕➖</span>Plus und Minus</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="schatzleiste">
+      <span class="schild">🪙</span>
+      <span class="goldbox js-goldbox"><span class="js-gold">0</span></span>
+      <span class="schild">🎁</span>
+      <span class="balken"><i class="js-truhe-balken"></i></span>
+      <span class="zaehler js-truhe-zaehler">0/5</span>
+    </div>
+
+    <div class="spielwahl">
+      <button class="spielkarte" id="karte-kampf" type="button">
+        <span class="bild">🐲</span>
+        <span>
+          <h3>Ritter gegen Drachen</h3>
+          <p>Schlag dem Drachen die Giftzähne aus. Jeder Treffer bringt Gold.</p>
+        </span>
+      </button>
+      <button class="spielkarte" id="karte-hort" type="button">
+        <span class="bild">💰</span>
+        <span>
+          <h3>Schatzjagd</h3>
+          <p>Sammle Gold in Ruhe – ohne Herzen, ohne Verlieren.</p>
+        </span>
+      </button>
+    </div>
+
+    <div class="fusszeile">
+      <button class="mini" id="btn-ton-start">🔊 Ton an</button>
+      <button class="mini" data-kammer>🗝️ Schatzkammer</button>
+    </div>
+  </section>
+
+  <!-- ============ SPIEL 1: DRACHENKAMPF ============ -->
+  <section class="screen" id="screen-kampf">
+    <div class="kampfleiste">
+      <div class="partei">
+        <div class="name">Ritter</div>
+        <div class="leben" id="herzen"></div>
+      </div>
+      <div class="runde" id="runde">Drache 1</div>
+      <div class="partei partei--drache">
+        <div class="name" id="drachen-name">Glutzahn</div>
+        <div class="leben" id="zaehne"></div>
+      </div>
+    </div>
+
+    <div class="schatzleiste">
+      <span class="schild">🪙</span>
+      <span class="goldbox js-goldbox"><span class="js-gold">0</span></span>
+      <span class="schild">🎁</span>
+      <span class="balken"><i class="js-truhe-balken"></i></span>
+      <span class="zaehler js-truhe-zaehler">0/5</span>
+    </div>
+
+    <div class="arena">
+      <div class="figur" id="ritter">🤺</div>
+      <div class="figur figur--drache" id="drache">🐲</div>
+      <div class="effekt" id="effekt"></div>
+      <div class="funken" id="funken"></div>
+    </div>
+
+    <div class="tafel aufgabe-tafel">
+      <div class="aufgabe" id="k-aufgabe">7 + 5 = ?</div>
+      <div class="rueckmeldung" id="k-rueckmeldung">Tippe die richtige Zahl an.</div>
+      <div class="tipp-feld" id="k-tipp"><div class="zahlenfeldpunkte" id="k-punkte"></div></div>
+    </div>
+
+    <div class="zahlenfeld" id="k-zahlen"></div>
+
+    <div class="fusszeile">
+      <button class="mini" data-tipp="k">💡 Tipp</button>
+      <button class="mini" data-kammer>🗝️ Kammer</button>
+      <button class="mini" data-ton>🔊 Ton</button>
+      <button class="mini" data-heim>🏠 Auswahl</button>
+    </div>
+  </section>
+
+  <!-- ============ SPIEL 2: SCHATZJAGD ============ -->
+  <section class="screen" id="screen-hort">
+    <div class="hort-kopf">
+      <div class="anzeige">
+        <div class="kopf">Gold</div>
+        <div class="wert"><span class="goldbox js-goldbox"><span class="js-gold">0</span></span></div>
+      </div>
+      <div class="anzeige anzeige--serie aus" id="anz-serie"><div class="kopf">Serie</div><div class="wert" id="serie-wert">×1</div></div>
+      <div class="anzeige"><div class="kopf">Aufgabe</div><div class="wert" id="runden-wert">1/15</div></div>
+    </div>
+
+    <div class="schatzleiste">
+      <span class="schild">🎁</span>
+      <span class="balken"><i class="js-truhe-balken"></i></span>
+      <span class="zaehler js-truhe-zaehler">0/5</span>
+    </div>
+
+    <div class="hort-buehne">
+      <div class="rang js-rang">Knappe</div>
+      <div class="haufen js-haufen">🪙</div>
+      <div class="funken" id="h-funken"></div>
+    </div>
+
+    <div class="tafel aufgabe-tafel">
+      <div class="aufgabe" id="h-aufgabe">7 + 5 = ?</div>
+      <div class="rueckmeldung" id="h-rueckmeldung">Tippe die richtige Zahl an.</div>
+      <div class="tipp-feld" id="h-tipp"><div class="zahlenfeldpunkte" id="h-punkte"></div></div>
+    </div>
+
+    <div class="zahlenfeld" id="h-zahlen"></div>
+
+    <div class="fusszeile">
+      <button class="mini" data-tipp="h">💡 Tipp</button>
+      <button class="mini" data-kammer>🗝️ Schatzkammer</button>
+      <button class="mini" data-ton>🔊 Ton</button>
+      <button class="mini" data-heim>🏠 Auswahl</button>
+    </div>
+  </section>
+
+  <!-- ============ DRACHE BESIEGT ============ -->
+  <section class="screen" id="screen-win">
+    <div class="ergebnis">
+      <div class="grossfigur">🏆</div>
+      <h2 id="win-titel">Drache besiegt!</h2>
+      <div class="sterne" id="win-sterne">⭐⭐⭐</div>
+      <p class="beute" id="win-beute">+50 Gold</p>
+      <p id="win-text"></p>
+      <button class="knopf" id="btn-weiter">Nächster Drache</button>
+      <button class="mini" data-heim>🏠 Auswahl</button>
+    </div>
+  </section>
+
+  <!-- ============ ENDE ============ -->
+  <section class="screen" id="screen-ende">
+    <div class="ergebnis">
+      <div class="grossfigur" id="ende-figur">🐉</div>
+      <h2 id="ende-titel">Der Drache war stärker</h2>
+      <p id="ende-text"></p>
+      <div class="bilanz">
+        <div><b id="stat-richtig">0</b><span>richtig</span></div>
+        <div><b id="stat-serie">0</b><span>beste Serie</span></div>
+        <div><b id="stat-gold">0</b><span>Gold verdient</span></div>
+      </div>
+      <button class="knopf" id="btn-nochmal">Noch einmal</button>
+      <button class="mini" data-heim>🏠 Auswahl</button>
+    </div>
+  </section>
+</div>
+
+<!-- ============ TRUHEN-OVERLAY ============ -->
+<div class="overlay" id="ov-truhe">
+  <div class="overlay-karte">
+    <div class="truhe" id="truhen-bild">🎁</div>
+    <h2 id="truhen-titel">Eine Schatztruhe!</h2>
+    <p id="truhen-text">Tippe die Truhe an.</p>
+    <p class="gold-plus" id="truhen-gold" style="visibility:hidden">+50 Gold</p>
+    <button class="knopf" id="btn-truhe-zu" style="visibility:hidden">Weiter rechnen</button>
+  </div>
+</div>
+
+<!-- ============ SCHATZKAMMER ============ -->
+<div class="overlay" id="ov-kammer">
+  <div class="overlay-karte">
+    <h2>Deine Schatzkammer</h2>
+    <p id="kammer-text">0 von 12 Schätzen gefunden</p>
+    <div class="album-gitter" id="album"></div>
+    <p class="gold-plus" id="kammer-gold">🪙 0 Gold</p>
+    <button class="knopf" id="btn-kammer-zu">Zurück</button>
+  </div>
+</div>
+
+<!-- ============ TAGESZIEL ============ -->
+<div class="overlay" id="ov-ziel">
+  <div class="overlay-karte">
+    <div class="belohnung">🌟</div>
+    <h2>Tagesziel geschafft!</h2>
+    <p id="ziel-text"></p>
+    <p class="gold-plus">+100 Bonus-Gold</p>
+    <button class="knopf" id="btn-ziel-weiter">Weiter sammeln</button>
+    <button class="mini" data-heim>🏠 Auswahl</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const $ = id => document.getElementById(id);
+  const alle = s => Array.prototype.slice.call(document.querySelectorAll(s));
+  const zufall = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+  const waehle = a => a[Math.floor(Math.random()*a.length)];
+
+  const opt = { max:20, minus:true, ton:true };
+
+  /* ================= Ton ================= */
+  let audio = null;
+  function ton(freq,dauer,form,warten,laut){
+    if(!opt.ton) return;
+    try{
+      if(!audio) audio = new (window.AudioContext||window.webkitAudioContext)();
+      const t = audio.currentTime + (warten||0);
+      const o = audio.createOscillator(), g = audio.createGain();
+      o.type = form||"square";
+      o.frequency.setValueAtTime(freq,t);
+      g.gain.setValueAtTime(.0001,t);
+      g.gain.exponentialRampToValueAtTime(laut||.16,t+.02);
+      g.gain.exponentialRampToValueAtTime(.0001,t+dauer);
+      o.connect(g); g.connect(audio.destination);
+      o.start(t); o.stop(t+dauer+.05);
+    }catch(e){}
+  }
+  const kRichtig  = () => { ton(660,.12,"square",0); ton(880,.18,"square",.1); };
+  const kFalsch   = () => { ton(180,.28,"sawtooth",0,.12); ton(120,.3,"sawtooth",.12,.12); };
+  const kSieg     = () => [523,659,784,1046].forEach((f,i)=>ton(f,.22,"triangle",i*.12,.18));
+  const kAus      = () => [392,330,262,196].forEach((f,i)=>ton(f,.3,"triangle",i*.16,.16));
+  const kMuenze   = () => { ton(988,.08,"triangle",0,.12); ton(1319,.12,"triangle",.07,.12); };
+  const kGoldWeg  = () => { ton(440,.1,"triangle",0,.12); ton(294,.16,"triangle",.09,.12); };
+  const kTruhe    = () => [523,659,784,1046,1319].forEach((f,i)=>ton(f,.18,"triangle",i*.09,.2));
+
+  /* ================= Gemeinsame Schatzkammer ================= */
+  const SCHAETZE = [
+    {id:"diamant",   bild:"💎", name:"Diamant"},
+    {id:"krone",     bild:"👑", name:"Krone"},
+    {id:"schluessel",bild:"🗝️", name:"Goldschlüssel"},
+    {id:"stab",      bild:"🪄", name:"Zauberstab"},
+    {id:"schwert",   bild:"⚔️", name:"Flammenschwert"},
+    {id:"schild",    bild:"🛡️", name:"Silberschild"},
+    {id:"ei",        bild:"🥚", name:"Drachenei"},
+    {id:"einhorn",   bild:"🦄", name:"Einhorn"},
+    {id:"kompass",   bild:"🧭", name:"Kompass"},
+    {id:"laterne",   bild:"🕯️", name:"Ewiges Licht"},
+    {id:"vase",      bild:"🏺", name:"Goldvase"},
+    {id:"perle",     bild:"🌈", name:"Regenbogenperle"}
+  ];
+  const RAENGE = [
+    {ab:0,    name:"Knappe",        bild:"🪙"},
+    {ab:150,  name:"Ritter",        bild:"💰"},
+    {ab:400,  name:"Schatzmeister", bild:"💎"},
+    {ab:800,  name:"Drachenreiter", bild:"🐲"},
+    {ab:1500, name:"Legende",       bild:"👑"}
+  ];
+  const TRUHE_ALLE = 5, SPEICHER = "rechenritter.schatz";
+  const VERLUST = 5, GRUNDGOLD = 10;
+
+  const schatz = { gold:0, album:[], bisTruhe:0 };
+
+  function laden(){
+    try{
+      const roh = localStorage.getItem(SPEICHER);
+      if(roh){
+        const d = JSON.parse(roh);
+        schatz.gold = Math.max(0, Number(d.gold)||0);
+        schatz.album = Array.isArray(d.album) ? d.album : [];
+        schatz.bisTruhe = Math.min(TRUHE_ALLE-1, Number(d.bisTruhe)||0);
+      }
+    }catch(e){}
+  }
+  function sichern(){
+    try{ localStorage.setItem(SPEICHER, JSON.stringify(schatz)); }catch(e){}
+  }
+  function rang(){
+    let r = RAENGE[0];
+    RAENGE.forEach(x => { if(schatz.gold>=x.ab) r = x; });
+    return r;
+  }
+  function schatzZeichnen(){
+    alle(".js-gold").forEach(el => el.textContent = schatz.gold);
+    alle(".js-truhe-balken").forEach(el => el.style.width = (schatz.bisTruhe/TRUHE_ALLE*100)+"%");
+    alle(".js-truhe-zaehler").forEach(el => el.textContent = schatz.bisTruhe+"/"+TRUHE_ALLE);
+    alle(".js-rang").forEach(el => el.textContent = rang().name);
+    alle(".js-haufen").forEach(el => el.textContent = rang().bild);
+  }
+  function goldDazu(betrag){
+    schatz.gold += betrag;
+    alle(".js-goldbox").forEach(el => { el.classList.remove("puls"); void el.offsetWidth; el.classList.add("puls"); });
+    schatzZeichnen(); sichern();
+    return betrag;
+  }
+  function goldWeg(){
+    const verlust = Math.min(VERLUST, schatz.gold);
+    schatz.gold -= verlust;
+    if(verlust>0){
+      alle(".js-goldbox").forEach(el => { el.classList.remove("minus"); void el.offsetWidth; el.classList.add("minus"); });
+      setTimeout(()=>alle(".js-goldbox").forEach(el=>el.classList.remove("minus")),700);
+      kGoldWeg();
+    }
+    schatzZeichnen(); sichern();
+    return verlust;
+  }
+  /* Truhenfortschritt zählt in beiden Spielen mit */
+  function truheZaehlen(){
+    schatz.bisTruhe++;
+    if(schatz.bisTruhe>=TRUHE_ALLE){ schatz.bisTruhe = 0; schatzZeichnen(); sichern(); return true; }
+    schatzZeichnen(); sichern();
+    return false;
+  }
+
+  let truheWeiter = null, truheOffen = false;
+  function truheZeigen(weiter){
+    truheWeiter = weiter; truheOffen = false;
+    kTruhe();
+    const bild = $("truhen-bild");
+    bild.textContent = "🎁"; bild.className = "truhe";
+    $("truhen-titel").textContent = "Eine Schatztruhe!";
+    $("truhen-text").textContent = "Tippe die Truhe an.";
+    $("truhen-gold").style.visibility = "hidden";
+    $("btn-truhe-zu").style.visibility = "hidden";
+    $("ov-truhe").classList.add("is-offen");
+  }
+  function truheOeffnen(){
+    if(truheOffen) return;
+    truheOffen = true;
+    kTruhe();
+    const bonus = goldDazu(50);
+    const offen = SCHAETZE.filter(x => schatz.album.indexOf(x.id)<0);
+    const bild = $("truhen-bild");
+    if(offen.length){
+      const neu = waehle(offen);
+      schatz.album.push(neu.id); sichern();
+      bild.textContent = neu.bild; bild.className = "belohnung";
+      $("truhen-titel").textContent = neu.name+" gefunden!";
+      $("truhen-text").textContent = "Neu in deiner Schatzkammer – "+schatz.album.length+" von "+SCHAETZE.length+".";
+    } else {
+      bild.textContent = "💰"; bild.className = "belohnung";
+      $("truhen-titel").textContent = "Randvoll mit Gold!";
+      $("truhen-text").textContent = "Du hast schon alle Schätze – dafür klingelt die Kasse.";
+    }
+    $("truhen-gold").textContent = "+"+bonus+" Gold";
+    $("truhen-gold").style.visibility = "visible";
+    $("btn-truhe-zu").style.visibility = "visible";
+  }
+  function truheSchliessen(){
+    $("ov-truhe").classList.remove("is-offen");
+    const w = truheWeiter; truheWeiter = null;
+    if(w) w();
+  }
+  function kammerZeigen(){
+    const gitter = $("album");
+    gitter.innerHTML = "";
+    SCHAETZE.forEach(sch => {
+      const hat = schatz.album.indexOf(sch.id)>=0;
+      const el = document.createElement("div");
+      el.className = "sammelstueck"+(hat?"":" fehlt");
+      el.innerHTML = '<span class="bild">'+(hat?sch.bild:"❔")+'</span>'+
+                     '<span class="titel-klein">'+(hat?sch.name:"noch offen")+'</span>';
+      gitter.appendChild(el);
+    });
+    $("kammer-text").textContent = schatz.album.length+" von "+SCHAETZE.length+" Schätzen gefunden";
+    $("kammer-gold").textContent = "🪙 "+schatz.gold+" Gold · "+rang().name;
+    $("ov-kammer").classList.add("is-offen");
+  }
+  const multiplikator = serie => serie>=6 ? 3 : serie>=3 ? 2 : 1;
+
+  /* ================= Aufgaben ================= */
+  function fertig(a,b,op,luecke){
+    const ergebnis = op==="+" ? a+b : a-b;
+    return { a:a,b:b,op:op,ergebnis:ergebnis,luecke:luecke,
+             antwort: luecke ? b : ergebnis,
+             text: luecke ? a+op+"?"+ergebnis : a+op+b,
+             loesung: a+" "+op+" "+b+" = "+ergebnis };
+  }
+  function rohAufgabe(stufe){
+    if(opt.max===10 && stufe!==4) stufe = 1;
+    let a,b,op;
+    if(stufe===4){
+      const basis = rohAufgabe(opt.max===10 ? 1 : waehle([2,3]));
+      return fertig(basis.a,basis.b,basis.op,true);
+    }
+    const plus = !opt.minus || Math.random()<.5;
+    if(stufe===1){
+      if(plus){ op="+"; a=zufall(1,9); b=zufall(1,10-a); }
+      else    { op="-"; a=zufall(2,10); b=zufall(1,a); }
+    } else if(stufe===2){
+      if(plus){ op="+"; a=zufall(10,19); b=zufall(1,20-a); }
+      else    { op="-"; a=zufall(11,20); b=zufall(1,a-10); }
+    } else {
+      if(plus){ op="+"; a=zufall(3,9); b=zufall(11-a,Math.min(9,20-a)); }
+      else    { op="-"; a=zufall(11,18); b=zufall(a-9,9); }
+    }
+    return fertig(a,b,op,false);
+  }
+  function neuAufgabe(stufen,letzte){
+    let n,i=0;
+    do { n = rohAufgabe(waehle(stufen)); i++; } while(n.text===letzte && i<12);
+    return n;
+  }
+  function zeigeAufgabe(elId,n){
+    $(elId).innerHTML = n.luecke
+      ? n.a+" "+n.op+' <span class="luecke">?</span> = '+n.ergebnis
+      : n.a+" "+n.op+" "+n.b+' = <span class="luecke">?</span>';
+  }
+  function sagen(elId,text,art){
+    const el = $(elId);
+    el.textContent = text;
+    el.className = "rueckmeldung" + (art ? " "+art : "");
+  }
+  function bauePunkte(elId,n){
+    const feld = $(elId), gross = opt.max===10 ? 10 : 20;
+    const k = new Array(gross).fill("");
+    const setze = (v,bis,cls) => { for(let i=v;i<bis && i<gross;i++) k[i]=cls; };
+    if(n.op==="+" && !n.luecke){ setze(0,n.a,"a"); setze(n.a,n.a+n.b,"b"); }
+    else if(n.op==="+" && n.luecke){ setze(0,n.a,"a"); setze(n.a,n.ergebnis,"dazu"); }
+    else if(n.op==="-" && !n.luecke){ setze(0,n.a-n.b,"a"); setze(n.a-n.b,n.a,"weg"); }
+    else { setze(0,n.ergebnis,"a"); setze(n.ergebnis,n.a,"weg"); }
+    feld.innerHTML = "";
+    for(let i=0;i<gross;i++){
+      const p = document.createElement("i");
+      if(k[i]) p.className = k[i];
+      feld.appendChild(p);
+    }
+  }
+
+  /* ================= Zahlenfeld ================= */
+  function baueZahlen(elId,handler){
+    const feld = $(elId);
+    feld.innerHTML = "";
+    feld.classList.toggle("zahlenfeld--klein", opt.max===10);
+    for(let i=0;i<=opt.max;i++){
+      const b = document.createElement("button");
+      b.className = "zahl"; b.type = "button";
+      b.textContent = i; b.dataset.wert = i;
+      b.setAttribute("aria-label","Antwort "+i);
+      b.addEventListener("click", ()=>handler(i,b));
+      feld.appendChild(b);
+    }
+  }
+  const sperren = elId => $(elId).classList.add("gesperrt");
+  function freigeben(elId){
+    const f = $(elId);
+    f.classList.remove("gesperrt");
+    f.querySelectorAll(".zahl").forEach(b=>b.classList.remove("richtig","falsch"));
+  }
+  function zeigeLoesung(elId,antwort){
+    $(elId).querySelectorAll(".zahl").forEach(b=>{
+      if(Number(b.dataset.wert)===antwort) b.classList.add("richtig");
+    });
+  }
+
+  /* ================= Effekte ================= */
+  function bewege(el,klasse,dauer){
+    el.classList.remove(klasse); void el.offsetWidth; el.classList.add(klasse);
+    setTimeout(()=>el.classList.remove(klasse),dauer);
+  }
+  function funken(boxId,zeichen,anzahl){
+    const box = $(boxId);
+    for(let i=0;i<(anzahl||10);i++){
+      const f = document.createElement("span");
+      f.className = "funke"; f.textContent = zeichen;
+      f.style.left = zufall(20,75)+"%"; f.style.top = zufall(20,70)+"%";
+      f.style.setProperty("--dx",zufall(-90,90)+"px");
+      f.style.setProperty("--dy",zufall(-120,-40)+"px");
+      f.style.setProperty("--dr",zufall(-180,180)+"deg");
+      box.appendChild(f);
+      setTimeout(()=>f.remove(),1200);
+    }
+  }
+  function zeigeScreen(id){
+    alle(".screen").forEach(el=>el.classList.remove("is-active"));
+    $(id).classList.add("is-active");
+    schatzZeichnen();
+    window.scrollTo(0,0);
+  }
+  const lobWorte = ["Treffer!","Stark!","Volltreffer!","Genau richtig!","Perfekt!","Super gerechnet!"];
+
+  /* ================= SPIEL 1: Drachenkampf ================= */
+  const DRACHEN = [
+    { name:"Glutzahn",      emoji:"🐲", zaehne:4, stufen:[1],   hue:0,   beute:50 },
+    { name:"Nebelschwinge", emoji:"🐉", zaehne:5, stufen:[1,2], hue:160, beute:75 },
+    { name:"Frostkralle",   emoji:"🐲", zaehne:5, stufen:[2,3], hue:200, beute:100 },
+    { name:"Schattenhorn",  emoji:"🐉", zaehne:6, stufen:[3],   hue:270, beute:125 },
+    { name:"Königsdrache",  emoji:"🐲", zaehne:6, stufen:[3,4], hue:330, beute:200 }
+  ];
+  const MAX_HERZEN = 3;
+  const k = { drache:0, herzen:3, zaehne:0, maxZaehne:0, aufgabe:null, letzte:"",
+              gesperrt:false, richtig:0, falsch:0, serie:0, beste:0, beute:0 };
+
+  function kLeben(){
+    const d = DRACHEN[Math.min(k.drache,DRACHEN.length-1)];
+    $("herzen").innerHTML = Array.from({length:MAX_HERZEN},(_,i)=>
+      '<span class="'+(i<k.herzen?"":"weg")+'">❤️</span>').join("");
+    $("zaehne").innerHTML = Array.from({length:k.maxZaehne},(_,i)=>
+      '<span class="'+(i<k.zaehne?"":"weg")+'">🦷</span>').join("");
+    $("drachen-name").textContent = d.name;
+    $("runde").textContent = "Drache "+(k.drache+1)+"/"+DRACHEN.length;
+    const f = $("drache");
+    f.textContent = d.emoji;
+    f.style.filter = "drop-shadow(0 6px 6px rgba(0,0,0,.5)) hue-rotate("+d.hue+"deg)";
+  }
+  function kVerlustAnzeigen(feldId,uebrig){
+    const kinder = $(feldId).children;
+    if(kinder[uebrig]) kinder[uebrig].classList.add("verliert");
+  }
+  function kNeueAufgabe(){
+    const d = DRACHEN[Math.min(k.drache,DRACHEN.length-1)];
+    k.aufgabe = neuAufgabe(d.stufen,k.letzte);
+    k.letzte = k.aufgabe.text;
+    zeigeAufgabe("k-aufgabe",k.aufgabe);
+    sagen("k-rueckmeldung","Welche Zahl passt?","");
+    $("k-tipp").classList.remove("is-offen");
+    bauePunkte("k-punkte",k.aufgabe);
+    k.gesperrt = false;
+    freigeben("k-zahlen");
+  }
+  function kAntwort(wert,knopf){
+    if(k.gesperrt) return;
+    k.gesperrt = true; sperren("k-zahlen");
+
+    if(wert===k.aufgabe.antwort){
+      knopf.classList.add("richtig");
+      k.richtig++; k.serie++; k.beste = Math.max(k.beste,k.serie); k.zaehne--;
+      const mult = multiplikator(k.serie);
+      const gewinn = goldDazu(GRUNDGOLD*mult);
+      k.beute += gewinn;
+      kRichtig(); kMuenze();
+      sagen("k-rueckmeldung",waehle(lobWorte)+"  +"+gewinn+" Gold","gut");
+      bewege($("ritter"),"angriff",460);
+      const e = $("effekt"); e.textContent = "⚔️"; bewege(e,"schlag",750);
+      setTimeout(()=>{
+        bewege($("drache"),"getroffen",460);
+        funken("funken","🪙",mult*4);
+        kLeben(); kVerlustAnzeigen("zaehne",k.zaehne);
+      },220);
+      const truheFaellig = truheZaehlen();
+      setTimeout(()=>{
+        const weiter = () => { k.zaehne<=0 ? kDracheBesiegt() : kNeueAufgabe(); };
+        truheFaellig ? truheZeigen(weiter) : weiter();
+      },1050);
+
+    } else {
+      knopf.classList.add("falsch");
+      zeigeLoesung("k-zahlen",k.aufgabe.antwort);
+      k.falsch++; k.serie = 0; k.herzen--;
+      const weg = goldWeg();
+      k.beute -= weg;
+      kFalsch();
+      sagen("k-rueckmeldung","Richtig wäre: "+k.aufgabe.loesung+(weg?"  −"+weg+" Gold":""),"schlecht");
+      $("k-tipp").classList.add("is-offen");
+      const e = $("effekt"); e.textContent = "🔥"; bewege(e,"flamme",750);
+      setTimeout(()=>{ bewege($("ritter"),"getroffen",460); kLeben(); kVerlustAnzeigen("herzen",k.herzen); },260);
+      setTimeout(()=>{ k.herzen<=0 ? kEnde(false) : kNeueAufgabe(); },2400);
+    }
+  }
+  function kDracheBesiegt(){
+    kSieg();
+    $("drache").classList.add("faellt");
+    funken("funken","⭐",14);
+    setTimeout(()=>{
+      $("drache").classList.remove("faellt");
+      const d = DRACHEN[k.drache];
+      const sterne = k.herzen===3 ? "⭐⭐⭐" : k.herzen===2 ? "⭐⭐" : "⭐";
+      const beute = goldDazu(d.beute);
+      k.beute += beute;
+      k.drache++;
+      if(k.drache>=DRACHEN.length){ kEnde(true); return; }
+      $("win-titel").textContent = d.name+" ist besiegt!";
+      $("win-sterne").textContent = sterne;
+      $("win-beute").textContent = "🪙 +"+beute+" Gold Drachenschatz";
+      $("win-text").textContent = "Weiter geht's: "+DRACHEN[k.drache].name+" wartet schon. Deine Herzen sind wieder voll.";
+      zeigeScreen("screen-win");
+    },900);
+  }
+  function kEnde(gewonnen){
+    if(gewonnen){
+      kSieg();
+      $("ende-figur").textContent = "👑";
+      $("ende-titel").textContent = "Alle Drachen besiegt!";
+      $("ende-text").textContent = "Das Königreich ist gerettet – und dein Drachengold liegt in der Schatzkammer.";
+    } else {
+      kAus();
+      $("ende-figur").textContent = "🐉";
+      $("ende-titel").textContent = "Der Drache war stärker";
+      $("ende-text").textContent = "Deine Herzen sind aufgebraucht. Dein Gold bleibt dir – noch ein Versuch?";
+    }
+    $("stat-richtig").textContent = k.richtig;
+    $("stat-serie").textContent = k.beste;
+    $("stat-gold").textContent = Math.max(0,k.beute);
+    zeigeScreen("screen-ende");
+  }
+  function kStarteDrachen(){
+    const d = DRACHEN[k.drache];
+    k.zaehne = d.zaehne; k.maxZaehne = d.zaehne; k.herzen = MAX_HERZEN;
+    kLeben();
+    baueZahlen("k-zahlen",kAntwort);
+    zeigeScreen("screen-kampf");
+    kNeueAufgabe();
+  }
+  function kNeuesSpiel(){
+    k.drache=0; k.richtig=0; k.falsch=0; k.serie=0; k.beste=0; k.beute=0; k.letzte="";
+    kStarteDrachen();
+  }
+
+  /* ================= SPIEL 2: Schatzjagd ================= */
+  const ZIEL = 15;
+  const h = { runde:1, richtig:0, falsch:0, serie:0, beste:0,
+              aufgabe:null, letzte:"", gesperrt:false, wiederholen:false };
+
+  function hKopf(){
+    const mult = multiplikator(h.serie);
+    $("serie-wert").textContent = "×"+mult;
+    $("anz-serie").classList.toggle("aus",mult===1);
+    $("runden-wert").textContent = Math.min(h.runde,ZIEL)+"/"+ZIEL;
+    schatzZeichnen();
+  }
+  function hStufen(){
+    if(opt.max===10) return h.runde>10 ? [1,4] : [1];
+    if(h.runde<=4) return [1];
+    if(h.runde<=8) return [1,2];
+    if(h.runde<=12) return [2,3];
+    return [3,4];
+  }
+  function hNeueAufgabe(){
+    if(!h.wiederholen){
+      h.aufgabe = neuAufgabe(hStufen(),h.letzte);
+      h.letzte = h.aufgabe.text;
+    }
+    h.wiederholen = false;
+    zeigeAufgabe("h-aufgabe",h.aufgabe);
+    sagen("h-rueckmeldung","Welche Zahl passt?","");
+    $("h-tipp").classList.remove("is-offen");
+    bauePunkte("h-punkte",h.aufgabe);
+    h.gesperrt = false;
+    freigeben("h-zahlen");
+    hKopf();
+  }
+  function hAntwort(wert,knopf){
+    if(h.gesperrt) return;
+    h.gesperrt = true; sperren("h-zahlen");
+
+    if(wert===h.aufgabe.antwort){
+      knopf.classList.add("richtig");
+      h.richtig++; h.serie++; h.beste = Math.max(h.beste,h.serie);
+      const mult = multiplikator(h.serie);
+      const gewinn = goldDazu(GRUNDGOLD*mult);
+      kMuenze();
+      sagen("h-rueckmeldung",waehle(lobWorte)+"  +"+gewinn+" Gold","gut");
+      bewege($("app").querySelector(".js-haufen"),"huepft",520);
+      funken("h-funken","🪙",mult*4);
+      if(h.serie===3 || h.serie===6){
+        setTimeout(()=>{ sagen("h-rueckmeldung","🔥 Serie! Ab jetzt ×"+multiplikator(h.serie)+" Gold","gut"); ton(1046,.15,"triangle",0,.18); },560);
+      }
+      hKopf();
+      const truheFaellig = truheZaehlen();
+      setTimeout(()=>{
+        h.runde++;
+        const weiter = () => { (h.runde>ZIEL && h.richtig>=ZIEL) ? hZiel() : hNeueAufgabe(); };
+        truheFaellig ? truheZeigen(weiter) : weiter();
+      },1150);
+
+    } else {
+      knopf.classList.add("falsch");
+      zeigeLoesung("h-zahlen",h.aufgabe.antwort);
+      h.falsch++; h.serie = 0;
+      const weg = goldWeg();
+      kFalsch();
+      bewege($("app").querySelector(".js-haufen"),"schrumpft",520);
+      sagen("h-rueckmeldung", weg
+        ? "Fast! "+h.aufgabe.loesung+"  −"+weg+" Gold. Gleich nochmal."
+        : "Fast! "+h.aufgabe.loesung+" – gleich nochmal.", "schlecht");
+      $("h-tipp").classList.add("is-offen");
+      h.wiederholen = true;   /* dieselbe Aufgabe kommt gleich noch einmal */
+      hKopf();
+      setTimeout(hNeueAufgabe,2600);
+    }
+  }
+  function hZiel(){
+    kSieg();
+    goldDazu(100);
+    $("ziel-text").textContent = h.richtig+" Aufgaben geschafft, beste Serie: "+h.beste+". "+
+      (h.falsch===0 ? "Und kein einziger Fehler!" : "Weiter so!");
+    $("ov-ziel").classList.add("is-offen");
+    hKopf();
+  }
+  function hWeiterSammeln(){
+    $("ov-ziel").classList.remove("is-offen");
+    h.runde=1; h.richtig=0; h.falsch=0;
+    hNeueAufgabe();
+  }
+  function hStart(){
+    h.runde=1; h.richtig=0; h.falsch=0; h.serie=0; h.beste=0; h.letzte=""; h.wiederholen=false;
+    baueZahlen("h-zahlen",hAntwort);
+    zeigeScreen("screen-hort");
+    hNeueAufgabe();
+  }
+
+  /* ================= Auswahl & Bedienung ================= */
+  function wahlSetzen(gruppeId,wert){
+    alle("#"+gruppeId+" button").forEach(b =>
+      b.setAttribute("aria-pressed", b.dataset.wert===wert ? "true" : "false"));
+  }
+  $("wahl-raum").addEventListener("click", e => {
+    const b = e.target.closest("button"); if(!b) return;
+    opt.max = Number(b.dataset.wert); wahlSetzen("wahl-raum",b.dataset.wert);
+    ton(880,.09,"triangle",0,.12);
+  });
+  $("wahl-art").addEventListener("click", e => {
+    const b = e.target.closest("button"); if(!b) return;
+    opt.minus = b.dataset.wert==="beides"; wahlSetzen("wahl-art",b.dataset.wert);
+    ton(880,.09,"triangle",0,.12);
+  });
+  function tonUmschalten(){
+    opt.ton = !opt.ton;
+    alle("[data-ton]").forEach(b => b.textContent = opt.ton ? "🔊 Ton" : "🔇 Ton aus");
+    $("btn-ton-start").textContent = opt.ton ? "🔊 Ton an" : "🔇 Ton aus";
+    if(opt.ton) ton(880,.1,"triangle",0);
+  }
+  function heim(){
+    alle(".overlay").forEach(o=>o.classList.remove("is-offen"));
+    truheWeiter = null;
+    zeigeScreen("screen-start");
+  }
+
+  $("karte-kampf").addEventListener("click", kNeuesSpiel);
+  $("karte-hort").addEventListener("click", hStart);
+  $("btn-weiter").addEventListener("click", kStarteDrachen);
+  $("btn-nochmal").addEventListener("click", kNeuesSpiel);
+  $("truhen-bild").addEventListener("click", truheOeffnen);
+  $("btn-truhe-zu").addEventListener("click", truheSchliessen);
+  $("btn-ziel-weiter").addEventListener("click", hWeiterSammeln);
+  $("btn-kammer-zu").addEventListener("click", ()=> $("ov-kammer").classList.remove("is-offen"));
+  $("btn-ton-start").addEventListener("click", tonUmschalten);
+  alle("[data-ton]").forEach(b=>b.addEventListener("click",tonUmschalten));
+  alle("[data-heim]").forEach(b=>b.addEventListener("click",heim));
+  alle("[data-kammer]").forEach(b=>b.addEventListener("click",kammerZeigen));
+  alle("[data-tipp]").forEach(b=>b.addEventListener("click",()=>{
+    $(b.dataset.tipp+"-tipp").classList.toggle("is-offen");
+  }));
+
+  laden();
+  schatzZeichnen();
+})();
+</script>
+</body>
+</html>
