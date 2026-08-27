@@ -97,6 +97,24 @@ body::after{
 .spielkarte .bild{font-size:2.6rem;line-height:1;flex-shrink:0}
 .spielkarte h3{font-family:var(--schrift-display);font-size:1.25rem;line-height:1.1}
 .spielkarte p{font-size:.92rem;font-weight:500;opacity:.85;margin-top:3px}
+.spielwahl-titel{
+  font-family:var(--schrift-display);font-size:1rem;letter-spacing:1px;line-height:1;
+  text-align:center;margin-top:6px;color:var(--gold);
+}
+.spielwahl-titel--ausgeben{color:var(--feuer)}
+.spielkarte .badge{
+  margin-left:auto;align-self:flex-start;flex-shrink:0;
+  font-family:var(--schrift-display);font-size:.68rem;letter-spacing:.5px;
+  border-radius:999px;padding:4px 10px;white-space:nowrap;
+}
+.spielkarte .badge--verdienen{background:rgba(87,192,125,.18);color:#a7f0c3;border:2px solid var(--drache)}
+.spielkarte .badge--ausgeben{background:rgba(239,90,53,.18);color:#ffb4a0;border:2px solid var(--feuer)}
+.spielkarte--ausgeben{
+  background:linear-gradient(#3c2b1d,#28190f);color:var(--pergament);border-color:var(--feuer);
+  box-shadow:0 8px 0 rgba(180,45,20,.45);
+}
+.spielkarte--ausgeben h3{color:var(--gold)}
+.spielkarte--ausgeben p{color:rgba(247,232,200,.72)}
 
 /* ---------- Kampfleiste ---------- */
 .kampfleiste{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px}
@@ -405,12 +423,14 @@ body::after{
     </div>
 
     <div class="spielwahl">
+      <div class="spielwahl-titel">🎯 Spielen &amp; Verdienen</div>
       <button class="spielkarte" id="karte-kampf" type="button">
         <span class="bild">🐲</span>
         <span>
           <h3>Ritter gegen Drachen</h3>
           <p>Schlag dem Drachen die Giftzähne aus. Jeder Treffer bringt Gold.</p>
         </span>
+        <span class="badge badge--verdienen">Verdienen</span>
       </button>
       <button class="spielkarte" id="karte-hort" type="button">
         <span class="bild">💰</span>
@@ -418,20 +438,7 @@ body::after{
           <h3>Schatzjagd</h3>
           <p>Sammle Gold in Ruhe – ohne Herzen, ohne Verlieren.</p>
         </span>
-      </button>
-      <button class="spielkarte" id="karte-puzzle" type="button">
-        <span class="bild">🧩</span>
-        <span>
-          <h3>Puzzle-Schatz</h3>
-          <p>Kaufe Puzzleteile für 200 Gold und enthülle das Bild Stück für Stück.</p>
-        </span>
-      </button>
-      <button class="spielkarte" id="karte-burg" type="button">
-        <span class="bild">🏰</span>
-        <span>
-          <h3>Burg bauen</h3>
-          <p>Gib Gold aus und errichte deine Burg Stein für Stein.</p>
-        </span>
+        <span class="badge badge--verdienen">Verdienen</span>
       </button>
       <button class="spielkarte" id="karte-mauer" type="button">
         <span class="bild">🧮</span>
@@ -439,6 +446,25 @@ body::after{
           <h3>Rechenmauer</h3>
           <p>Fülle die Lücken der Zahlenmauer und verdiene Gold.</p>
         </span>
+        <span class="badge badge--verdienen">Verdienen</span>
+      </button>
+
+      <div class="spielwahl-titel spielwahl-titel--ausgeben">🪙 Gold ausgeben</div>
+      <button class="spielkarte spielkarte--ausgeben" id="karte-puzzle" type="button">
+        <span class="bild">🧩</span>
+        <span>
+          <h3>Puzzle-Schatz</h3>
+          <p>Kaufe Puzzleteile für 200 Gold und enthülle das Bild Stück für Stück.</p>
+        </span>
+        <span class="badge badge--ausgeben">Ausgeben</span>
+      </button>
+      <button class="spielkarte spielkarte--ausgeben" id="karte-burg" type="button">
+        <span class="bild">🏰</span>
+        <span>
+          <h3>Burg bauen</h3>
+          <p>Gib Gold aus und errichte deine Burg Stein für Stein.</p>
+        </span>
+        <span class="badge badge--ausgeben">Ausgeben</span>
       </button>
     </div>
 
