@@ -261,6 +261,45 @@ body::after{
   100%{filter:none;transform:scale(1)}
 }
 
+/* ---------- Burg ---------- */
+.burg-kopf{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.burg-tafel{padding:10px}
+.burg-baustelle{
+  display:flex;flex-direction:column-reverse;align-items:center;gap:6px;
+  padding:14px 10px 10px;min-height:230px;
+  border-bottom:5px solid rgba(0,0,0,.28);border-radius:16px;
+  background:linear-gradient(var(--nacht),var(--nacht-tief));
+}
+.burg-teil{
+  display:flex;align-items:center;gap:8px;width:100%;max-width:260px;
+  background:linear-gradient(var(--pergament),var(--pergament-tief));color:var(--tinte);
+  border:3px solid var(--gold-tief);border-radius:var(--r-klein);
+  padding:8px 12px;font-weight:600;box-shadow:0 4px 0 rgba(0,0,0,.35);
+}
+.burg-teil .zeichen{font-size:1.7rem;line-height:1}
+.burg-teil.neu{animation:burgAuf .55s ease-out}
+.burg-teil.leer{
+  background:transparent;color:var(--pergament);opacity:.7;
+  border:3px dashed rgba(255,255,255,.28);box-shadow:none;
+  justify-content:center;text-align:center;
+}
+.burg-teil.leer .zeichen{opacity:.5}
+.burg-fortschritt{padding:10px 2px 2px}
+.burg-fortschritt-text{text-align:center;font-weight:600;font-size:.92rem;margin-bottom:8px;min-height:2.4em}
+.burg-info{
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.13);
+  border-radius:var(--r-klein);padding:10px 14px;font-weight:600;
+}
+.burg-info strong{font-family:var(--schrift-display);color:var(--gold);font-size:1.2rem}
+#btn-burg-kaufen:disabled{opacity:.5;cursor:not-allowed;filter:grayscale(.5)}
+.burg-hinweis{text-align:center;font-size:.86rem;opacity:.7;min-height:1.2em}
+@keyframes burgAuf{
+  0%{transform:translateY(14px) scale(.9);opacity:0}
+  60%{transform:translateY(-2px) scale(1.02);opacity:1}
+  100%{transform:none}
+}
+
 /* ---------- Bewegung ---------- */
 @keyframes schweben{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 @keyframes angriff{0%{transform:translateX(0)}45%{transform:translateX(46px) rotate(-12deg)}100%{transform:translateX(0)}}
@@ -336,6 +375,13 @@ body::after{
         <span>
           <h3>Puzzle-Schatz</h3>
           <p>Kaufe Puzzleteile für 200 Gold und enthülle das Bild Stück für Stück.</p>
+        </span>
+      </button>
+      <button class="spielkarte" id="karte-burg" type="button">
+        <span class="bild">🏰</span>
+        <span>
+          <h3>Burg bauen</h3>
+          <p>Gib Gold aus und errichte deine Burg Stein für Stein.</p>
         </span>
       </button>
     </div>
@@ -462,6 +508,46 @@ body::after{
 
     <button class="knopf" id="btn-puzzle-kaufen" type="button">🧩 Puzzleteil kaufen – 200 Gold</button>
     <div class="puzzle-hinweis" id="puzzle-hinweis">Mit jedem gekauften Teil wird das Bild ein bisschen sichtbarer.</div>
+
+    <div class="fusszeile">
+      <button class="mini" data-kammer>🗝️ Schatzkammer</button>
+      <button class="mini" data-ton>🔊 Ton</button>
+      <button class="mini" data-heim>🏠 Auswahl</button>
+    </div>
+  </section>
+
+  <!-- ============ SPIEL 4: BURG BAUEN ============ -->
+  <section class="screen" id="screen-burg">
+    <div class="burg-kopf">
+      <div class="anzeige">
+        <div class="kopf">Gold</div>
+        <div class="wert"><span class="goldbox js-goldbox"><span class="js-gold">0</span></span></div>
+      </div>
+      <div class="anzeige">
+        <div class="kopf">Burg</div>
+        <div class="wert" id="burg-nr">1</div>
+      </div>
+      <div class="anzeige">
+        <div class="kopf">Teile</div>
+        <div class="wert" id="burg-zaehler">0/0</div>
+      </div>
+    </div>
+
+    <div class="tafel burg-tafel">
+      <div class="burg-baustelle" id="burg-baustelle" aria-label="Burgbaustelle"></div>
+      <div class="burg-fortschritt">
+        <div class="burg-fortschritt-text" id="burg-text">Baue deine Burg Teil für Teil.</div>
+        <div class="balken"><i id="burg-balken"></i></div>
+      </div>
+    </div>
+
+    <div class="burg-info">
+      <span id="burg-info-teil">🏗️ Nächster Bauteil</span>
+      <strong id="burg-info-preis">–</strong>
+    </div>
+
+    <button class="knopf" id="btn-burg-kaufen" type="button">🏗️ Bauteil bauen</button>
+    <div class="burg-hinweis" id="burg-hinweis">Jeder Bauteil kostet Gold – die Burg wächst von unten nach oben.</div>
 
     <div class="fusszeile">
       <button class="mini" data-kammer>🗝️ Schatzkammer</button>
@@ -647,6 +733,15 @@ body::after{
     }
     schatzZeichnen(); sichern();
     return verlust;
+  }
+  function goldAusgeben(betrag){
+    if(schatz.gold < betrag) return false;
+    schatz.gold -= betrag;
+    alle(".js-goldbox").forEach(el => { el.classList.remove("minus"); void el.offsetWidth; el.classList.add("minus"); });
+    setTimeout(()=>alle(".js-goldbox").forEach(el=>el.classList.remove("minus")),700);
+    kGoldWeg();
+    schatzZeichnen(); sichern();
+    return true;
   }
   /* Truhenfortschritt zählt in beiden Spielen mit */
   function truheZaehlen(){
@@ -1047,11 +1142,9 @@ body::after{
   /* ================= SPIEL 3: PUZZLE-SCHATZ ================= */
   const PUZZLE_PREIS = 200;
   const PUZZLE_TEILE = 20;
-  const PUZZLE_BILDER = [
-    {name:"Die Burg und der Drache", bild:"puzzle-burg-drache.png"}
-  ];
+  const puzzleBild = () => "puzzle"+puzzle.nummer+".png";
 
-  const puzzle = { nummer:1, bildIndex:0, offen:[] };
+  const puzzle = { nummer:1, offen:[] };
 
   function puzzleLaden(){
     try{
@@ -1059,7 +1152,6 @@ body::after{
       if(!roh) return;
       const d = JSON.parse(roh);
       puzzle.nummer = Math.max(1, Number(d.nummer)||1);
-      puzzle.bildIndex = Math.max(0, Number(d.bildIndex)||0);
       puzzle.offen = Array.isArray(d.offen)
         ? d.offen.map(Number).filter(x=>x>=0&&x<PUZZLE_TEILE)
         : [];
@@ -1070,7 +1162,6 @@ body::after{
     try{
       localStorage.setItem("rechenritter.puzzle", JSON.stringify({
         nummer:puzzle.nummer,
-        bildIndex:puzzle.bildIndex,
         offen:puzzle.offen
       }));
     }catch(e){}
@@ -1079,14 +1170,14 @@ body::after{
   function puzzleZeichnen(){
     const box = $("puzzle-bild");
     if(!box) return;
-    const bild = PUZZLE_BILDER[puzzle.bildIndex % PUZZLE_BILDER.length];
+    const bild = puzzleBild();
     box.innerHTML = "";
 
     for(let i=0;i<PUZZLE_TEILE;i++){
       const teil = document.createElement("div");
       const offen = puzzle.offen.indexOf(i)>=0;
       teil.className = "puzzle-teil"+(offen ? " offen" : "");
-      teil.style.backgroundImage = 'url("'+bild.bild+'")';
+      teil.style.backgroundImage = 'url("'+bild+'")';
 
       const col = i % 5;
       const row = Math.floor(i/5);
@@ -1155,12 +1246,106 @@ body::after{
         $("puzzle-hinweis").textContent = "Das nächste Abenteuer wartet!";
         setTimeout(()=>{
           puzzle.nummer++;
-          puzzle.bildIndex = (puzzle.bildIndex+1) % PUZZLE_BILDER.length;
           puzzle.offen = [];
           puzzleSichern();
           puzzleZeichnen();
         },1800);
       },500);
+    }
+  }
+
+  /* ================= SPIEL 4: BURG BAUEN ================= */
+  const BURG_TEILE = [
+    {name:"Grundstein", bild:"🪨", preis:50},
+    {name:"Mauer",      bild:"🧱", preis:100},
+    {name:"Turm",       bild:"🗼", preis:150},
+    {name:"Tor",        bild:"🚪", preis:200},
+    {name:"Flagge",     bild:"🚩", preis:250},
+    {name:"Turmspitze", bild:"🏰", preis:400}
+  ];
+
+  const burg = { gebaut:0 };
+
+  function burgLaden(){
+    try{
+      const roh = localStorage.getItem("rechenritter.burg");
+      if(!roh) return;
+      const d = JSON.parse(roh);
+      burg.gebaut = Math.max(0, Math.min(BURG_TEILE.length, Number(d.gebaut)||0));
+    }catch(e){}
+  }
+
+  function burgSichern(){
+    try{
+      localStorage.setItem("rechenritter.burg", JSON.stringify({ gebaut:burg.gebaut }));
+    }catch(e){}
+  }
+
+  function burgZeichnen(){
+    const box = $("burg-baustelle");
+    if(!box) return;
+    box.innerHTML = "";
+
+    for(let i=0;i<BURG_TEILE.length;i++){
+      const teil = BURG_TEILE[i];
+      const fertig = i < burg.gebaut;
+      const el = document.createElement("div");
+      el.className = "burg-teil"+(fertig ? "" : " leer");
+      el.innerHTML = '<span class="zeichen">'+teil.bild+'</span><span>'+
+        (fertig ? teil.name : teil.name+" · "+teil.preis+" 🪙")+'</span>';
+      box.appendChild(el);
+    }
+
+    const fertig = burg.gebaut>=BURG_TEILE.length;
+    const naechster = BURG_TEILE[burg.gebaut];
+    $("burg-nr").textContent = "1";
+    $("burg-zaehler").textContent = burg.gebaut+"/"+BURG_TEILE.length;
+    $("burg-balken").style.width = (burg.gebaut/BURG_TEILE.length*100)+"%";
+
+    const kaufen = $("btn-burg-kaufen");
+    if(!fertig){
+      kaufen.disabled = schatz.gold < naechster.preis;
+      kaufen.textContent = "🏗️ "+naechster.name+" bauen – "+naechster.preis+" Gold";
+      $("burg-info-teil").textContent = "🏗️ Nächster Bauteil: "+naechster.name;
+      $("burg-info-preis").textContent = naechster.preis+" 🪙";
+      $("burg-text").textContent =
+        (BURG_TEILE.length-burg.gebaut)+" Teile fehlen noch. Deine Burg wächst Stück für Stück.";
+      $("burg-hinweis").textContent =
+        schatz.gold < naechster.preis
+          ? "Du brauchst noch "+(naechster.preis-schatz.gold)+" Gold für den nächsten Bauteil."
+          : "Du hast genug Gold – bau deine Burg weiter!";
+    }else{
+      kaufen.disabled = true;
+      kaufen.textContent = "🏰 Burg fertig!";
+      $("burg-info-teil").textContent = "🏰 Burg vollendet";
+      $("burg-info-preis").textContent = "–";
+      $("burg-text").textContent = "Geschafft! Deine Burg steht und ist vollständig erbaut.";
+      $("burg-hinweis").textContent = "Ein stolzes Zuhause für einen echten Rechen-Ritter.";
+    }
+  }
+
+  function burgKaufen(){
+    const fertig = burg.gebaut>=BURG_TEILE.length;
+    if(fertig) return;
+    const naechster = BURG_TEILE[burg.gebaut];
+    if(!goldAusgeben(naechster.preis)) return;
+
+    burg.gebaut++;
+    burgSichern();
+    burgZeichnen();
+
+    const el = $("burg-baustelle").children[burg.gebaut-1];
+    if(el){
+      el.classList.add("neu");
+      setTimeout(()=>el.classList.remove("neu"),600);
+    }
+
+    if(burg.gebaut>=BURG_TEILE.length){
+      setTimeout(()=>{
+        kSieg();
+        $("burg-text").textContent = "🎉 Burg fertig!";
+        $("burg-hinweis").textContent = "Deine Burg steht – ein prächtiger Anblick!";
+      },400);
     }
   }
 
@@ -1213,10 +1398,18 @@ body::after{
   });
   $("btn-puzzle-kaufen").addEventListener("click", puzzleKaufen);
 
+  $("karte-burg").addEventListener("click", ()=>{
+    burgZeichnen();
+    zeigeScreen("screen-burg");
+  });
+  $("btn-burg-kaufen").addEventListener("click", burgKaufen);
+
   puzzleLaden();
+  burgLaden();
   laden();
   schatzZeichnen();
   puzzleZeichnen();
+  burgZeichnen();
 })();
 </script>
 </body>
