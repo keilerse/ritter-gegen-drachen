@@ -107,7 +107,7 @@ body::after{
   font-family:var(--schrift-display);font-size:.68rem;letter-spacing:.5px;
   border-radius:999px;padding:4px 10px;white-space:nowrap;
 }
-.spielkarte .badge--verdienen{background:rgba(87,192,125,.18);color:#a7f0c3;border:2px solid var(--drache)}
+.spielkarte .badge--verdienen{background:rgba(87,192,125,.3);color:#0c3f24;border:2px solid #2f7d4e}
 .spielkarte .badge--ausgeben{background:rgba(239,90,53,.18);color:#ffb4a0;border:2px solid var(--feuer)}
 .spielkarte--ausgeben{
   background:linear-gradient(#3c2b1d,#28190f);color:var(--pergament);border-color:var(--feuer);
@@ -328,24 +328,40 @@ body::after{
 /* ---------- Burg ---------- */
 .burg-kopf{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 .burg-tafel{padding:10px}
+.burg-buehne{
+  position:relative;border-radius:16px;overflow:hidden;
+  background:linear-gradient(#9fd6f2 0%,#d6edfb 34%,#7ec850 34%,#4f9632 100%);
+  border:3px solid var(--gold-tief);box-shadow:inset 0 0 0 2px rgba(255,255,255,.18);
+  padding:10px 6px 6px;
+}
+.burg-zinnen,.burg-fundament{display:grid;grid-template-columns:repeat(8,1fr);gap:0}
+.burg-zinnen{position:relative}
+.burg-zinnen .zinne{
+  aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  font-size:clamp(1.4rem,5.6vw,2.1rem);line-height:1;overflow:hidden;
+}
+.burg-zinnen .zinne.gap{opacity:0}
+.burg-fundament{margin-top:0}
+.burg-fundament .stein{
+  aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  font-size:clamp(1.6rem,6.4vw,2.4rem);line-height:1;overflow:hidden;
+}
 .burg-raster{
-  display:grid;grid-template-columns:repeat(5,1fr);gap:1px;
-  padding:6px;border-radius:16px;
-  background:linear-gradient(#2b3a63 0%,var(--nacht) 60%,#2a3a2a 100%);
-  border:3px solid var(--gold-tief);box-shadow:inset 0 0 0 2px rgba(255,255,255,.12);
-  position:relative;
+  display:grid;grid-template-columns:repeat(8,1fr);gap:0;
+  border-radius:4px;background:rgba(0,0,0,.28);
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.08);
+  position:relative;margin:2px 0;
 }
 .burg-zelle{
   aspect-ratio:1;display:flex;align-items:center;justify-content:center;
-  font-size:clamp(1.5rem,6vw,2.1rem);line-height:1;cursor:pointer;
-  border-radius:2px;
-  background:rgba(0,0,0,.18);
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);
-  transition:transform .08s,box-shadow .15s,background .15s;
+  font-size:clamp(1.6rem,6.6vw,2.5rem);line-height:1;overflow:hidden;cursor:pointer;
+  border-radius:0;background:rgba(0,0,0,.14);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.22);
+  transition:transform .08s,background .15s;
 }
-.burg-zelle.kann{background:rgba(245,181,60,.16);box-shadow:inset 0 0 0 3px var(--gold)}
+.burg-zelle.kann{background:rgba(245,181,60,.28);box-shadow:inset 0 0 0 3px var(--gold)}
 .burg-zelle:active{transform:scale(.94)}
-.burg-zelle.besetzt{background:rgba(255,255,255,.16);box-shadow:inset 0 0 0 1px rgba(255,255,255,.22)}
+.burg-zelle.besetzt{background:transparent;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
 .burg-zelle.neu{animation:burgAuf .5s ease-out}
 .burg-palette{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .burg-werkzeug{
@@ -364,7 +380,7 @@ body::after{
 .burg-checkliste{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
 .burg-ziel{font-size:.8rem;font-weight:600;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.14);
   border-radius:999px;padding:4px 10px;opacity:.55}
-.burg-ziel.ok{opacity:1;border-color:var(--drache);background:rgba(87,192,125,.15);color:#a7f0c3}
+.burg-ziel.ok{opacity:1;border-color:#2f7d4e;background:rgba(87,192,125,.3);color:#0c3f24}
 .burg-hinweis{text-align:center;font-size:.86rem;opacity:.7;min-height:1.2em}
 @keyframes burgAuf{
   0%{transform:scale(.6) rotate(-8deg);opacity:0}
@@ -671,7 +687,11 @@ body::after{
     </div>
 
     <div class="tafel burg-tafel">
-      <div class="burg-raster" id="burg-raster" aria-label="Burgbaustelle"></div>
+      <div class="burg-buehne">
+        <div class="burg-zinnen" id="burg-zinnen" aria-hidden="true"></div>
+        <div class="burg-raster" id="burg-raster" aria-label="Burgbaustelle"></div>
+        <div class="burg-fundament" id="burg-fundament" aria-hidden="true"></div>
+      </div>
       <div class="burg-fortschritt">
         <div class="burg-checkliste" id="burg-checkliste"></div>
       </div>
@@ -1539,7 +1559,7 @@ body::after{
   }
 
   /* ================= SPIEL 4: BURG BAUEN ================= */
-  const BURG_SPALTEN = 5, BURG_REIHEN = 4;
+  const BURG_SPALTEN = 8, BURG_REIHEN = 5;
   const BURG_ZELLEN = BURG_SPALTEN*BURG_REIHEN;
   const BURG_TEILE = [
     {id:"mauer",   bild:"🧱", name:"Mauer",   preis:100, erlaubt:(z,s)=>true},
@@ -1549,10 +1569,10 @@ body::after{
     {id:"wappen",  bild:"🛡️", name:"Wappen",  preis:150, erlaubt:(z,s)=>true}
   ];
   const BURG_ZIEL = [
-    {text:"🚪 Tor",             min:1, n:()=>burgZaehlen("tor")},
-    {text:"🗼 Turm (3 Mauern)",  min:1, n:()=>burgTuerme()},
-    {text:"🚩 Flagge",          min:1, n:()=>burgZaehlen("flagge")},
-    {text:"🧱 4 Mauern",        min:4, n:()=>burgZaehlen("mauer")}
+    {text:"🚪 Tor",       min:1, n:()=>burgZaehlen("tor")},
+    {text:"🛡️ Wappen",    min:1, n:()=>burgZaehlen("wappen")},
+    {text:"🚩 Flagge",    min:1, n:()=>burgZaehlen("flagge")},
+    {text:"🧱 4 Mauern",  min:4, n:()=>burgZaehlen("mauer")}
   ];
 
   const burg = { feld:new Array(BURG_ZELLEN).fill(""), auswahl:null, geloest:false };
@@ -1565,10 +1585,10 @@ body::after{
       const roh = localStorage.getItem(kontoKey(konto.aktiv,"burg"));
       if(!roh) return;
       const d = JSON.parse(roh);
-      if(Array.isArray(d.feld)){
-        burg.feld = d.feld.slice(0,BURG_ZELLEN).map(v =>
+      /* Alte Burgen mit anderer Rastergröße werden verworfen */
+      if(Array.isArray(d.feld) && d.feld.length===BURG_ZELLEN){
+        burg.feld = d.feld.map(v =>
           BURG_TEILE.some(x=>x.id===v) ? v : "");
-        while(burg.feld.length<BURG_ZELLEN) burg.feld.push("");
       }
     }catch(e){}
   }
@@ -1587,18 +1607,6 @@ body::after{
     return burg.feld.filter(v=>v===id).length;
   }
 
-  function burgTuerme(){
-    let n = 0;
-    for(let s=0;s<BURG_SPALTEN;s++){
-      let mauern = 0;
-      for(let z=0;z<BURG_REIHEN;z++){
-        if(burg.feld[z*BURG_SPALTEN+s]==="mauer") mauern++;
-      }
-      if(mauern>=3) n++;
-    }
-    return n;
-  }
-
   function burgCheckliste(){
     return BURG_ZIEL.map(z => ({ text:z.text, ok: z.n()>=z.min }));
   }
@@ -1607,9 +1615,36 @@ body::after{
     return burgCheckliste().every(z=>z.ok);
   }
 
+  function burgDekoZeichnen(){
+    const zinnen = $("burg-zinnen");
+    if(zinnen){
+      zinnen.style.gridTemplateColumns = "repeat("+BURG_SPALTEN+",1fr)";
+      zinnen.innerHTML = "";
+      for(let s=0;s<BURG_SPALTEN;s++){
+        const z = document.createElement("div");
+        z.className = "zinne"+(s%2===1 ? " gap" : "");
+        z.textContent = "🧱";
+        zinnen.appendChild(z);
+      }
+    }
+    const fundament = $("burg-fundament");
+    if(fundament){
+      fundament.style.gridTemplateColumns = "repeat("+BURG_SPALTEN+",1fr)";
+      fundament.innerHTML = "";
+      for(let s=0;s<BURG_SPALTEN;s++){
+        const st = document.createElement("div");
+        st.className = "stein";
+        st.textContent = "🪨";
+        fundament.appendChild(st);
+      }
+    }
+  }
+
   function burgZeichnen(){
     const raster = $("burg-raster");
     if(!raster) return;
+    raster.style.gridTemplateColumns = "repeat("+BURG_SPALTEN+",1fr)";
+    burgDekoZeichnen();
     raster.innerHTML = "";
     const gewaehlt = burgTeil(burg.auswahl);
 
