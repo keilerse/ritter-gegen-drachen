@@ -264,40 +264,46 @@ body::after{
 /* ---------- Burg ---------- */
 .burg-kopf{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 .burg-tafel{padding:10px}
-.burg-baustelle{
-  display:flex;flex-direction:column-reverse;align-items:center;gap:6px;
-  padding:14px 10px 10px;min-height:230px;
-  border-bottom:5px solid rgba(0,0,0,.28);border-radius:16px;
-  background:linear-gradient(var(--nacht),var(--nacht-tief));
+.burg-raster{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:6px;
+  padding:10px;border-radius:16px;
+  background:linear-gradient(#2b3a63 0%,var(--nacht) 60%,#2a3a2a 100%);
+  border:3px solid var(--gold-tief);box-shadow:inset 0 0 0 2px rgba(255,255,255,.12);
+  position:relative;
 }
-.burg-teil{
-  display:flex;align-items:center;gap:8px;width:100%;max-width:260px;
-  background:linear-gradient(var(--pergament),var(--pergament-tief));color:var(--tinte);
-  border:3px solid var(--gold-tief);border-radius:var(--r-klein);
-  padding:8px 12px;font-weight:600;box-shadow:0 4px 0 rgba(0,0,0,.35);
+.burg-zelle{
+  aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  font-size:clamp(1.4rem,6vw,2rem);line-height:1;cursor:pointer;
+  border-radius:10px;border:2px dashed rgba(255,255,255,.18);
+  background:rgba(255,255,255,.04);transition:transform .08s,box-shadow .15s,background .15s;
 }
-.burg-teil .zeichen{font-size:1.7rem;line-height:1}
-.burg-teil.neu{animation:burgAuf .55s ease-out}
-.burg-teil.leer{
-  background:transparent;color:var(--pergament);opacity:.7;
-  border:3px dashed rgba(255,255,255,.28);box-shadow:none;
-  justify-content:center;text-align:center;
+.burg-zelle.kann{border-color:var(--gold);background:rgba(245,181,60,.14);box-shadow:0 0 0 2px rgba(245,181,60,.35)}
+.burg-zelle:active{transform:scale(.94)}
+.burg-zelle.besetzt{border-style:solid;border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.1)}
+.burg-zelle.neu{animation:burgAuf .5s ease-out}
+.burg-palette{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.burg-werkzeug{
+  display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;
+  background:rgba(255,255,255,.08);color:var(--pergament);
+  border:2px solid rgba(255,255,255,.16);border-radius:var(--r-klein);padding:8px 4px;
+  font-family:var(--schrift-text);transition:transform .08s,box-shadow .08s;
 }
-.burg-teil.leer .zeichen{opacity:.5}
-.burg-fortschritt{padding:10px 2px 2px}
-.burg-fortschritt-text{text-align:center;font-weight:600;font-size:.92rem;margin-bottom:8px;min-height:2.4em}
-.burg-info{
-  display:flex;align-items:center;justify-content:space-between;
-  background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.13);
-  border-radius:var(--r-klein);padding:10px 14px;font-weight:600;
-}
-.burg-info strong{font-family:var(--schrift-display);color:var(--gold);font-size:1.2rem}
-#btn-burg-kaufen:disabled{opacity:.5;cursor:not-allowed;filter:grayscale(.5)}
+.burg-werkzeug .zeichen{font-size:1.7rem;line-height:1}
+.burg-werkzeug .name{font-size:.78rem;font-weight:600}
+.burg-werkzeug .preis{font-size:.72rem;opacity:.8}
+.burg-werkzeug:active{transform:translateY(2px)}
+.burg-werkzeug.gewaehlt{background:linear-gradient(#ffe9ae,var(--gold));color:var(--tinte);border-color:var(--gold-tief);box-shadow:0 0 0 2px #fff8}
+.burg-werkzeug.zu-teuer{opacity:.45;filter:grayscale(.5);cursor:not-allowed}
+.burg-fortschritt{padding:12px 2px 2px}
+.burg-checkliste{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.burg-ziel{font-size:.8rem;font-weight:600;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.14);
+  border-radius:999px;padding:4px 10px;opacity:.55}
+.burg-ziel.ok{opacity:1;border-color:var(--drache);background:rgba(87,192,125,.15);color:#a7f0c3}
 .burg-hinweis{text-align:center;font-size:.86rem;opacity:.7;min-height:1.2em}
 @keyframes burgAuf{
-  0%{transform:translateY(14px) scale(.9);opacity:0}
-  60%{transform:translateY(-2px) scale(1.02);opacity:1}
-  100%{transform:none}
+  0%{transform:scale(.6) rotate(-8deg);opacity:0}
+  60%{transform:scale(1.12);opacity:1}
+  100%{transform:scale(1)}
 }
 
 /* ---------- Bewegung ---------- */
@@ -524,30 +530,25 @@ body::after{
         <div class="wert"><span class="goldbox js-goldbox"><span class="js-gold">0</span></span></div>
       </div>
       <div class="anzeige">
-        <div class="kopf">Burg</div>
-        <div class="wert" id="burg-nr">1</div>
+        <div class="kopf">Burgwert</div>
+        <div class="wert" id="burg-wert">0</div>
       </div>
       <div class="anzeige">
         <div class="kopf">Teile</div>
-        <div class="wert" id="burg-zaehler">0/0</div>
+        <div class="wert" id="burg-zaehler">0</div>
       </div>
     </div>
 
     <div class="tafel burg-tafel">
-      <div class="burg-baustelle" id="burg-baustelle" aria-label="Burgbaustelle"></div>
+      <div class="burg-raster" id="burg-raster" aria-label="Burgbaustelle"></div>
       <div class="burg-fortschritt">
-        <div class="burg-fortschritt-text" id="burg-text">Baue deine Burg Teil für Teil.</div>
-        <div class="balken"><i id="burg-balken"></i></div>
+        <div class="burg-checkliste" id="burg-checkliste"></div>
       </div>
     </div>
 
-    <div class="burg-info">
-      <span id="burg-info-teil">🏗️ Nächster Bauteil</span>
-      <strong id="burg-info-preis">–</strong>
-    </div>
+    <div class="burg-palette" id="burg-palette" aria-label="Bauteile"></div>
 
-    <button class="knopf" id="btn-burg-kaufen" type="button">🏗️ Bauteil bauen</button>
-    <div class="burg-hinweis" id="burg-hinweis">Jeder Bauteil kostet Gold – die Burg wächst von unten nach oben.</div>
+    <div class="burg-hinweis" id="burg-hinweis">Wähle ein Bauteil und tippe dann auf ein Feld.</div>
 
     <div class="fusszeile">
       <button class="mini" data-kammer>🗝️ Schatzkammer</button>
@@ -1255,98 +1256,168 @@ body::after{
   }
 
   /* ================= SPIEL 4: BURG BAUEN ================= */
+  const BURG_SPALTEN = 5, BURG_REIHEN = 4;
+  const BURG_ZELLEN = BURG_SPALTEN*BURG_REIHEN;
   const BURG_TEILE = [
-    {name:"Grundstein", bild:"🪨", preis:50},
-    {name:"Mauer",      bild:"🧱", preis:100},
-    {name:"Turm",       bild:"🗼", preis:150},
-    {name:"Tor",        bild:"🚪", preis:200},
-    {name:"Flagge",     bild:"🚩", preis:250},
-    {name:"Turmspitze", bild:"🏰", preis:400}
+    {id:"mauer",   bild:"🧱", name:"Mauer",   preis:100, erlaubt:(z,s)=>true},
+    {id:"turm",    bild:"🗼", name:"Turm",    preis:250, erlaubt:(z,s)=>s===0||s===BURG_SPALTEN-1},
+    {id:"tor",     bild:"🚪", name:"Tor",     preis:300, erlaubt:(z,s)=>z===BURG_REIHEN-1},
+    {id:"fenster", bild:"🪟", name:"Fenster", preis:80,  erlaubt:(z,s)=>z===1||z===2},
+    {id:"flagge",  bild:"🚩", name:"Flagge",  preis:200, erlaubt:(z,s)=>z===0},
+    {id:"wappen",  bild:"🛡️", name:"Wappen",  preis:150, erlaubt:(z,s)=>true}
+  ];
+  const BURG_ZIEL = [
+    {id:"tor",     min:1, text:"🚪 Tor"},
+    {id:"turm",    min:2, text:"🗼 2 Türme"},
+    {id:"flagge",  min:1, text:"🚩 Flagge"},
+    {id:"mauer",   min:4, text:"🧱 4 Mauern"}
   ];
 
-  const burg = { gebaut:0 };
+  const burg = { feld:new Array(BURG_ZELLEN).fill(""), auswahl:null, geloest:false };
+
+  function burgTeil(id){ return BURG_TEILE.find(x=>x.id===id)||null; }
 
   function burgLaden(){
     try{
       const roh = localStorage.getItem("rechenritter.burg");
       if(!roh) return;
       const d = JSON.parse(roh);
-      burg.gebaut = Math.max(0, Math.min(BURG_TEILE.length, Number(d.gebaut)||0));
+      if(Array.isArray(d.feld)){
+        burg.feld = d.feld.slice(0,BURG_ZELLEN).map(v =>
+          BURG_TEILE.some(x=>x.id===v) ? v : "");
+        while(burg.feld.length<BURG_ZELLEN) burg.feld.push("");
+      }
     }catch(e){}
   }
 
   function burgSichern(){
     try{
-      localStorage.setItem("rechenritter.burg", JSON.stringify({ gebaut:burg.gebaut }));
+      localStorage.setItem("rechenritter.burg", JSON.stringify({ feld:burg.feld }));
     }catch(e){}
   }
 
-  function burgZeichnen(){
-    const box = $("burg-baustelle");
-    if(!box) return;
-    box.innerHTML = "";
+  function burgWert(){
+    return burg.feld.reduce((s,v)=> s + (burgTeil(v)?burgTeil(v).preis:0), 0);
+  }
 
-    for(let i=0;i<BURG_TEILE.length;i++){
-      const teil = BURG_TEILE[i];
-      const fertig = i < burg.gebaut;
-      const el = document.createElement("div");
-      el.className = "burg-teil"+(fertig ? "" : " leer");
-      el.innerHTML = '<span class="zeichen">'+teil.bild+'</span><span>'+
-        (fertig ? teil.name : teil.name+" · "+teil.preis+" 🪙")+'</span>';
-      box.appendChild(el);
+  function burgZaehlen(id){
+    return burg.feld.filter(v=>v===id).length;
+  }
+
+  function burgCheckliste(){
+    return BURG_ZIEL.map(z => ({ ...z, ok: burgZaehlen(z.id)>=z.min }));
+  }
+
+  function burgFertig(){
+    return burgCheckliste().every(z=>z.ok);
+  }
+
+  function burgZeichnen(){
+    const raster = $("burg-raster");
+    if(!raster) return;
+    raster.innerHTML = "";
+    const gewaehlt = burgTeil(burg.auswahl);
+
+    for(let i=0;i<BURG_ZELLEN;i++){
+      const z = Math.floor(i/BURG_SPALTEN), s = i%BURG_SPALTEN;
+      const teil = burgTeil(burg.feld[i]);
+      const el = document.createElement("button");
+      el.type = "button";
+      el.className = "burg-zelle";
+      el.dataset.index = i;
+      el.setAttribute("aria-label","Feld "+(i+1));
+      if(teil){
+        el.classList.add("besetzt");
+        el.textContent = teil.bild;
+        el.title = teil.name;
+      }else if(gewaehlt && gewaehlt.erlaubt(z,s) && schatz.gold>=gewaehlt.preis){
+        el.classList.add("kann");
+      }
+      raster.appendChild(el);
     }
 
-    const fertig = burg.gebaut>=BURG_TEILE.length;
-    const naechster = BURG_TEILE[burg.gebaut];
-    $("burg-nr").textContent = "1";
-    $("burg-zaehler").textContent = burg.gebaut+"/"+BURG_TEILE.length;
-    $("burg-balken").style.width = (burg.gebaut/BURG_TEILE.length*100)+"%";
+    const besetzt = burg.feld.filter(v=>v!==null && v!=="").length;
+    $("burg-wert").textContent = burgWert();
+    $("burg-zaehler").textContent = besetzt;
 
-    const kaufen = $("btn-burg-kaufen");
-    if(!fertig){
-      kaufen.disabled = schatz.gold < naechster.preis;
-      kaufen.textContent = "🏗️ "+naechster.name+" bauen – "+naechster.preis+" Gold";
-      $("burg-info-teil").textContent = "🏗️ Nächster Bauteil: "+naechster.name;
-      $("burg-info-preis").textContent = naechster.preis+" 🪙";
-      $("burg-text").textContent =
-        (BURG_TEILE.length-burg.gebaut)+" Teile fehlen noch. Deine Burg wächst Stück für Stück.";
-      $("burg-hinweis").textContent =
-        schatz.gold < naechster.preis
-          ? "Du brauchst noch "+(naechster.preis-schatz.gold)+" Gold für den nächsten Bauteil."
-          : "Du hast genug Gold – bau deine Burg weiter!";
-    }else{
-      kaufen.disabled = true;
-      kaufen.textContent = "🏰 Burg fertig!";
-      $("burg-info-teil").textContent = "🏰 Burg vollendet";
-      $("burg-info-preis").textContent = "–";
-      $("burg-text").textContent = "Geschafft! Deine Burg steht und ist vollständig erbaut.";
-      $("burg-hinweis").textContent = "Ein stolzes Zuhause für einen echten Rechen-Ritter.";
+    const palette = $("burg-palette");
+    palette.innerHTML = "";
+    BURG_TEILE.forEach(t => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "burg-werkzeug";
+      if(burg.auswahl===t.id) b.classList.add("gewaehlt");
+      if(schatz.gold<t.preis) b.classList.add("zu-teuer");
+      b.innerHTML = '<span class="zeichen">'+t.bild+'</span>'+
+        '<span class="name">'+t.name+'</span>'+
+        '<span class="preis">'+t.preis+' 🪙</span>';
+      b.addEventListener("click", ()=>burgWaehle(t.id));
+      palette.appendChild(b);
+    });
+
+    const liste = $("burg-checkliste");
+    liste.innerHTML = "";
+    burgCheckliste().forEach(z => {
+      const el = document.createElement("span");
+      el.className = "burg-ziel"+(z.ok?" ok":"");
+      el.textContent = z.text;
+      liste.appendChild(el);
+    });
+
+    if(!burg.auswahl){
+      $("burg-hinweis").textContent = "Wähle ein Bauteil und tippe dann auf ein leeres Feld.";
+    }else if(gewaehlt && schatz.gold<gewaehlt.preis){
+      $("burg-hinweis").textContent = "Für "+gewaehlt.name+" fehlen dir noch "+(gewaehlt.preis-schatz.gold)+" Gold.";
+    }else if(gewaehlt){
+      $("burg-hinweis").textContent = "Tippe ein leuchtendes Feld, um "+gewaehlt.name+" zu setzen. Tippe auf ein gesetztes Teil, um es abzureißen.";
     }
   }
 
-  function burgKaufen(){
-    const fertig = burg.gebaut>=BURG_TEILE.length;
-    if(fertig) return;
-    const naechster = BURG_TEILE[burg.gebaut];
-    if(!goldAusgeben(naechster.preis)) return;
+  function burgWaehle(id){
+    burg.auswahl = burg.auswahl===id ? null : id;
+    burgZeichnen();
+  }
 
-    burg.gebaut++;
+  function burgPlatziere(index){
+    const z = Math.floor(index/BURG_SPALTEN), s = index%BURG_SPALTEN;
+    const gewaehlt = burgTeil(burg.auswahl);
+    if(!gewaehlt) return;
+    if(burg.feld[index]) return;
+    if(!gewaehlt.erlaubt(z,s)){
+      $("burg-hinweis").textContent = gewaehlt.name+" passt hier nicht hin.";
+      return;
+    }
+    if(!goldAusgeben(gewaehlt.preis)) return;
+
+    burg.feld[index] = gewaehlt.id;
     burgSichern();
     burgZeichnen();
+    kMuenze();
+    const el = $("burg-raster").children[index];
+    if(el){ el.classList.add("neu"); setTimeout(()=>el.classList.remove("neu"),600); }
 
-    const el = $("burg-baustelle").children[burg.gebaut-1];
-    if(el){
-      el.classList.add("neu");
-      setTimeout(()=>el.classList.remove("neu"),600);
-    }
-
-    if(burg.gebaut>=BURG_TEILE.length){
+    if(!burg.geloest && burgFertig()){
+      burg.geloest = true;
       setTimeout(()=>{
         kSieg();
-        $("burg-text").textContent = "🎉 Burg fertig!";
-        $("burg-hinweis").textContent = "Deine Burg steht – ein prächtiger Anblick!";
-      },400);
+        funken("burg-raster","✨",16);
+        $("burg-hinweis").textContent = "🏰 Prachtburg! Deine Burg ist vollständig – du kannst sie weiter ausbauen.";
+      },500);
     }
+  }
+
+  function burgAbreissen(index){
+    const teil = burgTeil(burg.feld[index]);
+    if(!teil) return;
+    burg.feld[index] = "";
+    const erstattung = Math.floor(teil.preis/2);
+    burgSichern();
+    burgZeichnen();
+    if(erstattung>0){
+      goldDazu(erstattung);
+      kGoldWeg();
+    }
+    $("burg-hinweis").textContent = teil.name+" abgerissen – +"+erstattung+" Gold zurück.";
   }
 
   /* ================= Auswahl & Bedienung ================= */
@@ -1402,7 +1473,13 @@ body::after{
     burgZeichnen();
     zeigeScreen("screen-burg");
   });
-  $("btn-burg-kaufen").addEventListener("click", burgKaufen);
+  $("burg-raster").addEventListener("click", e => {
+    const zelle = e.target.closest(".burg-zelle");
+    if(!zelle) return;
+    const index = Number(zelle.dataset.index);
+    if(burg.feld[index]) burgAbreissen(index);
+    else burgPlatziere(index);
+  });
 
   puzzleLaden();
   burgLaden();
