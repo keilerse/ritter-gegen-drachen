@@ -308,6 +308,47 @@ body::after{
   100%{transform:scale(1)}
 }
 
+/* ---------- Rechenmauer ---------- */
+.mauer-buehne{padding:6px 0 2px}
+.mauer{display:flex;flex-direction:column;gap:6px;align-items:center;position:relative}
+.mauer-zeile{display:flex;gap:6px}
+.mauer-stein{
+  width:clamp(52px,13vw,68px);aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  font-family:var(--schrift-display);font-size:clamp(1.3rem,6vw,1.9rem);color:var(--tinte);
+  background:linear-gradient(var(--pergament),var(--pergament-tief));
+  border:3px solid var(--gold-tief);border-radius:var(--r-klein);
+  box-shadow:0 4px 0 rgba(0,0,0,.35),inset 0 2px 0 rgba(255,255,255,.6);
+}
+.mauer-luecke{
+  cursor:pointer;color:var(--gold);
+  background:linear-gradient(#2b3a63,#1a2440);
+  border:3px solid var(--gold-tief);
+  box-shadow:0 4px 0 rgba(0,0,0,.35);
+}
+.mauer-luecke.aktiv{
+  color:#fff;border-color:var(--feuer);
+  box-shadow:0 0 0 3px rgba(239,90,53,.55),0 4px 0 rgba(0,0,0,.35);
+  animation:mauerPuls 1.1s ease-in-out infinite;
+}
+.mauer-stein.gefuellt{
+  color:#0c3f24;background:linear-gradient(#7de2a2,var(--drache));border-color:#2f7d4e;
+}
+.mauer-stein.richtig{
+  color:#0c3f24;background:linear-gradient(#7de2a2,var(--drache));border-color:#2f7d4e;
+  animation:mauerSprung .4s ease-out;
+}
+.mauer-stein.falsch{animation:ruettel .4s ease-out;border-color:var(--feuer)}
+.m-tipp-hinweis{text-align:center;font-family:var(--schrift-display);font-size:1.3rem;color:var(--tinte)}
+@keyframes mauerPuls{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.06)}
+}
+@keyframes mauerSprung{
+  0%{transform:scale(.7)}
+  55%{transform:scale(1.12)}
+  100%{transform:scale(1)}
+}
+
 /* ---------- Bewegung ---------- */
 @keyframes schweben{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 @keyframes angriff{0%{transform:translateX(0)}45%{transform:translateX(46px) rotate(-12deg)}100%{transform:translateX(0)}}
@@ -390,6 +431,13 @@ body::after{
         <span>
           <h3>Burg bauen</h3>
           <p>Gib Gold aus und errichte deine Burg Stein für Stein.</p>
+        </span>
+      </button>
+      <button class="spielkarte" id="karte-mauer" type="button">
+        <span class="bild">🧮</span>
+        <span>
+          <h3>Rechenmauer</h3>
+          <p>Fülle die Lücken der Zahlenmauer und verdiene Gold.</p>
         </span>
       </button>
     </div>
@@ -559,6 +607,48 @@ body::after{
     </div>
   </section>
 
+  <!-- ============ SPIEL 5: RECHENMAUER ============ -->
+  <section class="screen" id="screen-mauer">
+    <div class="hort-kopf">
+      <div class="anzeige">
+        <div class="kopf">Gold</div>
+        <div class="wert"><span class="goldbox js-goldbox"><span class="js-gold">0</span></span></div>
+      </div>
+      <div class="anzeige anzeige--serie aus" id="m-serie">
+        <div class="kopf">Serie</div>
+        <div class="wert" id="m-serie-wert">×1</div>
+      </div>
+      <div class="anzeige">
+        <div class="kopf">Mauer</div>
+        <div class="wert" id="m-runden">1/15</div>
+      </div>
+    </div>
+
+    <div class="schatzleiste">
+      <span class="schild">🎁</span>
+      <span class="balken"><i class="js-truhe-balken"></i></span>
+      <span class="zaehler js-truhe-zaehler">0/5</span>
+    </div>
+
+    <div class="mauer-buehne">
+      <div class="mauer" id="mauer" aria-label="Rechenmauer"></div>
+    </div>
+
+    <div class="tafel aufgabe-tafel">
+      <div class="rueckmeldung" id="m-rueckmeldung">Fülle die leuchtende Lücke der Mauer.</div>
+      <div class="tipp-feld" id="m-tipp"><div class="m-tipp-hinweis" id="m-tipp-hinweis"></div></div>
+    </div>
+
+    <div class="zahlenfeld" id="m-zahlen"></div>
+
+    <div class="fusszeile">
+      <button class="mini" data-tipp="m">💡 Tipp</button>
+      <button class="mini" data-kammer>🗝️ Schatzkammer</button>
+      <button class="mini" data-ton>🔊 Ton</button>
+      <button class="mini" data-heim>🏠 Auswahl</button>
+    </div>
+  </section>
+
   <!-- ============ DRACHE BESIEGT ============ -->
   <section class="screen" id="screen-win">
     <div class="ergebnis">
@@ -619,6 +709,18 @@ body::after{
     <p id="ziel-text"></p>
     <p class="gold-plus">+100 Bonus-Gold</p>
     <button class="knopf" id="btn-ziel-weiter">Weiter sammeln</button>
+    <button class="mini" data-heim>🏠 Auswahl</button>
+  </div>
+</div>
+
+<!-- ============ RECHENMAUER GESCHAFFT ============ -->
+<div class="overlay" id="ov-mauer">
+  <div class="overlay-karte">
+    <div class="belohnung">🧮</div>
+    <h2>Alle Rechenmauern geschafft!</h2>
+    <p id="mauer-ziel-text"></p>
+    <p class="gold-plus">+100 Bonus-Gold</p>
+    <button class="knopf" id="btn-mauer-weiter">Weiter mauern</button>
     <button class="mini" data-heim>🏠 Auswahl</button>
   </div>
 </div>
@@ -1433,6 +1535,294 @@ body::after{
     $("burg-hinweis").textContent = teil.name+" abgerissen – +"+erstattung+" Gold zurück.";
   }
 
+  /* ================= SPIEL 5: RECHENMAUER ================= */
+  const MAUER_ZIEL = 15;
+  const m = { runde:1, richtig:0, falsch:0, serie:0, beste:0,
+              wand:null, reihenfolge:[], aktiv:0, gesperrt:false,
+              geloest:new Set(), zuletzt:null, flashNeu:false };
+
+  function mStufen(){
+    const max20 = opt.max===20;
+    const r = m.runde;
+    if(r<=4)  return {hoehe:3, luecken:2, unten:0};
+    if(r<=8)  return {hoehe:3, luecken:3, unten: opt.minus?1:0};
+    if(r<=12) return {hoehe: max20?4:3, luecken:3, unten: opt.minus?1:0};
+    return     {hoehe: max20?4:3, luecken: max20?4:3, unten: opt.minus?2:0};
+  }
+
+  function mErzeuge(hoehe){
+    let maxBase = opt.max===10 ? 3 : 6;
+    for(let versuch=0; versuch<80; versuch++){
+      const zeilen = [];
+      for(let z=0;z<hoehe;z++) zeilen.push(new Array(z+1).fill(0));
+      const unten = zeilen[hoehe-1];
+      for(let s=0;s<hoehe;s++) unten[s] = zufall(1, maxBase);
+      for(let z=hoehe-2;z>=0;z--)
+        for(let s=0;s<=z;s++) zeilen[z][s] = zeilen[z+1][s]+zeilen[z+1][s+1];
+      if(zeilen[0][0] <= opt.max) return zeilen;
+      if(versuch>50 && maxBase>1) maxBase--;
+    }
+    const zeilen = [];
+    for(let z=0;z<hoehe;z++) zeilen.push(new Array(z+1).fill(1));
+    for(let z=hoehe-2;z>=0;z--)
+      for(let s=0;s<=z;s++) zeilen[z][s] = zeilen[z+1][s]+zeilen[z+1][s+1];
+    return zeilen;
+  }
+
+  function mEltern(z,s){
+    const el = [];
+    if(z>0 && s-1>=0) el.push([z-1,s-1]);
+    if(z>0 && s<=z-1) el.push([z-1,s]);
+    return el;
+  }
+
+  function mLoesungsReihenfolge(zeilen, luecken){
+    const hoehe = zeilen.length;
+    const bekannt = {};
+    for(let z=0;z<hoehe;z++) for(let s=0;s<=z;s++){
+      const key = z+"-"+s;
+      if(!luecken.has(key)) bekannt[key] = true;
+    }
+    const geloest = [];
+    let fort = true;
+    while(fort){
+      fort = false;
+      for(let z=0;z<hoehe;z++){
+        for(let s=0;s<=z;s++){
+          const key = z+"-"+s;
+          if(bekannt[key] || !luecken.has(key)) continue;
+          let wert = null;
+          if(z<hoehe-1){
+            const l = (z+1)+"-"+s, r = (z+1)+"-"+(s+1);
+            if(bekannt[l] && bekannt[r]) wert = zeilen[z+1][s]+zeilen[z+1][s+1];
+          }
+          if(wert===null){
+            const eltern = mEltern(z,s);
+            for(const [pz,ps] of eltern){
+              const pkey = pz+"-"+ps;
+              if(!bekannt[pkey]) continue;
+              const geschw = (z===pz+1 && s===ps) ? [pz+1,ps+1] : [pz+1,ps];
+              const gkey = geschw[0]+"-"+geschw[1];
+              if(bekannt[gkey]){
+                wert = zeilen[pz][ps] - zeilen[geschw[0]][geschw[1]];
+                break;
+              }
+            }
+          }
+          if(wert!==null){
+            bekannt[key] = true;
+            geloest.push([z,s]);
+            fort = true;
+          }
+        }
+      }
+    }
+    for(const key of luecken){
+      if(!bekannt[key]) return null;
+    }
+    return geloest;
+  }
+
+  function mZiehe(arr, n){
+    const copy = arr.slice();
+    const out = [];
+    while(out.length<n && copy.length){
+      const i = Math.floor(Math.random()*copy.length);
+      out.push(copy.splice(i,1)[0]);
+    }
+    return out;
+  }
+
+  function mWaehleLuecken(zeilen, hoehe, luecken, unten){
+    const untenZellen = [], obenZellen = [];
+    for(let z=0;z<hoehe;z++) for(let s=0;s<=z;s++){
+      if(z===hoehe-1) untenZellen.push([z,s]); else obenZellen.push([z,s]);
+    }
+    for(let versuch=0; versuch<200; versuch++){
+      const set = new Set();
+      mZiehe(untenZellen, unten).forEach(c=>set.add(c[0]+"-"+c[1]));
+      mZiehe(obenZellen, luecken-unten).forEach(c=>set.add(c[0]+"-"+c[1]));
+      if(set.size < luecken) continue;
+      const reihenfolge = mLoesungsReihenfolge(zeilen, set);
+      if(reihenfolge && reihenfolge.length===luecken) return { set, reihenfolge };
+    }
+    const set = new Set();
+    mZiehe(obenZellen, luecken).forEach(c=>set.add(c[0]+"-"+c[1]));
+    return { set, reihenfolge: mLoesungsReihenfolge(zeilen, set) || [] };
+  }
+
+  function mTippAktualisieren(){
+    const hin = $("m-tipp-hinweis");
+    if(!hin) return;
+    const aktiv = m.reihenfolge[m.aktiv];
+    const w = m.wand;
+    if(!aktiv || !w){ hin.textContent = ""; return; }
+    const [z,s] = aktiv;
+    if(z < w.hoehe-1){
+      hin.textContent = "Rechne: "+w.zeilen[z+1][s]+" + "+w.zeilen[z+1][s+1];
+      return;
+    }
+    for(const [pz,ps] of mEltern(z,s)){
+      const pkey = pz+"-"+ps;
+      const geschw = (z===pz+1 && s===ps) ? [pz+1,ps+1] : [pz+1,ps];
+      const gkey = geschw[0]+"-"+geschw[1];
+      const pknown = !w.luecken.has(pkey) || m.geloest.has(pkey);
+      const gknown = !w.luecken.has(gkey) || m.geloest.has(gkey);
+      if(pknown && gknown){
+        hin.textContent = "Rechne rückwärts: "+w.zeilen[pz][ps]+" − "+w.zeilen[geschw[0]][geschw[1]];
+        return;
+      }
+    }
+    hin.textContent = "";
+  }
+
+  function mZeichnen(){
+    const box = $("mauer");
+    if(!box) return;
+    box.innerHTML = "";
+    const w = m.wand;
+    if(!w) return;
+    for(let z=0;z<w.hoehe;z++){
+      const zeile = document.createElement("div");
+      zeile.className = "mauer-zeile";
+      for(let s=0;s<=z;s++){
+        const key = z+"-"+s;
+        const wert = w.zeilen[z][s];
+        const el = document.createElement("div");
+        el.className = "mauer-stein";
+        el.dataset.mZ = z; el.dataset.mS = s;
+        const istLuecke = w.luecken.has(key);
+        const geloest = m.geloest.has(key);
+        if(istLuecke && !geloest){
+          el.classList.add("mauer-luecke");
+          const aktiv = m.reihenfolge[m.aktiv];
+          if(aktiv && aktiv[0]===z && aktiv[1]===s) el.classList.add("aktiv");
+          el.textContent = "?";
+        }else{
+          el.textContent = wert;
+          if(geloest){
+            if(key===m.zuletzt && m.flashNeu) el.classList.add("richtig");
+            else el.classList.add("gefuellt");
+          }
+        }
+        zeile.appendChild(el);
+      }
+      box.appendChild(zeile);
+    }
+    mTippAktualisieren();
+  }
+
+  function mKopf(){
+    const mult = multiplikator(m.serie);
+    $("m-serie-wert").textContent = "×"+mult;
+    $("m-serie").classList.toggle("aus", mult===1);
+    $("m-runden").textContent = Math.min(m.runde,MAUER_ZIEL)+"/"+MAUER_ZIEL;
+    schatzZeichnen();
+  }
+
+  function mNeueWand(){
+    const st = mStufen();
+    const zeilen = mErzeuge(st.hoehe);
+    const gew = mWaehleLuecken(zeilen, st.hoehe, st.luecken, st.unten);
+    m.wand = { hoehe:st.hoehe, zeilen:zeilen, luecken:gew.set };
+    m.reihenfolge = gew.reihenfolge;
+    m.aktiv = 0;
+    m.geloest = new Set();
+    m.zuletzt = null;
+    m.flashNeu = false;
+    m.gesperrt = false;
+    mZeichnen();
+    mKopf();
+    sagen("m-rueckmeldung","Fülle die leuchtende Lücke der Mauer.","");
+    $("m-tipp").classList.remove("is-offen");
+    freigeben("m-zahlen");
+  }
+
+  function mWandFertig(){
+    m.runde++;
+    if(m.runde > MAUER_ZIEL){
+      mZiel();
+    }else{
+      kSieg();
+      funken("mauer","✨",12);
+      setTimeout(mNeueWand,900);
+    }
+  }
+
+  function mZiel(){
+    kSieg();
+    goldDazu(100);
+    $("mauer-ziel-text").textContent = m.richtig+" Lücken gefüllt, beste Serie: "+m.beste+". "+
+      (m.falsch===0 ? "Und kein einziger Fehler!" : "Weiter so!");
+    $("ov-mauer").classList.add("is-offen");
+    mKopf();
+  }
+
+  function mWeiterMauern(){
+    $("ov-mauer").classList.remove("is-offen");
+    m.runde=1; m.richtig=0; m.falsch=0; m.serie=0; m.beste=0;
+    mNeueWand();
+  }
+
+  function mAntwort(wert,knopf){
+    if(m.gesperrt) return;
+    const aktiv = m.reihenfolge[m.aktiv];
+    if(!aktiv) return;
+    const [z,s] = aktiv;
+    const loesung = m.wand.zeilen[z][s];
+
+    if(wert===loesung){
+      m.gesperrt = true; sperren("m-zahlen");
+      knopf.classList.add("richtig");
+      m.richtig++; m.serie++; m.beste = Math.max(m.beste,m.serie);
+      const mult = multiplikator(m.serie);
+      const gewinn = goldDazu(GRUNDGOLD*mult);
+      kRichtig(); kMuenze();
+      const key = z+"-"+s;
+      m.geloest.add(key);
+      m.aktiv++;
+      m.zuletzt = key; m.flashNeu = true;
+      sagen("m-rueckmeldung",waehle(lobWorte)+"  +"+gewinn+" Gold","gut");
+      mZeichnen(); m.flashNeu = false;
+      mKopf();
+      const truheFaellig = truheZaehlen();
+      setTimeout(()=>{
+        const weiter = () => { m.aktiv>=m.reihenfolge.length ? mWandFertig() : mNaechsteLuecke(); };
+        truheFaellig ? truheZeigen(weiter) : weiter();
+      },1050);
+    }else{
+      m.gesperrt = true; sperren("m-zahlen");
+      knopf.classList.add("falsch");
+      zeigeLoesung("m-zahlen",loesung);
+      m.falsch++; m.serie = 0;
+      const weg = goldWeg();
+      kFalsch();
+      sagen("m-rueckmeldung","Richtig wäre: "+loesung+(weg?"  −"+weg+" Gold":""),"schlecht");
+      mZeichnen();
+      const el = $("mauer").querySelector('[data-m-z="'+z+'"][data-m-s="'+s+'"]');
+      if(el) el.classList.add("falsch");
+      mKopf();
+      setTimeout(()=>{
+        freigeben("m-zahlen");
+        m.gesperrt = false;
+      },1800);
+    }
+  }
+
+  function mNaechsteLuecke(){
+    m.gesperrt = false;
+    freigeben("m-zahlen");
+    sagen("m-rueckmeldung","Weiter mit der nächsten Lücke.","");
+    mZeichnen();
+  }
+
+  function mStart(){
+    m.runde=1; m.richtig=0; m.falsch=0; m.serie=0; m.beste=0;
+    baueZahlen("m-zahlen",mAntwort);
+    zeigeScreen("screen-mauer");
+    mNeueWand();
+  }
+
   /* ================= Auswahl & Bedienung ================= */
   function wahlSetzen(gruppeId,wert){
     alle("#"+gruppeId+" button").forEach(b =>
@@ -1493,6 +1883,9 @@ body::after{
     if(burg.feld[index]) burgAbreissen(index);
     else burgPlatziere(index);
   });
+
+  $("karte-mauer").addEventListener("click", mStart);
+  $("btn-mauer-weiter").addEventListener("click", mWeiterMauern);
 
   puzzleLaden();
   burgLaden();
