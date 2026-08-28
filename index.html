@@ -279,12 +279,27 @@ body::after{
 .overlay p{font-weight:500;font-size:1.05rem;max-width:28ch}
 .gold-plus{font-family:var(--schrift-display);font-size:1.6rem;color:var(--gold)}
 .album-gitter{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%}
-.sammelstueck{background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.14);
+.sammelstueck{position:relative;background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.14);
   border-radius:var(--r-klein);padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:2px}
 .sammelstueck .bild{font-size:1.9rem;line-height:1}
 .sammelstueck .titel-klein{font-size:.65rem;line-height:1.15;opacity:.85}
 .sammelstueck.fehlt{opacity:.45}
 .sammelstueck.fehlt .bild{filter:grayscale(1) brightness(.4)}
+.sammelstueck:not(.fehlt){cursor:pointer;-webkit-tap-highlight-color:transparent}
+.sammelstueck.fehlt{cursor:pointer}
+.sammelstueck.fx-puls{animation:puls .5s ease-out}
+.sammelstueck.fx-wackeln{animation:wackeln .55s ease-out}
+.sammelstueck.fx-huepfen{animation:huepfen .55s ease-out}
+.sammelstueck.fx-ruettel{animation:ruettel .45s ease-out}
+.sammelstueck.fx-schweben{animation:schweben .7s ease-in-out}
+.sammelstueck.fx-schimmer{animation:schimmer .6s ease-out}
+.sammelstueck.fx-wash::after{content:"";position:absolute;inset:0;border-radius:inherit;
+  background:var(--fx,#fff);opacity:0;pointer-events:none;
+  box-shadow:0 0 16px 3px var(--fx,#fff);animation:fxWash .6s ease-out}
+.neu-badge{position:absolute;top:-7px;right:-5px;background:linear-gradient(var(--gold),#d99420);
+  color:var(--tinte);font-size:.54rem;font-weight:700;letter-spacing:.03em;
+  padding:1px 5px;border-radius:999px;border:1.5px solid var(--gold-tief);
+  box-shadow:0 1px 3px rgba(0,0,0,.4);animation:neuPuls 1.1s ease-in-out infinite}
 
 /* ---------- Puzzle ---------- */
 .puzzle-kopf{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
@@ -438,6 +453,9 @@ body::after{
 @keyframes schrumpfen{0%,100%{transform:scale(1)}45%{transform:scale(.82) rotate(-6deg)}}
 @keyframes wackeln{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg) scale(1.04)}}
 @keyframes aufpoppen{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.18)}100%{transform:scale(1);opacity:1}}
+@keyframes schimmer{0%,100%{filter:none;transform:scale(1)}40%{filter:brightness(1.7) drop-shadow(0 0 6px #fff);transform:scale(1.14)}}
+@keyframes fxWash{0%,100%{opacity:0}30%{opacity:.4}}
+@keyframes neuPuls{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.001s !important;animation-iteration-count:1 !important}}
 @media (max-width:360px){.zahlenfeld{grid-template-columns:repeat(5,1fr)}.zahlenfeld--klein{grid-template-columns:repeat(4,1fr)}}
 @media (min-height:780px){.arena{height:145px}.hort-buehne{height:140px}}
@@ -929,6 +947,15 @@ body::after{
   const kMuenze   = () => { ton(988,.08,"triangle",0,.12); ton(1319,.12,"triangle",.07,.12); };
   const kGoldWeg  = () => { ton(440,.1,"triangle",0,.12); ton(294,.16,"triangle",.09,.12); };
   const kTruhe    = () => [523,659,784,1046,1319].forEach((f,i)=>ton(f,.18,"triangle",i*.09,.2));
+  /* Sound-Familien für die Schatz-Tipp-Effekte (alle über ton(), respektieren opt.ton) */
+  const kChime    = () => { ton(1046,.09,"triangle",0,.14); ton(1568,.14,"triangle",.07,.12); };
+  const kFanfare  = () => [523,659,784,1046].forEach((f,i)=>ton(f,.16,"square",i*.08,.16));
+  const kMagie    = () => [784,988,1319,1568].forEach((f,i)=>ton(f,.1,"triangle",i*.06,.13));
+  const kMetall   = () => { ton(1200,.08,"square",0,.12); ton(1720,.06,"square",.03,.08); ton(900,.2,"square",.05,.07); };
+  const kFeuer    = () => [520,400,300,220].forEach((f,i)=>ton(f,.13,"sawtooth",i*.05,.09));
+  const kZirp     = () => { ton(1400,.06,"square",0,.1); ton(1900,.06,"square",.05,.09); };
+  const kPop      = () => { ton(700,.05,"triangle",0,.13); ton(1300,.08,"triangle",.04,.1); };
+  const kGesperrt = () => { ton(240,.12,"triangle",0,.08); ton(180,.16,"triangle",.1,.08); };
 
   /* ================= Gemeinsame Schatzkammer ================= */
   const SCHAETZE = [
@@ -945,6 +972,22 @@ body::after{
     {id:"vase",      bild:"🏺", name:"Goldvase"},
     {id:"perle",     bild:"🌈", name:"Regenbogenperle"}
   ];
+  /* Tipp-Effekt je Schatz: Partikel-Emoji, Farb-Overlay, Animation, Sound-Familie */
+  const SCHATZ_FX = {
+    diamant:    {p:"✨", glow:"#bfe9ff", anim:"schimmer", sound:kChime},
+    krone:      {p:"⭐", glow:"#ffd75e", anim:"wackeln",  sound:kFanfare},
+    schluessel: {p:"✨", glow:"#ffdf7a", anim:"wackeln",  sound:kChime},
+    stab:       {p:"🌟", glow:"#c9a0ff", anim:"wackeln",  sound:kMagie},
+    schwert:    {p:"🔥", glow:"#ff7a3c", anim:"ruettel",  sound:kFeuer},
+    schild:     {p:"✨", glow:"#d7e0ea", anim:"ruettel",  sound:kMetall},
+    ei:         {p:"💛", glow:"#ffe07a", anim:"huepfen",  sound:kZirp},
+    einhorn:    {p:"🌈", glow:"#ff9ad2", anim:"huepfen",  sound:kMagie},
+    kompass:    {p:"✨", glow:"#7fe0c8", anim:"wackeln",  sound:kChime},
+    laterne:    {p:"🔆", glow:"#ffc36b", anim:"schweben", sound:kFeuer},
+    vase:       {p:"✨", glow:"#ffd75e", anim:"puls",     sound:kChime},
+    perle:      {p:"🫧", glow:"#b6f0ff", anim:"puls",     sound:kPop}
+  };
+  const SCHATZ_FX_STD = {p:"✨", glow:"#ffe7a8", anim:"puls", sound:kChime};
   const RAENGE = [
     {ab:0,     name:"Knappe",          bild:"🪙"},
     {ab:150,   name:"Ritter",          bild:"💰"},
@@ -964,10 +1007,10 @@ body::after{
   const TRUHE_ALLE = 5;
   const VERLUST = 5, GRUNDGOLD = 10;
 
-  const schatz = { gold:0, album:[], bisTruhe:0 };
+  const schatz = { gold:0, album:[], bisTruhe:0, neu:[] };
 
   function laden(){
-    schatz.gold = 0; schatz.album = []; schatz.bisTruhe = 0;
+    schatz.gold = 0; schatz.album = []; schatz.bisTruhe = 0; schatz.neu = [];
     try{
       const roh = localStorage.getItem(kontoKey(konto.aktiv,"schatz"));
       if(roh){
@@ -975,6 +1018,7 @@ body::after{
         schatz.gold = Math.max(0, Number(d.gold)||0);
         schatz.album = Array.isArray(d.album) ? d.album : [];
         schatz.bisTruhe = Math.min(TRUHE_ALLE-1, Number(d.bisTruhe)||0);
+        schatz.neu = Array.isArray(d.neu) ? d.neu : [];
       }
     }catch(e){}
   }
@@ -1069,7 +1113,7 @@ body::after{
     const bild = $("truhen-bild");
     if(offen.length){
       const neu = waehle(offen);
-      schatz.album.push(neu.id); sichern();
+      schatz.album.push(neu.id); schatz.neu.push(neu.id); sichern();
       bild.textContent = neu.bild; bild.className = "belohnung";
       $("truhen-titel").textContent = neu.name+" gefunden!";
       $("truhen-text").textContent = "Neu in deiner Schatzkammer – "+schatz.album.length+" von "+SCHAETZE.length+".";
@@ -1087,6 +1131,39 @@ body::after{
     const w = truheWeiter; truheWeiter = null;
     if(w) w();
   }
+  let kammerTakt = null, kammerHinweisTakt = null;
+
+  function kammerTextStd(){
+    $("kammer-text").textContent = schatz.album.length+" von "+SCHAETZE.length+" Schätzen gefunden";
+  }
+
+  /* Antippen eines gefundenen Schatzes: passende Animation + Farb-Overlay + Funken + Sound.
+     istTipp=true nur beim echten Fingertipp (entfernt dann das NEU-Abzeichen). */
+  function schatzTippen(el, sch, istTipp){
+    const fx = SCHATZ_FX[sch.id] || SCHATZ_FX_STD;
+    el.style.setProperty("--fx", fx.glow);
+    bewege(el, "fx-"+fx.anim, 620);
+    bewege(el, "fx-wash", 620);
+    funkenEl(el, fx.p, 12);
+    fx.sound();
+    if(istTipp){
+      const i = schatz.neu.indexOf(sch.id);
+      if(i>=0){
+        schatz.neu.splice(i,1); sichern();
+        const b = el.querySelector(".neu-badge"); if(b) b.remove();
+      }
+    }
+  }
+
+  /* Antippen eines noch gesperrten Slots: sanftes Wackeln + weicher Ton + Hinweis. */
+  function schatzGesperrt(el){
+    bewege(el, "fx-ruettel", 450);
+    kGesperrt();
+    $("kammer-text").textContent = "🔒 Spiel weiter, um ihn zu finden!";
+    clearTimeout(kammerHinweisTakt);
+    kammerHinweisTakt = setTimeout(kammerTextStd, 1600);
+  }
+
   function kammerZeigen(){
     const gitter = $("album");
     gitter.innerHTML = "";
@@ -1094,13 +1171,53 @@ body::after{
       const hat = schatz.album.indexOf(sch.id)>=0;
       const el = document.createElement("div");
       el.className = "sammelstueck"+(hat?"":" fehlt");
+      el.dataset.id = sch.id;
       el.innerHTML = '<span class="bild">'+(hat?sch.bild:"❔")+'</span>'+
                      '<span class="titel-klein">'+(hat?sch.name:"noch offen")+'</span>';
+      if(hat){
+        if(schatz.neu.indexOf(sch.id)>=0){
+          const badge = document.createElement("span");
+          badge.className = "neu-badge"; badge.textContent = "NEU";
+          el.appendChild(badge);
+        }
+        el.addEventListener("click", ()=>schatzTippen(el, sch, true));
+      }else{
+        el.addEventListener("click", ()=>schatzGesperrt(el));
+      }
       gitter.appendChild(el);
     });
-    $("kammer-text").textContent = schatz.album.length+" von "+SCHAETZE.length+" Schätzen gefunden";
+    kammerTextStd();
     $("kammer-gold").textContent = "🪙 "+schatz.gold+" Gold · "+rang().name;
     $("ov-kammer").classList.add("is-offen");
+
+    /* Frisch gewonnene Schätze kurz selbst feiern (Abzeichen bleibt bis zum Tipp/Schließen) */
+    const neue = SCHAETZE.filter(s => schatz.neu.indexOf(s.id)>=0 && schatz.album.indexOf(s.id)>=0);
+    neue.forEach((s,i)=>{
+      setTimeout(()=>{
+        const el = gitter.querySelector('.sammelstueck[data-id="'+s.id+'"]');
+        if(el && $("ov-kammer").classList.contains("is-offen")) schatzTippen(el, s, false);
+      }, 400 + i*750);
+    });
+
+    /* Ambientes Funkeln, solange die Kammer offen ist (nicht bei "Bewegung reduzieren") */
+    clearInterval(kammerTakt); kammerTakt = null;
+    if(!matchMedia('(prefers-reduced-motion:reduce)').matches){
+      kammerTakt = setInterval(()=>{
+        if(!$("ov-kammer").classList.contains("is-offen")){ clearInterval(kammerTakt); kammerTakt=null; return; }
+        const tiles = alle('#album .sammelstueck:not(.fehlt)');
+        if(!tiles.length) return;
+        const el = waehle(tiles);
+        el.style.setProperty("--fx", "#ffffff");
+        bewege(el, "fx-wash", 600);
+        funkenEl(el, "✨", 3);
+      }, 2600);
+    }
+  }
+
+  function kammerSchliessen(){
+    $("ov-kammer").classList.remove("is-offen");
+    clearInterval(kammerTakt); kammerTakt = null;
+    if(schatz.neu.length){ schatz.neu = []; sichern(); }
   }
   const multiplikator = serie => serie>=6 ? 3 : serie>=3 ? 2 : 1;
 
@@ -1194,19 +1311,21 @@ body::after{
     el.classList.remove(klasse); void el.offsetWidth; el.classList.add(klasse);
     setTimeout(()=>el.classList.remove(klasse),dauer);
   }
-  function funken(boxId,zeichen,anzahl){
-    const box = $(boxId);
+  function funkenEl(box,zeichen,anzahl,reichweite){
+    if(!box) return;
+    const r = reichweite || 1;
     for(let i=0;i<(anzahl||10);i++){
       const f = document.createElement("span");
       f.className = "funke"; f.textContent = zeichen;
       f.style.left = zufall(20,75)+"%"; f.style.top = zufall(20,70)+"%";
-      f.style.setProperty("--dx",zufall(-90,90)+"px");
-      f.style.setProperty("--dy",zufall(-120,-40)+"px");
+      f.style.setProperty("--dx",Math.round(zufall(-90,90)*r)+"px");
+      f.style.setProperty("--dy",Math.round(zufall(-120,-40)*r)+"px");
       f.style.setProperty("--dr",zufall(-180,180)+"deg");
       box.appendChild(f);
       setTimeout(()=>f.remove(),1200);
     }
   }
+  function funken(boxId,zeichen,anzahl){ funkenEl($(boxId),zeichen,anzahl); }
   function zeigeScreen(id){
     alle(".screen").forEach(el=>el.classList.remove("is-active"));
     $(id).classList.add("is-active");
@@ -2285,7 +2404,7 @@ body::after{
   $("truhen-bild").addEventListener("click", truheOeffnen);
   $("btn-truhe-zu").addEventListener("click", truheSchliessen);
   $("btn-ziel-weiter").addEventListener("click", hWeiterSammeln);
-  $("btn-kammer-zu").addEventListener("click", ()=> $("ov-kammer").classList.remove("is-offen"));
+  $("btn-kammer-zu").addEventListener("click", kammerSchliessen);
   $("btn-ton-start").addEventListener("click", tonUmschalten);
   alle("[data-ton]").forEach(b=>b.addEventListener("click",tonUmschalten));
   alle("[data-heim]").forEach(b=>b.addEventListener("click",heim));
