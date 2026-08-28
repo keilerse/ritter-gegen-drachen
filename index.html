@@ -197,6 +197,16 @@ body::after{
 .figur.angriff{animation:angriff .45s ease-out}
 .figur.getroffen{animation:getroffen .45s ease-out}
 .figur.faellt{animation:faellt .9s forwards}
+/* Der eigene Drache aus der Höhle: schwebt über der Schulter des Ritters.
+   Absolut positioniert, damit er das space-between der Arena nicht stört. */
+.figur--begleiter{
+  position:absolute;left:6px;top:0;z-index:1;pointer-events:none;
+  font-size:clamp(1.4rem,6vw,2rem);
+  filter:drop-shadow(0 3px 4px rgba(0,0,0,.5));
+  animation:schweben 3.2s ease-in-out infinite;
+}
+.figur--begleiter.aus{display:none}
+.figur--begleiter.jubelt{animation:huepfen .5s ease-out}
 .effekt{position:absolute;top:35%;left:10%;font-size:2.6rem;opacity:0;pointer-events:none}
 .effekt.schlag{animation:schlag .55s ease-out}
 .effekt.flamme{animation:flamme .7s ease-in}
@@ -421,6 +431,91 @@ body::after{
   100%{transform:scale(1)}
 }
 
+/* ---------- Drachenhöhle ---------- */
+.hoehle-kopf{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.hoehle-buehne{
+  /* 572x260 – dasselbe Seitenverhaeltnis, auf das drachenhoehle.png
+     zugeschnitten ist, damit "cover" nichts Wichtiges abschneidet. */
+  position:relative;height:260px;margin:0 -6px;
+  display:flex;align-items:flex-end;justify-content:center;
+}
+/* Kulisse + Übergang: Höhlenbild und Farbschleier werden gemeinsam maskiert,
+   damit die Kanten weich in den Seitenhintergrund auslaufen statt hart
+   abzubrechen. Deshalb liegt der Drache ausserhalb dieser Ebene – er soll
+   voll deckend bleiben. */
+.hoehle-kulisse{
+  position:absolute;inset:0;border-radius:20px;overflow:hidden;
+  /* farthest-corner: die Ellipse endet genau in den Ecken der Buehne, damit die
+     Maske dort wirklich bei null ankommt. Mit festen Prozentwerten waere sie an
+     den Ecken noch fast deckend und das Bild braeche als Rechteck ab. */
+  -webkit-mask-image:radial-gradient(ellipse farthest-corner at 50% 45%,#000 30%,rgba(0,0,0,.5) 60%,transparent 85%);
+  mask-image:radial-gradient(ellipse farthest-corner at 50% 45%,#000 30%,rgba(0,0,0,.5) 60%,transparent 85%);
+}
+.hoehle-kulisse svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+/* Liegt "drachenhoehle.png" neben der HTML-Datei, deckt das Foto die
+   SVG-Kulisse ab. Fehlt die Datei, bleibt diese Ebene leer und die gezeichnete
+   Höhle bleibt sichtbar – genau wie bei den Schriften greift ein Ersatz. */
+.hoehle-foto{position:absolute;inset:0;background:url("drachenhoehle.png") center/cover no-repeat;
+  filter:brightness(.96) saturate(1.12)}
+/* Farbangleich an den Seitenhintergrund – nimmt dem Bildrand den Bruch. */
+.hoehle-kulisse::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(100% 86% at 50% 60%,transparent 28%,rgba(20,29,56,.46) 70%,rgba(11,17,34,.9) 100%),
+    linear-gradient(rgba(20,29,56,.6),transparent 40%);
+}
+.hoehle-drache{
+  position:relative;z-index:1;font-size:clamp(3.2rem,16vw,4.6rem);line-height:1;
+  margin-bottom:76px;filter:drop-shadow(0 8px 10px rgba(0,0,0,.55));
+  animation:schweben 3.4s ease-in-out infinite;
+}
+.hoehle-drache::after{
+  content:"";position:absolute;left:50%;top:56%;transform:translate(-50%,-50%);
+  width:170%;height:130%;border-radius:50%;z-index:-1;pointer-events:none;
+  background:radial-gradient(circle,rgba(245,181,60,.3),transparent 68%);
+}
+.hoehle-drache.huepft{animation:huepfen .5s ease-out}
+.hoehle-drache.waechst{animation:aufpoppen .6s ease-out}
+.hoehle-name{
+  position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:1;
+  font-family:var(--schrift-display);font-size:.95rem;color:var(--gold);
+  background:rgba(11,17,34,.72);border:2px solid var(--gold-tief);border-radius:999px;
+  padding:4px 14px;white-space:nowrap;
+}
+.hoehle-schmuck{position:absolute;inset:0;z-index:1;pointer-events:none}
+.hoehle-schmuck span{
+  position:absolute;font-size:1.7rem;line-height:1;
+  filter:drop-shadow(0 3px 4px rgba(0,0,0,.55));animation:aufpoppen .5s ease-out;
+}
+.hoehle-tafel{padding:14px}
+.hoehle-text{text-align:center;font-weight:600;font-size:.95rem;margin-bottom:10px;min-height:2.6em}
+.hoehle-fort{text-align:center;font-size:.82rem;opacity:.75;margin-top:8px;min-height:1.2em}
+#btn-hoehle-haupt:disabled{opacity:.5;cursor:not-allowed;filter:grayscale(.5)}
+.hoehle-namen{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+/* display:grid schlaegt sonst das hidden-Attribut aus dem Browser-Stylesheet. */
+.hoehle-namen[hidden]{display:none}
+.hoehle-namen button{
+  font-family:var(--schrift-text);font-size:.78rem;font-weight:600;
+  background:rgba(255,255,255,.08);color:var(--pergament);
+  border:2px solid rgba(255,255,255,.16);border-radius:var(--r-klein);
+  padding:8px 4px;cursor:pointer;transition:transform .08s;
+}
+.hoehle-namen button:active{transform:translateY(2px)}
+.hoehle-laden{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.hoehle-ware{
+  display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;
+  background:rgba(255,255,255,.08);color:var(--pergament);
+  border:2px solid rgba(255,255,255,.16);border-radius:var(--r-klein);padding:7px 3px;
+  font-family:var(--schrift-text);transition:transform .08s;
+}
+.hoehle-ware .zeichen{font-size:1.5rem;line-height:1}
+.hoehle-ware .name{font-size:.72rem;font-weight:600;text-align:center;line-height:1.1}
+.hoehle-ware .preis{font-size:.68rem;opacity:.8}
+.hoehle-ware:active{transform:translateY(2px)}
+.hoehle-ware.gekauft{background:rgba(87,192,125,.24);border-color:#2f7d4e;cursor:default}
+.hoehle-ware.zu-teuer{opacity:.45;filter:grayscale(.5);cursor:not-allowed}
+.hoehle-hinweis{text-align:center;font-size:.86rem;opacity:.7;min-height:1.2em}
+
 /* ---------- Rechenmauer ---------- */
 .mauer-buehne{padding:6px 0 2px}
 .mauer{display:flex;flex-direction:column;gap:6px;align-items:center;position:relative}
@@ -582,6 +677,14 @@ body::after{
         </span>
         <span class="badge badge--ausgeben">Ausgeben</span>
       </button>
+      <button class="spielkarte spielkarte--ausgeben" id="karte-hoehle" type="button">
+        <span class="bild">🐉</span>
+        <span>
+          <h3>Drachenhöhle</h3>
+          <p>Kauf ein Drachenei und zieh deinen eigenen Drachen gross.</p>
+        </span>
+        <span class="badge badge--ausgeben">Ausgeben</span>
+      </button>
     </div>
 
     <div class="fusszeile">
@@ -616,6 +719,7 @@ body::after{
 
     <div class="arena">
       <div class="figur" id="ritter">🤺</div>
+      <div class="figur figur--begleiter aus" id="kampf-begleiter" aria-hidden="true"></div>
       <div class="figur figur--drache" id="drache">🐲</div>
       <div class="effekt" id="effekt"></div>
       <div class="funken" id="funken"></div>
@@ -751,6 +855,96 @@ body::after{
     <div class="burg-palette" id="burg-palette" aria-label="Bauteile"></div>
 
     <div class="burg-hinweis" id="burg-hinweis">Wähle ein Bauteil und tippe dann auf ein Feld.</div>
+
+    <div class="fusszeile">
+      <button class="mini" data-kammer>🗝️ Schatzkammer</button>
+      <button class="mini" data-ton>🔊 Ton</button>
+      <button class="mini" data-heim>🏠 Auswahl</button>
+    </div>
+  </section>
+
+  <!-- ============ SPIEL 6: DRACHENHÖHLE ============ -->
+  <section class="screen" id="screen-hoehle">
+    <div class="hoehle-kopf">
+      <div class="anzeige">
+        <div class="kopf">Gold</div>
+        <div class="wert"><span class="goldbox js-goldbox"><span class="js-gold">0</span></span></div>
+      </div>
+      <div class="anzeige">
+        <div class="kopf">Drache</div>
+        <div class="wert" id="hoehle-stufe">–</div>
+      </div>
+      <div class="anzeige">
+        <div class="kopf">Futter</div>
+        <div class="wert" id="hoehle-zaehler">0</div>
+      </div>
+    </div>
+
+    <div class="rang-chip"><span class="js-rang-emoji">🪙</span><span class="js-rang">Knappe</span></div>
+
+    <div class="hoehle-buehne">
+      <div class="hoehle-kulisse">
+        <svg viewBox="0 0 400 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs>
+            <linearGradient id="hh-innen" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#101832"/><stop offset="1" stop-color="#4a2b22"/>
+            </linearGradient>
+            <linearGradient id="hh-fels" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#1a2138"/><stop offset="1" stop-color="#070b16"/>
+            </linearGradient>
+            <linearGradient id="hh-boden" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#6b3d24"/><stop offset="1" stop-color="#1a1020"/>
+            </linearGradient>
+            <radialGradient id="hh-glut" cx="50%" cy="90%" r="58%">
+              <stop offset="0" stop-color="#ffc061" stop-opacity=".75"/>
+              <stop offset="42%" stop-color="#e8722a" stop-opacity=".34"/>
+              <stop offset="100%" stop-color="#c8501f" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <!-- Höhleninneres mit Glut vom Feuer am Boden -->
+          <rect width="400" height="200" fill="url(#hh-innen)"/>
+          <rect width="400" height="200" fill="url(#hh-glut)"/>
+          <!-- Boden mit Glutsaum und ein paar Goldmünzen -->
+          <path d="M56 200 C110 174 160 168 200 168 C240 168 290 174 344 200 Z" fill="url(#hh-boden)"/>
+          <ellipse cx="200" cy="190" rx="70" ry="10" fill="#ffb44e" opacity=".3"/>
+          <g fill="#f5b53c">
+            <circle cx="140" cy="188" r="4"/><circle cx="158" cy="194" r="3"/>
+            <circle cx="255" cy="189" r="4"/><circle cx="238" cy="195" r="3"/>
+            <circle cx="199" cy="196" r="3.5"/><circle cx="277" cy="196" r="2.5"/>
+          </g>
+          <!-- Felsrahmen: aussen herum, in der Mitte der Höhlenbogen ausgespart -->
+          <path d="M0 0 H400 V200 H346 C356 130 320 62 252 42 C216 31 184 31 148 42 C80 62 44 130 54 200 H0 Z" fill="url(#hh-fels)"/>
+          <g fill="#111728">
+            <polygon points="150,40 160,44 154,86"/>
+            <polygon points="182,33 193,33 187,74"/>
+            <polygon points="215,33 225,34 220,66"/>
+            <polygon points="247,41 258,46 252,80"/>
+            <polygon points="112,62 124,54 120,96"/>
+            <polygon points="285,56 296,64 290,92"/>
+          </g>
+          <path d="M0 0 H400 V200 H346 C356 130 320 62 252 42 C216 31 184 31 148 42 C80 62 44 130 54 200 H0 Z" fill="none" stroke="#2b3350" stroke-width="2" opacity=".55"/>
+        </svg>
+        <div class="hoehle-foto"></div>
+      </div>
+      <div class="hoehle-name" id="hoehle-name">Drachenhöhle</div>
+      <div class="hoehle-schmuck" id="hoehle-schmuck"></div>
+      <div class="hoehle-drache" id="hoehle-drache">🥚</div>
+      <div class="funken" id="hoehle-funken"></div>
+    </div>
+
+    <div class="tafel hoehle-tafel">
+      <div class="hoehle-text" id="hoehle-text">In der Höhle ist es still. Hier könnte dein eigener Drache wohnen.</div>
+      <div class="balken"><i id="hoehle-balken"></i></div>
+      <div class="hoehle-fort" id="hoehle-fort"></div>
+    </div>
+
+    <button class="knopf" id="btn-hoehle-haupt" type="button">🥚 Drachenei kaufen – 500 Gold</button>
+
+    <div class="hoehle-namen" id="hoehle-namen" hidden></div>
+
+    <div class="hoehle-laden" id="hoehle-laden" aria-label="Höhlenschmuck"></div>
+
+    <div class="hoehle-hinweis" id="hoehle-hinweis">Verdiene Gold in den Rechenspielen und bring Leben in die Höhle.</div>
 
     <div class="fusszeile">
       <button class="mini" data-kammer>🗝️ Schatzkammer</button>
@@ -1475,6 +1669,7 @@ body::after{
       sagen("k-rueckmeldung",waehle(lobWorte)+"  +"+gewinn+" Gold","gut");
       bewege($("ritter"),"angriff",460);
       const e = $("effekt"); e.textContent = "⚔️"; bewege(e,"schlag",750);
+      hoehleBegleiterJubelt();
       setTimeout(()=>{
         bewege($("drache"),"getroffen",460);
         funken("funken","🪙",mult*4);
@@ -2075,6 +2270,249 @@ body::after{
     $("burg-hinweis").textContent = teil.name+" abgerissen – +"+erstattung+" Gold zurück.";
   }
 
+  /* ================= SPIEL 6: DRACHENHÖHLE =================
+     Dritte Ausgeben-Möglichkeit neben Puzzle und Burg: ein Ei kaufen und den
+     eigenen Drachen grossfüttern. Ab dem Jungdrachen fliegt er im Drachenkampf
+     als Begleiter mit. Achtung: "hort" ist schon die Schatzjagd, deshalb
+     heisst hier alles "hoehle". */
+  const HOEHLE_EI = 500;
+  const HOEHLE_FUTTER = 80;
+  const HOEHLE_STUFEN = [
+    {ab:0,  bild:"🥚", name:"Ei",
+     text:"Ein warmes Ei liegt in der Höhle. Füttere es, damit es schlüpft."},
+    {ab:3,  bild:"🐣", name:"Schlüpfling",
+     text:"Geschlüpft! Ein winziger Drache blinzelt dich an."},
+    {ab:8,  bild:"🐲", name:"Jungdrache",
+     text:"Er wächst – und fliegt ab jetzt im Drachenkampf an deiner Seite mit."},
+    {ab:15, bild:"🐉", name:"Hausdrache",
+     text:"Ausgewachsen! Dein Drache ist der Stolz der Höhle."}
+  ];
+  /* Ab dieser Stufe erscheint der Drache in der Kampfarena. */
+  const HOEHLE_BEGLEITER_AB = 2;
+  /* x/y in Prozent der Bühne: x von links, y von unten. */
+  const HOEHLE_SCHMUCK = [
+    {id:"nest",     bild:"🪺", name:"Nest",         preis:150, x:15, y:14},
+    {id:"fackel",   bild:"🔥", name:"Fackel",       preis:90,  x:85, y:46},
+    {id:"gold",     bild:"💰", name:"Goldhaufen",   preis:200, x:77, y:13},
+    {id:"kristall", bild:"💎", name:"Kristall",     preis:250, x:25, y:52},
+    {id:"knochen",  bild:"🦴", name:"Knochen",      preis:70,  x:34, y:7},
+    {id:"stern",    bild:"🌟", name:"Sternenlicht", preis:300, x:62, y:60}
+  ];
+  /* Namen werden angetippt, nicht getippt – im ganzen Spiel wird nichts geschrieben. */
+  const HOEHLE_NAMEN = ["Funkenschweif","Glutherz","Mondschuppe",
+                        "Sternenzahn","Rauchwölkchen","Goldkralle"];
+
+  const hoehle = { ei:false, futter:0, schmuck:[], name:"" };
+
+  function hoehleStufeIndex(){
+    if(!hoehle.ei) return -1;
+    let i = 0;
+    HOEHLE_STUFEN.forEach((s,n)=>{ if(hoehle.futter>=s.ab) i = n; });
+    return i;
+  }
+  function hoehleAusgewachsen(){ return hoehleStufeIndex() >= HOEHLE_STUFEN.length-1; }
+
+  function hoehleLaden(){
+    hoehle.ei = false; hoehle.futter = 0; hoehle.schmuck = []; hoehle.name = "";
+    try{
+      const roh = localStorage.getItem(kontoKey(konto.aktiv,"hoehle"));
+      if(!roh) return;
+      const d = JSON.parse(roh);
+      hoehle.ei = !!d.ei;
+      hoehle.futter = Math.max(0, Number(d.futter)||0);
+      hoehle.schmuck = Array.isArray(d.schmuck)
+        ? d.schmuck.filter(id => HOEHLE_SCHMUCK.some(s=>s.id===id))
+        : [];
+      hoehle.name = HOEHLE_NAMEN.indexOf(d.name)>=0 ? d.name : "";
+    }catch(e){}
+  }
+  function hoehleSichern(){
+    try{
+      localStorage.setItem(kontoKey(konto.aktiv,"hoehle"), JSON.stringify({
+        ei:hoehle.ei, futter:hoehle.futter, schmuck:hoehle.schmuck, name:hoehle.name
+      }));
+    }catch(e){}
+  }
+
+  /* Der Begleiter in der Kampfarena – wird auch beim Kontowechsel neu gesetzt. */
+  function hoehleBegleiterZeichnen(){
+    const el = $("kampf-begleiter");
+    if(!el) return;
+    const i = hoehleStufeIndex();
+    if(i >= HOEHLE_BEGLEITER_AB){
+      el.textContent = HOEHLE_STUFEN[i].bild;
+      el.classList.remove("aus");
+    }else{
+      el.textContent = "";
+      el.classList.add("aus");
+    }
+  }
+  function hoehleBegleiterJubelt(){
+    const el = $("kampf-begleiter");
+    if(el && !el.classList.contains("aus")) bewege(el,"jubelt",520);
+  }
+
+  function hoehleSchmuckZeichnen(){
+    const box = $("hoehle-schmuck");
+    box.innerHTML = "";
+    HOEHLE_SCHMUCK.forEach(s => {
+      if(hoehle.schmuck.indexOf(s.id)<0) return;
+      const el = document.createElement("span");
+      el.textContent = s.bild;
+      el.style.left = s.x+"%";
+      el.style.bottom = s.y+"%";
+      box.appendChild(el);
+    });
+  }
+
+  function hoehleLadenZeichnen(){
+    const box = $("hoehle-laden");
+    box.innerHTML = "";
+    if(!hoehle.ei) return;
+    HOEHLE_SCHMUCK.forEach(s => {
+      const hat = hoehle.schmuck.indexOf(s.id)>=0;
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "hoehle-ware"+(hat ? " gekauft" : (schatz.gold<s.preis ? " zu-teuer" : ""));
+      b.innerHTML = '<span class="zeichen">'+s.bild+'</span>'
+        + '<span class="name">'+s.name+'</span>'
+        + '<span class="preis">'+(hat ? "gekauft" : s.preis+" 🪙")+'</span>';
+      if(!hat) b.addEventListener("click", ()=>hoehleSchmuckKaufen(s.id));
+      box.appendChild(b);
+    });
+  }
+
+  function hoehleNamenZeichnen(){
+    const box = $("hoehle-namen");
+    const zeigen = hoehle.ei && hoehleStufeIndex()>=1 && !hoehle.name;
+    box.hidden = !zeigen;
+    box.innerHTML = "";
+    if(!zeigen) return;
+    HOEHLE_NAMEN.forEach(n => {
+      const b = document.createElement("button");
+      b.type = "button"; b.textContent = n;
+      b.addEventListener("click", ()=>{
+        hoehle.name = n;
+        hoehleSichern(); hoehleZeichnen();
+        kChime();
+        funken("hoehle-funken","✨",10);
+      });
+      box.appendChild(b);
+    });
+  }
+
+  function hoehleZeichnen(){
+    const i = hoehleStufeIndex();
+    const drache = $("hoehle-drache");
+
+    if(i<0){
+      drache.textContent = "🥚";
+      drache.style.opacity = ".35";
+      drache.style.filter = "grayscale(1) drop-shadow(0 8px 10px rgba(0,0,0,.55))";
+      $("hoehle-stufe").textContent = "–";
+      $("hoehle-name").textContent = "Drachenhöhle";
+    }else{
+      const stufe = HOEHLE_STUFEN[i];
+      drache.textContent = stufe.bild;
+      drache.style.opacity = "";
+      drache.style.filter = "";
+      $("hoehle-stufe").textContent = stufe.name;
+      $("hoehle-name").textContent = hoehle.name || stufe.name;
+    }
+
+    $("hoehle-zaehler").textContent = hoehle.futter;
+    hoehleSchmuckZeichnen();
+    hoehleLadenZeichnen();
+    hoehleNamenZeichnen();
+    hoehleBegleiterZeichnen();
+
+    const knopf = $("btn-hoehle-haupt");
+    const text = $("hoehle-text");
+    const fort = $("hoehle-fort");
+    const hinweis = $("hoehle-hinweis");
+    const balken = $("hoehle-balken");
+
+    if(!hoehle.ei){
+      knopf.disabled = schatz.gold < HOEHLE_EI;
+      knopf.textContent = "🥚 Drachenei kaufen – "+HOEHLE_EI+" Gold";
+      text.textContent = "In der Höhle ist es still. Hier könnte dein eigener Drache wohnen.";
+      balken.style.width = "0%";
+      fort.textContent = "";
+      hinweis.textContent = schatz.gold < HOEHLE_EI
+        ? "Du brauchst noch "+(HOEHLE_EI-schatz.gold)+" Gold für das Ei."
+        : "Du hast genug Gold – hol dir das Ei!";
+      return;
+    }
+
+    text.textContent = HOEHLE_STUFEN[i].text;
+
+    if(hoehleAusgewachsen()){
+      knopf.disabled = true;
+      knopf.textContent = "🐉 Ausgewachsen!";
+      balken.style.width = "100%";
+      fort.textContent = "Dein Drache ist fertig gewachsen.";
+      hinweis.textContent = "Schmücke jetzt die Höhle – schöner wohnt er allemal.";
+    }else{
+      const naechste = HOEHLE_STUFEN[i+1];
+      const vorige = HOEHLE_STUFEN[i].ab;
+      const fehlt = naechste.ab - hoehle.futter;
+      knopf.disabled = schatz.gold < HOEHLE_FUTTER;
+      knopf.textContent = "🍖 Füttern – "+HOEHLE_FUTTER+" Gold";
+      balken.style.width =
+        ((hoehle.futter-vorige)/(naechste.ab-vorige)*100)+"%";
+      fort.textContent = "noch "+fehlt+"× füttern bis "+naechste.name;
+      hinweis.textContent = schatz.gold < HOEHLE_FUTTER
+        ? "Du brauchst noch "+(HOEHLE_FUTTER-schatz.gold)+" Gold fürs Futter."
+        : "Dein Drache hat Hunger!";
+    }
+  }
+
+  function hoehleEiKaufen(){
+    if(hoehle.ei || !goldAusgeben(HOEHLE_EI)) return;
+    hoehle.ei = true;
+    hoehleSichern();
+    hoehleZeichnen();
+    kZirp();
+    bewege($("hoehle-drache"),"waechst",620);
+    funken("hoehle-funken","✨",12);
+  }
+
+  function hoehleFuettern(){
+    if(!hoehle.ei || hoehleAusgewachsen()) return;
+    const vorher = hoehleStufeIndex();
+    if(!goldAusgeben(HOEHLE_FUTTER)) return;
+
+    hoehle.futter++;
+    hoehleSichern();
+    hoehleZeichnen();
+
+    const nachher = hoehleStufeIndex();
+    if(nachher > vorher){
+      /* Aufstieg wird gefeiert – wie der Rangaufstieg im Rest des Spiels. */
+      kSieg();
+      bewege($("hoehle-drache"),"waechst",620);
+      funken("hoehle-funken","⭐",16);
+      $("hoehle-hinweis").textContent =
+        "🎉 Gewachsen! Jetzt ein "+HOEHLE_STUFEN[nachher].name+".";
+    }else{
+      kPop();
+      bewege($("hoehle-drache"),"huepft",520);
+      funken("hoehle-funken","💛",6);
+    }
+  }
+
+  function hoehleSchmuckKaufen(id){
+    const ware = HOEHLE_SCHMUCK.find(s=>s.id===id);
+    if(!ware || hoehle.schmuck.indexOf(id)>=0) return;
+    if(!goldAusgeben(ware.preis)){ kGesperrt(); return; }
+    hoehle.schmuck.push(id);
+    hoehleSichern();
+    hoehleZeichnen();
+    kMagie();
+    funken("hoehle-funken","✨",10);
+    $("hoehle-hinweis").textContent = ware.name+" schmückt jetzt deine Höhle.";
+  }
+
   /* ================= SPIEL 5: RECHENMAUER ================= */
   const MAUER_ZIEL = 15;
   const m = { runde:1, richtig:0, falsch:0, serie:0, beste:0,
@@ -2404,9 +2842,9 @@ body::after{
   }
   function kontoDatenLaden(){
     laden(); optLaden(); optAnwenden();
-    puzzleLaden(); burgLaden();
+    puzzleLaden(); burgLaden(); hoehleLaden();
     burg.auswahl = null; burg.geloest = false;
-    schatzZeichnen(); puzzleZeichnen(); burgZeichnen();
+    schatzZeichnen(); puzzleZeichnen(); burgZeichnen(); hoehleZeichnen();
     kontoAnzeigen();
   }
   function kontoGitterZeichnen(){
@@ -2513,6 +2951,14 @@ body::after{
     burgZeichnen();
     zeigeScreen("screen-burg");
   });
+
+  $("karte-hoehle").addEventListener("click", ()=>{
+    hoehleZeichnen();
+    zeigeScreen("screen-hoehle");
+  });
+  $("btn-hoehle-haupt").addEventListener("click", ()=>{
+    hoehle.ei ? hoehleFuettern() : hoehleEiKaufen();
+  });
   $("burg-raster").addEventListener("click", e => {
     const zelle = e.target.closest(".burg-zelle");
     if(!zelle) return;
@@ -2530,9 +2976,11 @@ body::after{
   optAnwenden();
   puzzleLaden();
   burgLaden();
+  hoehleLaden();
   schatzZeichnen();
   puzzleZeichnen();
   burgZeichnen();
+  hoehleZeichnen();
   kontoAnzeigen();
 })();
 </script>
