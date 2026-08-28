@@ -575,7 +575,7 @@
       }
       setTimeout(()=>{
         bewege($("drache"),"getroffen",460);
-        funken("funken","🪙",mult*4);
+        funken("k-gold-funken","🪙",mult*4);
         kLeben(); kVerlustAnzeigen("zaehne",k.zaehne);
       },220);
       const truheFaellig = truheZaehlen();
@@ -1351,10 +1351,15 @@
     if(!el) return;
     const i = hoehleStufeIndex();
     if(i >= HOEHLE_BEGLEITER_AB){
-      el.textContent = HOEHLE_STUFEN[i].bild;
+      const stufe = HOEHLE_STUFEN[i];
+      if(stufe.img){
+        el.innerHTML = '<img src="'+stufe.img+'" alt="'+tr(stufe.nameKey)+'">';
+      }else{
+        el.textContent = stufe.bild;
+      }
       el.classList.remove("aus");
     }else{
-      el.textContent = "";
+      el.innerHTML = "";
       el.classList.add("aus");
     }
   }
@@ -1972,10 +1977,10 @@
       /* Beim letzten Ritt übernimmt tKampf() das Anreiten – die Münzen fliegen
          dann schon in der kurzen Pause davor. */
       if(letzter){
-        funken("t-funken","🪙",mult*4);
+        funken("t-gold-funken","🪙",mult*4);
       } else {
         tRitt("gegner");
-        setTimeout(()=> funken("t-funken","🪙",mult*4), RITT_HIN);
+        setTimeout(()=> funken("t-gold-funken","🪙",mult*4), RITT_HIN);
       }
       tZeichnen();
       tKopf();
