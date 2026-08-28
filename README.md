@@ -43,6 +43,12 @@ unterschieden:
   sich die Lücken Schritt für Schritt lösen lassen; ein Knopf zeigt den nächsten
   Rechenschritt als Hilfestellung an.
 
+- **Ritter-Turnier** – ein Tjost gegen vier Gegner, von Ritter Blauhelm bis König
+  Goldhelm. Jede Aufgabe ist ein Ritt: beide Ritter preschen aufeinander zu, in der
+  Mitte krachen die Lanzen. Eine richtige Antwort setzt den eigenen Treffer, eine
+  falsche einen für den Gegner. Nach acht Ritten muss der Verlierer aus dem Sattel –
+  bei Gleichstand gewinnt das Kind.
+
 ### Gold ausgeben
 
 - **Puzzle-Schatz** – jedes Puzzleteil kostet 200 Gold. Stück für Stück wird ein Bild
@@ -106,7 +112,8 @@ Die Drachen stehen als Liste `DRACHEN`, die Schätze als `SCHAETZE` und die Rän
 `RAENGE` im Skript – dort lassen sich Namen, Zahnzahl, Schwierigkeit, Preise und
 Beute anpassen. Für die Drachenhöhle gilt dasselbe mit `HOEHLE_STUFEN` (Wachstum),
 `HOEHLE_SCHMUCK` (Deko samt Position in der Höhle), `HOEHLE_NAMEN` sowie den Preisen
-`HOEHLE_EI` und `HOEHLE_FUTTER`. Die Aufgaben selbst entstehen in `rohAufgabe()`, jede Stufe hat dort
+`HOEHLE_EI` und `HOEHLE_FUTTER`. Die Turniergegner liegen als `TURNIER_GEGNER`
+(Name, Schwierigkeit, Beute), die Zahl der Ritte pro Gegner als `TURNIER_RITTE`. Die Aufgaben selbst entstehen in `rohAufgabe()`, jede Stufe hat dort
 ein paar Zeilen. Die Farben liegen als CSS-Variablen ganz oben in der Datei.
 
 ## Lizenz

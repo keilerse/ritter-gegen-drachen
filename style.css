@@ -552,7 +552,7 @@ body::after{
 
 /* ---------- Ritter-Turnier ---------- */
 .turnier-buehne{
-  position:relative;height:118px;display:flex;align-items:flex-end;justify-content:space-between;
+  position:relative;height:132px;
   border-bottom:4px solid rgba(255,255,255,.08);overflow:hidden;
 }
 .turnier-spur{position:absolute;left:0;right:0;bottom:10px;height:6px;
@@ -560,13 +560,47 @@ body::after{
   border-radius:3px}
 .turnier-mitte{position:absolute;left:50%;top:-10px;width:4px;height:26px;transform:translateX(-50%);
   background:var(--gold-tief);border-radius:2px;box-shadow:0 0 0 2px rgba(245,181,60,.35)}
-.turnier-ritter{
-  position:absolute;bottom:14px;height:clamp(64px,22vw,96px);
-  filter:drop-shadow(0 6px 6px rgba(0,0,0,.5));
-  transition:left .45s cubic-bezier(.2,.9,.3,1.2),right .45s cubic-bezier(.2,.9,.3,1.2);
+/* Der Platz reitet (translateX), der Ritter darin stösst zu, wird getroffen und
+   stürzt. Zwei Ebenen, damit sich die Transformationen nicht überschreiben.
+   Die Strecke --ritt-weg setzt app.js vor jedem Ritt aus der Bühnenbreite. */
+.turnier-platz{position:absolute;bottom:14px}
+.turnier-platz--ich{left:4%}
+.turnier-platz--gegner{right:4%}
+.turnier-platz--ich.reitet{animation:tRittIch 1.04s ease-in-out}
+.turnier-platz--gegner.reitet{animation:tRittGegner 1.04s ease-in-out}
+.turnier-platz--ich.reitet-finale{animation:tRittIchFinale .38s ease-in forwards}
+.turnier-platz--gegner.reitet-finale{animation:tRittGegnerFinale .38s ease-in forwards}
+@keyframes tRittIch{
+  0%{transform:translateX(0)}
+  36%,60%{transform:translateX(var(--ritt-weg,0px))}
+  100%{transform:translateX(0)}
 }
-.turnier-ritter--ich{left:4%}
-.turnier-ritter--gegner{right:4%;transform:scaleX(1)}
+@keyframes tRittGegner{
+  0%{transform:translateX(0)}
+  36%,60%{transform:translateX(calc(-1 * var(--ritt-weg,0px)))}
+  100%{transform:translateX(0)}
+}
+/* Letzter Ritt: kein Rückweg, der Verlierer stürzt in der Mitte aus dem Sattel. */
+@keyframes tRittIchFinale{to{transform:translateX(var(--ritt-weg,0px))}}
+@keyframes tRittGegnerFinale{to{transform:translateX(calc(-1 * var(--ritt-weg,0px)))}}
+
+/* Namensschilder und Ritt-Zähler über der Bahn. */
+.turnier-schild{position:absolute;top:2px;display:flex;flex-direction:column;max-width:38%;overflow:hidden}
+.turnier-schild--ich{left:6px;align-items:flex-start}
+.turnier-schild--gegner{right:6px;align-items:flex-end;text-align:right}
+.turnier-name{font-family:var(--schrift-display);font-size:.8rem;letter-spacing:.5px;white-space:nowrap;
+  color:var(--gold);text-shadow:0 2px 3px rgba(0,0,0,.6);line-height:1.2}
+.turnier-treffer{font-size:.72rem;letter-spacing:1px;line-height:1.2;min-height:.9em}
+.turnier-ritt{position:absolute;top:4px;left:50%;transform:translateX(-50%);
+  font-size:.7rem;letter-spacing:1px;opacity:.65;white-space:nowrap}
+/* Die Lanzen krachen in der Bühnenmitte, nicht bei den 10% von .effekt.
+   Verschiebung über margin-left, weil @keyframes schlag das transform belegt. */
+#turnier-buehne .effekt{left:50%;top:26%;margin-left:-1.3rem}
+
+.turnier-ritter{
+  display:block;height:clamp(58px,20vw,88px);
+  filter:drop-shadow(0 6px 6px rgba(0,0,0,.5));
+}
 .turnier-ritter.angriff{animation:lanzenstoss .4s ease-out}
 .turnier-ritter.getroffen{animation:tGetroffen .45s ease-out}
 .turnier-ritter.faellt{animation:turnierFaellt .8s forwards}
@@ -608,6 +642,8 @@ body::after{
 @media (orientation:landscape) and (max-height:500px){
   .arena{height:86px;min-height:86px}
   .hort-buehne{height:86px;min-height:86px}
+  .turnier-buehne{height:104px}
+  .turnier-ritter{height:62px}
   .hoehle-buehne{aspect-ratio:572/200}
 }
 /* Tablets und grössere Screens: etwas breiter, grössere Treffflächen. */

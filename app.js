@@ -1705,11 +1705,15 @@
   }
 
   /* ================= SPIEL 7: RITTER-TURNIER =================
-     Zwei Ritter treffen sich auf der Bahn. Jede richtige Antwort bringt den
-     eigenen Ritter einen Schritt vor, jede falsche den Gegner. Nach 8 Schritten
-     treffen sie aufeinander – wer mehr Aufgaben gelöst hat, gewinnt (bei
-     Gleichstand gewinnt der Spieler). */
-  const TURNIER_SCHRITTE = 8;
+     Ein Tjost: Jede Aufgabe ist ein Ritt. Beide Ritter preschen aufeinander zu,
+     in der Mitte krachen die Lanzen – bei einer richtigen Antwort trifft der
+     eigene Ritter, bei einer falschen der Gegner. Danach reiten beide an ihr
+     Ende zurück und der nächste Ritt beginnt. Nach 8 Ritten entscheidet, wer
+     mehr Treffer gelandet hat (bei Gleichstand gewinnt der Spieler). */
+  const TURNIER_RITTE = 8;
+  /* Takt eines Ritts: hin, Lanzen krachen, zurück. */
+  const RITT_HIN = 380, RITT_HALT = 240, RITT_ZURUECK = 420;
+  const RITT_GESAMT = RITT_HIN + RITT_HALT + RITT_ZURUECK;
   const TURNIER_GEGNER = [
     { name:"Ritter Blauhelm",  stufen:[1],     beute:50 },
     { name:"Graf Grauguss",    stufen:[1,2],   beute:75 },
@@ -1733,24 +1737,45 @@
   function tGegnerName(){
     return TURNIER_GEGNER[Math.min(t.gegner,TURNIER_GEGNER.length-1)].name;
   }
-  function tPosition(){
-    /* 0..1: wie weit der eigene Ritter in Richtung Mitte gekommen ist.
-       Der Gegner bekommt dieselbe Spanne von der anderen Seite. */
-    return t.richtig / TURNIER_SCHRITTE;
-  }
-  function tGegnerPosition(){
-    return t.falsch / TURNIER_SCHRITTE;
-  }
   function tZeichnen(){
-    const ich = $("t-ich"), gegner = $("t-gegner-ritter");
-    if(!ich || !gegner) return;
-    /* Bahn von 4% bis 96% der Breite. Der eigene Ritter steht bei
-       "richtig/TURNIER_SCHRITTE", der Gegner bei "falsch/TURNIER_SCHRITTE"
-       von der anderen Seite – wenn richtig+falsch = 8, stehen sie exakt
-       an derselben Stelle (Treffen). */
-    const span = 92;
-    ich.style.left = (4 + span * tPosition()) + "%";
-    gegner.style.right = (4 + span * tGegnerPosition()) + "%";
+    const k = kontoAktuell();
+    $("t-name-ich").textContent    = (k && k.name) || "Dein Ritter";
+    $("t-name-gegner").textContent = tGegnerName();
+    $("t-treffer-ich").textContent    = "⚔".repeat(t.richtig);
+    $("t-treffer-gegner").textContent = "⚔".repeat(t.falsch);
+    $("t-ritt").textContent = "Ritt "+(t.richtig+t.falsch)+"/"+TURNIER_RITTE;
+  }
+  function tRittWeg(){
+    /* Halbe Bühne minus Ritterbreite: die beiden stehen sich in der Mitte
+       gegenüber statt sich zu überlappen. Die 10 px Zugabe lassen die
+       Lanzenspitzen sich kreuzen. Wird vor jedem Ritt neu gerechnet, damit
+       Drehen des Geräts ohne resize-Listener stimmt. */
+    const b = $("turnier-buehne"), r = $("t-ich");
+    if(!b || !r) return 0;
+    return Math.max(0, Math.round(b.clientWidth/2 - r.offsetWidth + 10));
+  }
+  /* Ein Anritt. "getroffen" ist "gegner" oder "ich"; beim letzten Ritt (finale)
+     bleiben die Ritter in der Mitte stehen, damit der Verlierer dort stürzt. */
+  function tRitt(getroffen, finale){
+    const b = $("turnier-buehne");
+    const ich = $("t-platz-ich"), geg = $("t-platz-gegner");
+    b.style.setProperty("--ritt-weg", tRittWeg()+"px");
+    if(finale){
+      ich.classList.add("reitet-finale");
+      geg.classList.add("reitet-finale");
+    } else {
+      bewege(ich,"reitet",RITT_GESAMT);
+      bewege(geg,"reitet",RITT_GESAMT);
+    }
+    setTimeout(()=>{
+      const opfer = getroffen==="gegner" ? $("t-gegner-ritter") : $("t-ich");
+      const stoss = getroffen==="gegner" ? $("t-ich") : $("t-gegner-ritter");
+      bewege(stoss,"angriff",460);
+      bewege(opfer,"getroffen",460);
+      const e = $("t-effekt");
+      e.textContent = getroffen==="gegner" ? "⚔️" : "🛡️";
+      bewege(e,"schlag",750);
+    }, RITT_HIN);
   }
   function tNeueAufgabe(){
     if(!t.wiederholen){
@@ -1774,11 +1799,10 @@
       const beute = goldDazu(g.beute);
       t.beute += beute;
       kSieg();
-      bewege($("t-ich"),"angriff",460);
-      bewege($("t-gegner-ritter"),"getroffen",460);
-      funken("t-funken","⭐",14);
+      tRitt("gegner",true);
+      setTimeout(()=> funken("t-funken","⭐",14), RITT_HIN);
+      setTimeout(()=> $("t-gegner-ritter").classList.add("faellt"), RITT_HIN+160);
       setTimeout(()=>{
-        $("t-gegner-ritter").classList.add("faellt");
         t.gegner++;
         if(t.gegner >= TURNIER_GEGNER.length){
           setTimeout(()=> tTurnierSieg(beute), 700);
@@ -1789,18 +1813,19 @@
         $("t-erg-text").textContent = "Du hast "+t.richtig+" Treffer gelandet – weiter geht's gegen "+tGegnerName()+".";
         $("t-erg-gold").textContent = "🪙 +"+beute+" Gold";
         $("ov-turnier").classList.add("is-offen");
-      },800);
+      },RITT_HIN+680);
     } else {
       kAus();
-      bewege($("t-ich"),"getroffen",460);
+      tRitt("ich",true);
+      setTimeout(()=> funken("t-funken","💥",12), RITT_HIN);
+      setTimeout(()=> $("t-ich").classList.add("faellt"), RITT_HIN+160);
       setTimeout(()=>{
-        $("t-ich").classList.add("faellt");
         $("t-erg-emoji").textContent = "🛡️";
         $("t-erg-titel").textContent = tGegnerName()+" war stärker";
         $("t-erg-text").textContent = "Du hast "+t.richtig+" gelöst, aber "+t.falsch+" Fehler gemacht. Noch ein Versuch?";
         $("t-erg-gold").textContent = "";
         $("ov-turnier").classList.add("is-offen");
-      },800);
+      },RITT_HIN+680);
     }
   }
   function tTurnierSieg(beute){
@@ -1824,24 +1849,29 @@
       t.beute += gewinn;
       kRichtig(); kMuenze();
       sagen("t-rueckmeldung",waehle(lobWorte)+"  +"+gewinn+" Gold","gut");
-      bewege($("t-ich"),"angriff",460);
-      const e = $("t-effekt"); e.textContent = "⚔️"; bewege(e,"schlag",750);
-      funken("t-funken","🪙",mult*4);
+      const letzter = (t.richtig+t.falsch) >= TURNIER_RITTE;
+      /* Beim letzten Ritt übernimmt tKampf() das Anreiten – die Münzen fliegen
+         dann schon in der kurzen Pause davor. */
+      if(letzter){
+        funken("t-funken","🪙",mult*4);
+      } else {
+        tRitt("gegner");
+        setTimeout(()=> funken("t-funken","🪙",mult*4), RITT_HIN);
+      }
       tZeichnen();
       tKopf();
       const truheFaellig = truheZaehlen();
       setTimeout(()=>{
-        const weiter = () => { (t.richtig+t.falsch) >= TURNIER_SCHRITTE ? tKampf() : tNeueAufgabe(); };
+        const weiter = () => { letzter ? tKampf() : tNeueAufgabe(); };
         truheFaellig ? truheZeigen(weiter) : weiter();
-      },1050);
+      }, letzter ? 400 : RITT_GESAMT+160);
     } else {
       knopf.classList.add("falsch");
       zeigeLoesung("t-zahlen",t.aufgabe.antwort);
       t.falsch++; t.serie = 0;
       const weg = goldWeg();
       kFalsch();
-      bewege($("t-gegner-ritter"),"angriff",460);
-      const e = $("t-effekt"); e.textContent = "🛡️"; bewege(e,"schlag",750);
+      if((t.richtig+t.falsch) < TURNIER_RITTE) tRitt("ich");
       sagen("t-rueckmeldung", weg
         ? "Daneben! "+t.aufgabe.loesung+"  −"+weg+" Gold."
         : "Daneben! "+t.aufgabe.loesung, "schlecht");
@@ -1850,15 +1880,21 @@
       tZeichnen();
       tKopf();
       setTimeout(()=>{
-        (t.richtig+t.falsch) >= TURNIER_SCHRITTE ? tKampf() : tNeueAufgabe();
+        (t.richtig+t.falsch) >= TURNIER_RITTE ? tKampf() : tNeueAufgabe();
       },2600);
     }
+  }
+  /* Beide Ritter zurück an ihr Ende – Sturz und laufende Ritte aufräumen. */
+  function tBuehneZuruecksetzen(){
+    $("t-gegner-ritter").classList.remove("faellt");
+    $("t-ich").classList.remove("faellt");
+    ["t-platz-ich","t-platz-gegner"].forEach(id =>
+      $(id).classList.remove("reitet","reitet-finale"));
   }
   function tStart(){
     t.gegner=0; t.richtig=0; t.falsch=0; t.serie=0; t.beste=0;
     t.beute=0; t.letzte=""; t.wiederholen=false; t.gewonnen=false;
-    $("t-gegner-ritter").classList.remove("faellt");
-    $("t-ich").classList.remove("faellt");
+    tBuehneZuruecksetzen();
     baueZahlen("t-zahlen",tAntwort);
     zeigeScreen("screen-turnier");
     tZeichnen();
@@ -1867,8 +1903,7 @@
   /* Nächster Gegner (nach Sieg): Gegner-Index bleibt, nur die Runde wird neu gesetzt. */
   function tNaechsterGegner(){
     t.richtig=0; t.falsch=0; t.serie=0; t.letzte=""; t.wiederholen=false;
-    $("t-gegner-ritter").classList.remove("faellt");
-    $("t-ich").classList.remove("faellt");
+    tBuehneZuruecksetzen();
     tZeichnen();
     tNeueAufgabe();
   }
