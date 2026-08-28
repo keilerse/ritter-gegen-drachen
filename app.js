@@ -12,7 +12,7 @@
   const AKTIV_KEY  = "rechenritter.aktiv";
   const MAX_KONTEN = 4;
   const AVATARE = ["🦁","🐲","🦄","🐱","🚀","🐼","🦉","🐸"];
-  const konto = { liste:[], aktiv:"", neuBild:"" };
+  const konto = { liste:[], aktiv:"", neuBild:"", neuSprache:"de" };
 
   function kontoKey(id, art){ return "rechenritter."+id+"."+art; }
   function kontoListeLaden(){
@@ -49,7 +49,7 @@
     try{ aktiv = localStorage.getItem(AKTIV_KEY); }catch(e){}
     if(konto.liste.length===0){
       const id = kontoNeuId();
-      konto.liste.push({ id:id, name:"Ritter 1", bild:AVATARE[0] });
+      konto.liste.push({ id:id, name:tr("konto.default.name",{n:1}), bild:AVATARE[0], sprache:"de" });
       konto.aktiv = id;
       kontoMigriereLegacy(id);
       kontoListeSichern(); kontoAktivSichern();
@@ -96,18 +96,18 @@
 
   /* ================= Gemeinsame Schatzkammer ================= */
   const SCHAETZE = [
-    {id:"diamant",   bild:"💎", name:"Diamant"},
-    {id:"krone",     bild:"👑", name:"Krone"},
-    {id:"schluessel",bild:"🗝️", name:"Goldschlüssel"},
-    {id:"stab",      bild:"🪄", name:"Zauberstab"},
-    {id:"schwert",   bild:"⚔️", name:"Flammenschwert"},
-    {id:"schild",    bild:"🛡️", name:"Silberschild"},
-    {id:"ei",        bild:"🥚", name:"Drachenei"},
-    {id:"einhorn",   bild:"🦄", name:"Einhorn"},
-    {id:"kompass",   bild:"🧭", name:"Kompass"},
-    {id:"laterne",   bild:"🕯️", name:"Ewiges Licht"},
-    {id:"vase",      bild:"🏺", name:"Goldvase"},
-    {id:"perle",     bild:"🌈", name:"Regenbogenperle"}
+    {id:"diamant",   bild:"💎", nameKey:"schatz.diamant"},
+    {id:"krone",     bild:"👑", nameKey:"schatz.krone"},
+    {id:"schluessel",bild:"🗝️", nameKey:"schatz.schluessel"},
+    {id:"stab",      bild:"🪄", nameKey:"schatz.stab"},
+    {id:"schwert",   bild:"⚔️", nameKey:"schatz.schwert"},
+    {id:"schild",    bild:"🛡️", nameKey:"schatz.schild"},
+    {id:"ei",        bild:"🥚", nameKey:"schatz.ei"},
+    {id:"einhorn",   bild:"🦄", nameKey:"schatz.einhorn"},
+    {id:"kompass",   bild:"🧭", nameKey:"schatz.kompass"},
+    {id:"laterne",   bild:"🕯️", nameKey:"schatz.laterne"},
+    {id:"vase",      bild:"🏺", nameKey:"schatz.vase"},
+    {id:"perle",     bild:"🌈", nameKey:"schatz.perle"}
   ];
   /* Tipp-Effekt je Schatz: Partikel-Emoji, Farb-Overlay, Animation, Sound-Familie */
   const SCHATZ_FX = {
@@ -129,20 +129,20 @@
      nicht mehr nach dem aktuellen Gold – so kostet Ausgeben keinen Rang.
      "ab" = benötigte gelöste Aufgaben insgesamt. */
   const RAENGE = [
-    {ab:0,    name:"Knappe",          bild:"🪙"},
-    {ab:10,   name:"Ritter",          bild:"💰"},
-    {ab:25,   name:"Schatzmeister",   bild:"💎"},
-    {ab:45,   name:"Drachenreiter",   bild:"🐲"},
-    {ab:75,   name:"Legende",         bild:"👑"},
-    {ab:120,  name:"Baron",           bild:"🏰"},
-    {ab:180,  name:"Graf",            bild:"⚜️"},
-    {ab:260,  name:"Herzog",          bild:"🛡️"},
-    {ab:370,  name:"Fürst",           bild:"🌟"},
-    {ab:520,  name:"König",           bild:"🤴"},
-    {ab:720,  name:"Kaiser",          bild:"🏛️"},
-    {ab:1000, name:"Drachentöter",    bild:"🗡️"},
-    {ab:1400, name:"Unsterblicher",   bild:"✨"},
-    {ab:2000, name:"Gott des Goldes", bild:"🌠"}
+    {ab:0,    nameKey:"rang.knappe",          bild:"🪙"},
+    {ab:10,   nameKey:"rang.ritter",          bild:"💰"},
+    {ab:25,   nameKey:"rang.schatzmeister",   bild:"💎"},
+    {ab:45,   nameKey:"rang.drachenreiter",   bild:"🐲"},
+    {ab:75,   nameKey:"rang.legende",         bild:"👑"},
+    {ab:120,  nameKey:"rang.baron",           bild:"🏰"},
+    {ab:180,  nameKey:"rang.graf",            bild:"⚜️"},
+    {ab:260,  nameKey:"rang.herzog",          bild:"🛡️"},
+    {ab:370,  nameKey:"rang.fuerst",          bild:"🌟"},
+    {ab:520,  nameKey:"rang.koenig",          bild:"🤴"},
+    {ab:720,  nameKey:"rang.kaiser",          bild:"🏛️"},
+    {ab:1000, nameKey:"rang.drachentoeter",   bild:"🗡️"},
+    {ab:1400, nameKey:"rang.unsterblicher",   bild:"✨"},
+    {ab:2000, nameKey:"rang.gott.des.goldes", bild:"🌠"}
   ];
   const TRUHE_ALLE = 5;
   const VERLUST = 5, GRUNDGOLD = 10;
@@ -192,8 +192,8 @@
   function optAnwenden(){
     wahlSetzen("wahl-raum", String(opt.max));
     wahlSetzen("wahl-art", opt.minus ? "beides" : "plus");
-    alle("[data-ton]").forEach(b => b.textContent = opt.ton ? "🔊 Ton" : "🔇 Ton aus");
-    $("btn-ton-start").textContent = opt.ton ? "🔊 Ton an" : "🔇 Ton aus";
+    alle("[data-ton]").forEach(b => b.textContent = opt.ton ? tr("ton.kurz") : tr("ton.aus"));
+    $("btn-ton-start").textContent = opt.ton ? tr("ton.an") : tr("ton.aus");
   }
   function rangFuer(n){
     let r = RAENGE[0];
@@ -207,8 +207,8 @@
   }
   function rangFortschrittText(){
     const n = naechsterRang();
-    if(!n) return "Höchster Rang erreicht! 🌠";
-    return "noch "+(n.ab - schatz.geloest)+" bis "+n.name;
+    if(!n) return tr("rang.max");
+    return tr("rang.fortschritt", { n: n.ab - schatz.geloest, rang: tr(n.nameKey) });
   }
   /* Wird bei jeder gelösten Aufgabe (in allen Spielen) aufgerufen: zählt hoch,
      speichert, aktualisiert die Anzeigen und feiert einen Rangaufstieg. */
@@ -225,8 +225,8 @@
     const b = document.createElement("div");
     b.className = "rang-feier";
     b.innerHTML = '<span class="rf-emoji">'+r.bild+'</span>'+
-                  '<span class="rf-label">Neuer Rang!</span>'+
-                  '<span class="rf-name">'+r.name+'</span>';
+                  '<span class="rf-label">'+tr("rang.neu")+'</span>'+
+                  '<span class="rf-name">'+tr(r.nameKey)+'</span>';
     $("app").appendChild(b);
     funkenEl(b, "✨", 16);
     setTimeout(()=>b.classList.add("weg"), 1700);
@@ -236,7 +236,7 @@
     alle(".js-gold").forEach(el => el.textContent = schatz.gold);
     alle(".js-truhe-balken").forEach(el => el.style.width = (schatz.bisTruhe/TRUHE_ALLE*100)+"%");
     alle(".js-truhe-zaehler").forEach(el => el.textContent = schatz.bisTruhe+"/"+TRUHE_ALLE);
-    alle(".js-rang").forEach(el => el.textContent = rang().name);
+    alle(".js-rang").forEach(el => el.textContent = tr(rang().nameKey));
     alle(".js-haufen").forEach(el => el.textContent = rang().bild);
     alle(".js-rang-emoji").forEach(el => el.textContent = rang().bild);
     alle(".js-rang-fort").forEach(el => el.textContent = rangFortschrittText());
@@ -281,8 +281,8 @@
     kTruhe();
     const bild = $("truhen-bild");
     bild.textContent = "🎁"; bild.className = "truhe";
-    $("truhen-titel").textContent = "Eine Schatztruhe!";
-    $("truhen-text").textContent = "Tippe die Truhe an.";
+    $("truhen-titel").textContent = tr("truhe.titel");
+    $("truhen-text").textContent = tr("truhe.text");
     $("truhen-gold").style.visibility = "hidden";
     $("btn-truhe-zu").style.visibility = "hidden";
     $("ov-truhe").classList.add("is-offen");
@@ -298,14 +298,14 @@
       const neu = waehle(offen);
       schatz.album.push(neu.id); schatz.neu.push(neu.id); sichern();
       bild.textContent = neu.bild; bild.className = "belohnung";
-      $("truhen-titel").textContent = neu.name+" gefunden!";
-      $("truhen-text").textContent = "Neu in deiner Schatzkammer – "+schatz.album.length+" von "+SCHAETZE.length+".";
+      $("truhen-titel").textContent = tr("truhe.gefunden", { name: tr(neu.nameKey) });
+      $("truhen-text").textContent = tr("truhe.neu", { n: schatz.album.length, m: SCHAETZE.length });
     } else {
       bild.textContent = "💰"; bild.className = "belohnung";
-      $("truhen-titel").textContent = "Randvoll mit Gold!";
-      $("truhen-text").textContent = "Du hast schon alle Schätze – dafür klingelt die Kasse.";
+      $("truhen-titel").textContent = tr("truhe.gold.voll");
+      $("truhen-text").textContent = tr("truhe.alle");
     }
-    $("truhen-gold").textContent = "+"+bonus+" Gold";
+    $("truhen-gold").textContent = tr("gold.plus", { n: bonus });
     $("truhen-gold").style.visibility = "visible";
     $("btn-truhe-zu").style.visibility = "visible";
   }
@@ -317,7 +317,7 @@
   let kammerTakt = null, kammerHinweisTakt = null;
 
   function kammerTextStd(){
-    $("kammer-text").textContent = schatz.album.length+" von "+SCHAETZE.length+" Schätzen gefunden";
+    $("kammer-text").textContent = trp("kammer.text", schatz.album.length, { m: SCHAETZE.length });
   }
 
   /* Antippen eines gefundenen Schatzes: passende Animation + Farb-Overlay + Funken + Sound.
@@ -342,7 +342,7 @@
   function schatzGesperrt(el){
     bewege(el, "fx-ruettel", 450);
     kGesperrt();
-    $("kammer-text").textContent = "🔒 Spiel weiter, um ihn zu finden!";
+    $("kammer-text").textContent = tr("kammer.gesperrt");
     clearTimeout(kammerHinweisTakt);
     kammerHinweisTakt = setTimeout(kammerTextStd, 1600);
   }
@@ -356,11 +356,11 @@
       el.className = "sammelstueck"+(hat?"":" fehlt");
       el.dataset.id = sch.id;
       el.innerHTML = '<span class="bild">'+(hat?sch.bild:"❔")+'</span>'+
-                     '<span class="titel-klein">'+(hat?sch.name:"noch offen")+'</span>';
+                     '<span class="titel-klein">'+(hat?tr(sch.nameKey):tr("kammer.noch.offen"))+'</span>';
       if(hat){
         if(schatz.neu.indexOf(sch.id)>=0){
           const badge = document.createElement("span");
-          badge.className = "neu-badge"; badge.textContent = "NEU";
+          badge.className = "neu-badge"; badge.textContent = tr("kammer.neu");
           el.appendChild(badge);
         }
         el.addEventListener("click", ()=>schatzTippen(el, sch, true));
@@ -370,7 +370,7 @@
       gitter.appendChild(el);
     });
     kammerTextStd();
-    $("kammer-gold").textContent = "🪙 "+schatz.gold+" Gold · "+rang().name;
+    $("kammer-gold").textContent = tr("kammer.gold", { n: schatz.gold, rang: tr(rang().nameKey) });
     $("ov-kammer").classList.add("is-offen");
 
     /* Frisch gewonnene Schätze kurz selbst feiern (Abzeichen bleibt bis zum Tipp/Schließen) */
@@ -472,7 +472,7 @@
       const b = document.createElement("button");
       b.className = "zahl"; b.type = "button";
       b.textContent = i; b.dataset.wert = i;
-      b.setAttribute("aria-label","Antwort "+i);
+      b.setAttribute("aria-label", tr("aria.antwort", { n: i }));
       b.addEventListener("click", ()=>handler(i,b));
       feld.appendChild(b);
     }
@@ -515,15 +515,15 @@
     schatzZeichnen();
     window.scrollTo(0,0);
   }
-  const lobWorte = ["Treffer!","Stark!","Volltreffer!","Genau richtig!","Perfekt!","Super gerechnet!"];
+  const lobWorte = ["lob.treffer","lob.stark","lob.volltreffer","lob.genau","lob.perfekt","lob.super"];
 
   /* ================= SPIEL 1: Drachenkampf ================= */
   const DRACHEN = [
-    { name:"Glutzahn",      emoji:"🐲", zaehne:4, stufen:[1],   hue:0,   beute:50 },
-    { name:"Nebelschwinge", emoji:"🐉", zaehne:5, stufen:[1,2], hue:160, beute:75 },
-    { name:"Frostkralle",   emoji:"🐲", zaehne:5, stufen:[2,3], hue:200, beute:100 },
-    { name:"Schattenhorn",  emoji:"🐉", zaehne:6, stufen:[3],   hue:270, beute:125 },
-    { name:"Königsdrache",  emoji:"🐲", zaehne:6, stufen:[3,4], hue:330, beute:200 }
+    { nameKey:"drache.glutzahn",      emoji:"🐲", zaehne:4, stufen:[1],   hue:0,   beute:50 },
+    { nameKey:"drache.nebelschwinge", emoji:"🐉", zaehne:5, stufen:[1,2], hue:160, beute:75 },
+    { nameKey:"drache.frostkralle",   emoji:"🐲", zaehne:5, stufen:[2,3], hue:200, beute:100 },
+    { nameKey:"drache.schattenhorn",  emoji:"🐉", zaehne:6, stufen:[3],   hue:270, beute:125 },
+    { nameKey:"drache.koenigsdrache", emoji:"🐲", zaehne:6, stufen:[3,4], hue:330, beute:200 }
   ];
   const MAX_HERZEN = 3;
   const k = { drache:0, herzen:3, zaehne:0, maxZaehne:0, aufgabe:null, letzte:"",
@@ -535,8 +535,8 @@
       '<span class="'+(i<k.herzen?"":"weg")+'">❤️</span>').join("");
     $("zaehne").innerHTML = Array.from({length:k.maxZaehne},(_,i)=>
       '<span class="'+(i<k.zaehne?"":"weg")+'">🦷</span>').join("");
-    $("drachen-name").textContent = d.name;
-    $("runde").textContent = "Drache "+(k.drache+1)+"/"+DRACHEN.length;
+    $("drachen-name").textContent = tr(d.nameKey);
+    $("runde").textContent = tr("k.runde", { n: k.drache+1, m: DRACHEN.length });
     const f = $("drache");
     f.textContent = d.emoji;
     f.style.filter = "drop-shadow(0 6px 6px rgba(0,0,0,.5)) hue-rotate("+d.hue+"deg)";
@@ -550,7 +550,7 @@
     k.aufgabe = neuAufgabe(d.stufen,k.letzte);
     k.letzte = k.aufgabe.text;
     zeigeAufgabe("k-aufgabe",k.aufgabe);
-    sagen("k-rueckmeldung","Welche Zahl passt?","");
+    sagen("k-rueckmeldung", tr("frage.zahl"), "");
     $("k-tipp").classList.remove("is-offen");
     bauePunkte("k-punkte",k.aufgabe);
     k.gesperrt = false;
@@ -568,7 +568,7 @@
       const gewinn = goldDazu(GRUNDGOLD*mult);
       k.beute += gewinn;
       kRichtig(); kMuenze();
-      sagen("k-rueckmeldung",waehle(lobWorte)+"  +"+gewinn+" Gold","gut");
+      sagen("k-rueckmeldung", tr(waehle(lobWorte))+"  "+tr("gold.plus",{n:gewinn}), "gut");
       bewege($("ritter"),"angriff",460);
       const e = $("effekt"); e.textContent = "⚔️"; bewege(e,"schlag",750);
       hoehleBegleiterJubelt();
@@ -593,7 +593,9 @@
       const weg = goldWeg();
       k.beute -= weg;
       kFalsch();
-      sagen("k-rueckmeldung","Richtig wäre: "+k.aufgabe.loesung+(weg?"  −"+weg+" Gold":""),"schlecht");
+      sagen("k-rueckmeldung", weg
+        ? tr("k.falsch.gold", { loesung: k.aufgabe.loesung, n: weg })
+        : tr("k.falsch", { loesung: k.aufgabe.loesung }), "schlecht");
       $("k-tipp").classList.add("is-offen");
       const e = $("effekt"); e.textContent = "🔥"; bewege(e,"flamme",750);
       setTimeout(()=>{ bewege($("ritter"),"getroffen",460); kLeben(); kVerlustAnzeigen("herzen",k.herzen); },260);
@@ -612,10 +614,10 @@
       k.beute += beute;
       k.drache++;
       if(k.drache>=DRACHEN.length){ kEnde(true); return; }
-      $("win-titel").textContent = d.name+" ist besiegt!";
+      $("win-titel").textContent = tr("k.win.titel", { name: tr(d.nameKey) });
       $("win-sterne").textContent = sterne;
-      $("win-beute").textContent = "🪙 +"+beute+" Gold Drachenschatz";
-      $("win-text").textContent = "Weiter geht's: "+DRACHEN[k.drache].name+" wartet schon. Deine Herzen sind wieder voll.";
+      $("win-beute").textContent = tr("k.win.beute", { n: beute });
+      $("win-text").textContent = tr("k.win.text", { name: tr(DRACHEN[k.drache].nameKey) });
       zeigeScreen("screen-win");
     },900);
   }
@@ -623,13 +625,13 @@
     if(gewonnen){
       kSieg();
       $("ende-figur").textContent = "👑";
-      $("ende-titel").textContent = "Alle Drachen besiegt!";
-      $("ende-text").textContent = "Das Königreich ist gerettet – und dein Drachengold liegt in der Schatzkammer.";
+      $("ende-titel").textContent = tr("k.ende.sieg.titel");
+      $("ende-text").textContent = tr("k.ende.sieg.text");
     } else {
       kAus();
       $("ende-figur").textContent = "🐉";
-      $("ende-titel").textContent = "Der Drache war stärker";
-      $("ende-text").textContent = "Deine Herzen sind aufgebraucht. Dein Gold bleibt dir – noch ein Versuch?";
+      $("ende-titel").textContent = tr("k.ende.niederlage.titel");
+      $("ende-text").textContent = tr("k.ende.niederlage.text");
     }
     $("stat-richtig").textContent = k.richtig;
     $("stat-serie").textContent = k.beste;
@@ -675,7 +677,7 @@
     }
     h.wiederholen = false;
     zeigeAufgabe("h-aufgabe",h.aufgabe);
-    sagen("h-rueckmeldung","Welche Zahl passt?","");
+    sagen("h-rueckmeldung", tr("frage.zahl"), "");
     $("h-tipp").classList.remove("is-offen");
     bauePunkte("h-punkte",h.aufgabe);
     h.gesperrt = false;
@@ -693,11 +695,11 @@
       const mult = multiplikator(h.serie);
       const gewinn = goldDazu(GRUNDGOLD*mult);
       kMuenze();
-      sagen("h-rueckmeldung",waehle(lobWorte)+"  +"+gewinn+" Gold","gut");
+      sagen("h-rueckmeldung", tr(waehle(lobWorte))+"  "+tr("gold.plus",{n:gewinn}), "gut");
       bewege($("app").querySelector(".js-haufen"),"huepft",520);
       funken("h-funken","🪙",mult*4);
       if(h.serie===3 || h.serie===6){
-        setTimeout(()=>{ sagen("h-rueckmeldung","🔥 Serie! Ab jetzt ×"+multiplikator(h.serie)+" Gold","gut"); ton(1046,.15,"triangle",0,.18); },560);
+        setTimeout(()=>{ sagen("h-rueckmeldung", tr("h.serie", { n: multiplikator(h.serie) }), "gut"); ton(1046,.15,"triangle",0,.18); },560);
       }
       hKopf();
       const truheFaellig = truheZaehlen();
@@ -715,8 +717,8 @@
       kFalsch();
       bewege($("app").querySelector(".js-haufen"),"schrumpft",520);
       sagen("h-rueckmeldung", weg
-        ? "Fast! "+h.aufgabe.loesung+"  −"+weg+" Gold. Gleich nochmal."
-        : "Fast! "+h.aufgabe.loesung+" – gleich nochmal.", "schlecht");
+        ? tr("h.fast.gold", { loesung: h.aufgabe.loesung, n: weg })
+        : tr("h.fast", { loesung: h.aufgabe.loesung }), "schlecht");
       $("h-tipp").classList.add("is-offen");
       h.wiederholen = true;   /* dieselbe Aufgabe kommt gleich noch einmal */
       hKopf();
@@ -726,8 +728,8 @@
   function hZiel(){
     kSieg();
     goldDazu(100);
-    $("ziel-text").textContent = h.richtig+" Aufgaben geschafft, beste Serie: "+h.beste+". "+
-      (h.falsch===0 ? "Und kein einziger Fehler!" : "Weiter so!");
+    $("ziel-text").textContent = trp("h.ziel.basis", h.richtig, { b: h.beste }) + " " +
+      (h.falsch===0 ? tr("h.ziel.sauber") : tr("h.weiterso"));
     $("ov-ziel").classList.add("is-offen");
     hKopf();
   }
@@ -832,23 +834,22 @@
     const kaufen = $("btn-puzzle-kaufen");
     if(rest>0){
       kaufen.disabled = schatz.gold < PUZZLE_PREIS;
-      kaufen.textContent = "🧩 Puzzleteil kaufen – "+PUZZLE_PREIS+" Gold";
-      $("puzzle-text").textContent =
-        rest+" Teile fehlen noch. Mit jedem Kauf wird das Bild sichtbarer.";
+      kaufen.textContent = tr("puzzle.kaufen", { n: PUZZLE_PREIS });
+      $("puzzle-text").textContent = trp("puzzle.rest", rest);
       $("puzzle-hinweis").textContent =
         schatz.gold < PUZZLE_PREIS
-          ? "Du brauchst noch "+(PUZZLE_PREIS-schatz.gold)+" Gold."
-          : "Du hast genug Gold – welches Stück wird als Nächstes sichtbar?";
+          ? tr("puzzle.brauchst", { n: PUZZLE_PREIS-schatz.gold })
+          : tr("puzzle.genug");
     }else if(puzzleFertig()){
       kaufen.disabled = true;
-      kaufen.textContent = "🏆 Alle Bilder gesammelt!";
-      $("puzzle-text").textContent = "Geschafft! Du hast jedes Bild vollständig enthüllt.";
-      $("puzzle-hinweis").textContent = "In der Bildergalerie kannst du sie dir alle ansehen.";
+      kaufen.textContent = tr("puzzle.alle.btn");
+      $("puzzle-text").textContent = tr("puzzle.alle.text");
+      $("puzzle-hinweis").textContent = tr("puzzle.alle.hinweis");
     }else{
       kaufen.disabled = true;
-      kaufen.textContent = "🏆 Puzzle gelöst!";
-      $("puzzle-text").textContent = "Geschafft! Das Bild ist vollständig enthüllt.";
-      $("puzzle-hinweis").textContent = "Das nächste Puzzle wird vorbereitet …";
+      kaufen.textContent = tr("puzzle.geloest.btn");
+      $("puzzle-text").textContent = tr("puzzle.geloest.text");
+      $("puzzle-hinweis").textContent = tr("puzzle.geloest.hinweis");
     }
   }
 
@@ -869,7 +870,7 @@
       if(fertig){
         const bild = document.createElement("img");
         bild.src = puzzleBild(nr);
-        bild.alt = "Bild "+nr;
+        bild.alt = tr("bild.titel", { n: nr });
         bild.loading = "lazy";
         bild.decoding = "async";
         el.appendChild(bild);
@@ -883,9 +884,9 @@
 
       const titel = document.createElement("span");
       titel.className = "titel-klein";
-      titel.textContent = fertig ? "Bild "+nr
-        : dran ? puzzle.offen.length+"/"+PUZZLE_TEILE+" Teile"
-        : "noch zu";
+      titel.textContent = fertig ? tr("bild.titel", { n: nr })
+        : dran ? tr("galerie.teile.kurz", { n: puzzle.offen.length, m: PUZZLE_TEILE })
+        : tr("galerie.noch.zu");
       el.appendChild(titel);
       gitter.appendChild(el);
     }
@@ -893,10 +894,10 @@
     const fertige = puzzle.geloest.length;
     $("galerie-zaehler").textContent = fertige+"/"+PUZZLE_ANZAHL;
     $("galerie-text").textContent = fertige===0
-      ? "Noch kein Bild fertig – löse ein Puzzle, dann hängt es hier."
+      ? tr("galerie.leer")
       : fertige>=PUZZLE_ANZAHL
-        ? "Alle "+PUZZLE_ANZAHL+" Bilder gesammelt! Tippe eines an."
-        : fertige+" von "+PUZZLE_ANZAHL+" Bildern fertig. Tippe eines an.";
+        ? tr("galerie.alle", { n: PUZZLE_ANZAHL })
+        : trp("galerie.teile", fertige, { m: PUZZLE_ANZAHL });
   }
 
   /* Lupe: Das Bild füllt den Rahmen. Ein Tipp schaltet auf gross um, dann
@@ -907,17 +908,17 @@
     rahmen.classList.remove("gross");
     rahmen.scrollTop = rahmen.scrollLeft = 0;
     bild.src = puzzleBild(nr);
-    bild.alt = "Bild "+nr;
-    $("bild-titel").textContent = "Bild "+nr;
-    $("bild-hinweis").textContent = "Tippe das Bild an, um es grösser zu sehen.";
+    bild.alt = tr("bild.titel", { n: nr });
+    $("bild-titel").textContent = tr("bild.titel", { n: nr });
+    $("bild-hinweis").textContent = tr("bild.hinweis");
     $("ov-bild").classList.add("is-offen");
   }
   function bildZoomen(){
     const rahmen = $("bild-rahmen");
     const gross = rahmen.classList.toggle("gross");
     $("bild-hinweis").textContent = gross
-      ? "Schieb mit dem Finger über das Bild. Nochmal tippen macht es wieder klein."
-      : "Tippe das Bild an, um es grösser zu sehen.";
+      ? tr("bild.zoom")
+      : tr("bild.hinweis");
     if(!gross) rahmen.scrollTop = rahmen.scrollLeft = 0;
   }
   function galerieZeigen(){
@@ -956,10 +957,10 @@
       const naechstes = puzzleNaechstes();
       setTimeout(()=>{
         kSieg();
-        $("puzzle-text").textContent = "🎉 Puzzle gelöst!";
+        $("puzzle-text").textContent = tr("puzzle.funken");
         $("puzzle-hinweis").textContent = naechstes
-          ? "Es wandert in die Bildergalerie – das nächste Abenteuer wartet!"
-          : "Alle Bilder hängen jetzt in deiner Bildergalerie!";
+          ? tr("puzzle.wandert")
+          : tr("puzzle.alle.galerie");
         funken("puzzle-funken","✨",14);
         setTimeout(()=>{
           /* Das letzte Bild bleibt stehen, wenn es kein nächstes mehr gibt. */
@@ -981,23 +982,23 @@
      Alte IDs (mauer/tor/fenster/flagge/wappen) bleiben erhalten -> gespeicherte
      Burgen behalten ihre Teile. */
   const BURG_TEILE = [
-    {id:"mauer",      name:"Mauer",     preis:100, gruppe:"wand", erlaubt:(z,s)=>true},
-    {id:"rote-mauer", name:"Backstein", preis:100, gruppe:"wand", erlaubt:(z,s)=>true},
-    {id:"turmstein",  name:"Turmstein", preis:120, gruppe:"wand", erlaubt:(z,s)=>true},
-    {id:"tor",        name:"Tor",       preis:300, erlaubt:(z,s)=>z>=BURG_REIHEN-2},
-    {id:"fenster",    name:"Fenster",   preis:80,  erlaubt:(z,s)=>true},
-    {id:"dach",       name:"Dach",      preis:150, erlaubt:(z,s)=>z<BURG_REIHEN-1},
-    {id:"flagge",     name:"Flagge",    preis:200, erlaubt:(z,s)=>z<=1},
-    {id:"wappen",     name:"Wappen",    preis:150, erlaubt:(z,s)=>true},
-    {id:"fackel",     name:"Fackel",    preis:90,  erlaubt:(z,s)=>true},
-    {id:"busch",      name:"Busch",     preis:60,  erlaubt:(z,s)=>z===BURG_REIHEN-1},
-    {id:"fass",       name:"Fass",      preis:60,  erlaubt:(z,s)=>z===BURG_REIHEN-1}
+    {id:"mauer",      nameKey:"burg.teil.mauer",     preis:100, gruppe:"wand", erlaubt:(z,s)=>true},
+    {id:"rote-mauer", nameKey:"burg.teil.rote-mauer", preis:100, gruppe:"wand", erlaubt:(z,s)=>true},
+    {id:"turmstein",  nameKey:"burg.teil.turmstein", preis:120, gruppe:"wand", erlaubt:(z,s)=>true},
+    {id:"tor",        nameKey:"burg.teil.tor",       preis:300, erlaubt:(z,s)=>z>=BURG_REIHEN-2},
+    {id:"fenster",    nameKey:"burg.teil.fenster",   preis:80,  erlaubt:(z,s)=>true},
+    {id:"dach",       nameKey:"burg.teil.dach",      preis:150, erlaubt:(z,s)=>z<BURG_REIHEN-1},
+    {id:"flagge",     nameKey:"burg.teil.flagge",    preis:200, erlaubt:(z,s)=>z<=1},
+    {id:"wappen",     nameKey:"burg.teil.wappen",    preis:150, erlaubt:(z,s)=>true},
+    {id:"fackel",     nameKey:"burg.teil.fackel",    preis:90,  erlaubt:(z,s)=>true},
+    {id:"busch",      nameKey:"burg.teil.busch",     preis:60,  erlaubt:(z,s)=>z===BURG_REIHEN-1},
+    {id:"fass",       nameKey:"burg.teil.fass",      preis:60,  erlaubt:(z,s)=>z===BURG_REIHEN-1}
   ];
   const BURG_ZIEL = [
-    {text:"🚪 Tor",      min:1, n:()=>burgZaehlen("tor")},
-    {text:"🛡️ Wappen",   min:1, n:()=>burgZaehlen("wappen")},
-    {text:"🚩 Flagge",   min:1, n:()=>burgZaehlen("flagge")},
-    {text:"🧱 6 Mauern", min:6, n:()=>burgZaehlenGruppe("wand")}
+    {textKey:"burg.ziel.tor",    min:1, n:()=>burgZaehlen("tor")},
+    {textKey:"burg.ziel.wappen", min:1, n:()=>burgZaehlen("wappen")},
+    {textKey:"burg.ziel.flagge", min:1, n:()=>burgZaehlen("flagge")},
+    {textKey:"burg.ziel.mauern", min:6, n:()=>burgZaehlenGruppe("wand")}
   ];
 
   const burg = { feld:new Array(BURG_ZELLEN).fill(""), auswahl:null, geloest:false };
@@ -1143,7 +1144,7 @@
   }
 
   function burgCheckliste(){
-    return BURG_ZIEL.map(z => ({ text:z.text, ok: z.n()>=z.min }));
+    return BURG_ZIEL.map(z => ({ textKey:z.textKey, ok: z.n()>=z.min }));
   }
 
   function burgFertig(){
@@ -1179,11 +1180,11 @@
       el.type = "button";
       el.className = "burg-zelle";
       el.dataset.index = i;
-      el.setAttribute("aria-label","Feld "+(i+1));
+      el.setAttribute("aria-label", tr("burg.feld", { n: i+1 }));
       if(teil){
         el.classList.add("besetzt");
         el.innerHTML = kachelSVG(teil.id);
-        el.title = teil.name;
+        el.title = tr(teil.nameKey);
       }else if(gewaehlt && gewaehlt.erlaubt(z,s) && schatz.gold>=gewaehlt.preis){
         el.classList.add("kann");
       }
@@ -1203,7 +1204,7 @@
       if(burg.auswahl===t.id) b.classList.add("gewaehlt");
       if(schatz.gold<t.preis) b.classList.add("zu-teuer");
       b.innerHTML = '<span class="zeichen">'+kachelSVG(t.id)+'</span>'+
-        '<span class="name">'+t.name+'</span>'+
+        '<span class="name">'+tr(t.nameKey)+'</span>'+
         '<span class="preis">'+t.preis+' 🪙</span>';
       b.addEventListener("click", ()=>burgWaehle(t.id));
       palette.appendChild(b);
@@ -1214,16 +1215,16 @@
     burgCheckliste().forEach(z => {
       const el = document.createElement("span");
       el.className = "burg-ziel"+(z.ok?" ok":"");
-      el.textContent = z.text;
+      el.textContent = tr(z.textKey);
       liste.appendChild(el);
     });
 
     if(!burg.auswahl){
-      $("burg-hinweis").textContent = "Wähle ein Bauteil und tippe dann auf ein leeres Feld.";
+      $("burg-hinweis").textContent = tr("burg.waehle");
     }else if(gewaehlt && schatz.gold<gewaehlt.preis){
-      $("burg-hinweis").textContent = "Für "+gewaehlt.name+" fehlen dir noch "+(gewaehlt.preis-schatz.gold)+" Gold.";
+      $("burg-hinweis").textContent = tr("burg.fehl", { name: tr(gewaehlt.nameKey), n: gewaehlt.preis-schatz.gold });
     }else if(gewaehlt){
-      $("burg-hinweis").textContent = "Tippe ein leuchtendes Feld, um "+gewaehlt.name+" zu setzen. Tippe auf ein gesetztes Teil, um es abzureißen.";
+      $("burg-hinweis").textContent = tr("burg.setzen", { name: tr(gewaehlt.nameKey) });
     }
   }
 
@@ -1238,7 +1239,7 @@
     if(!gewaehlt) return;
     if(burg.feld[index]) return;
     if(!gewaehlt.erlaubt(z,s)){
-      $("burg-hinweis").textContent = gewaehlt.name+" passt hier nicht hin.";
+      $("burg-hinweis").textContent = tr("burg.passt.nicht", { name: tr(gewaehlt.nameKey) });
       return;
     }
     if(!goldAusgeben(gewaehlt.preis)) return;
@@ -1255,7 +1256,7 @@
       setTimeout(()=>{
         kSieg();
         funken("burg-raster","✨",16);
-        $("burg-hinweis").textContent = "🏰 Prachtburg! Deine Burg ist vollständig – du kannst sie weiter ausbauen.";
+        $("burg-hinweis").textContent = tr("burg.pracht");
       },500);
     }
   }
@@ -1271,7 +1272,7 @@
       goldDazu(erstattung);
       kGoldWeg();
     }
-    $("burg-hinweis").textContent = teil.name+" abgerissen – +"+erstattung+" Gold zurück.";
+    $("burg-hinweis").textContent = tr("burg.abgerissen", { name: tr(teil.nameKey), n: erstattung });
   }
 
   /* ================= SPIEL 6: DRACHENHÖHLE =================
@@ -1282,31 +1283,34 @@
   const HOEHLE_EI = 500;
   const HOEHLE_FUTTER = 80;
   const HOEHLE_STUFEN = [
-    {ab:0,  bild:"🥚", name:"Ei",
-     text:"Ein warmes Ei liegt in der Höhle. Füttere es, damit es schlüpft."},
-    {ab:3,  bild:"🐣", img:"images/schluepfling.svg", name:"Schlüpfling",
-     text:"Geschlüpft! Ein winziger Drache blinzelt dich an."},
-    {ab:8,  bild:"🐲", name:"Jungdrache",
-     text:"Er wächst – und fliegt ab jetzt im Drachenkampf an deiner Seite mit."},
-    {ab:15, bild:"🐉", name:"Hausdrache",
-     text:"Ausgewachsen! Dein Drache ist der Stolz der Höhle."}
+    {ab:0,  bild:"🥚", nameKey:"hoehle.stufe.ei",
+     textKey:"hoehle.text.ei"},
+    {ab:3,  bild:"🐣", img:"images/schluepfling.svg", nameKey:"hoehle.stufe.schluepfling",
+     textKey:"hoehle.text.schluepfling"},
+    {ab:8,  bild:"🐲", nameKey:"hoehle.stufe.jungdrache",
+     textKey:"hoehle.text.jungdrache"},
+    {ab:15, bild:"🐉", nameKey:"hoehle.stufe.hausdrache",
+     textKey:"hoehle.text.hausdrache"}
   ];
   /* Ab dieser Stufe erscheint der Drache in der Kampfarena. */
   const HOEHLE_BEGLEITER_AB = 2;
   /* x/y in Prozent der Bühne: x von links, y von unten. */
   const HOEHLE_SCHMUCK = [
-    {id:"nest",     bild:"🪺", name:"Nest",         preis:150, x:15, y:14},
-    {id:"fackel",   bild:"🔥", name:"Fackel",       preis:90,  x:85, y:46},
-    {id:"gold",     bild:"💰", name:"Goldhaufen",   preis:200, x:77, y:13},
-    {id:"kristall", bild:"💎", name:"Kristall",     preis:250, x:25, y:52},
-    {id:"knochen",  bild:"🦴", name:"Knochen",      preis:70,  x:34, y:7},
-    {id:"stern",    bild:"🌟", name:"Sternenlicht", preis:300, x:62, y:60}
+    {id:"nest",     bild:"🪺", nameKey:"hoehle.schmuck.nest",     preis:150, x:15, y:14},
+    {id:"fackel",   bild:"🔥", nameKey:"hoehle.schmuck.fackel",   preis:90,  x:85, y:46},
+    {id:"gold",     bild:"💰", nameKey:"hoehle.schmuck.gold",     preis:200, x:77, y:13},
+    {id:"kristall", bild:"💎", nameKey:"hoehle.schmuck.kristall", preis:250, x:25, y:52},
+    {id:"knochen",  bild:"🦴", nameKey:"hoehle.schmuck.knochen",  preis:70,  x:34, y:7},
+    {id:"stern",    bild:"🌟", nameKey:"hoehle.schmuck.stern",    preis:300, x:62, y:60}
   ];
-  /* Namen werden angetippt, nicht getippt – im ganzen Spiel wird nichts geschrieben. */
-  const HOEHLE_NAMEN = ["Funkenschweif","Glutherz","Mondschuppe",
-                        "Sternenzahn","Rauchwölkchen","Goldkralle"];
+  /* Namen werden angetippt, nicht getippt – im ganzen Spiel wird nichts geschrieben.
+     Hier liegen die Übersetzungs-Schlüssel; gespeichert wird nur der Index. */
+  const HOEHLE_NAMEN = ["hoehle.name.funkenschweif","hoehle.name.glutherz","hoehle.name.mondschuppe",
+                        "hoehle.name.sternenzahn","hoehle.name.rauchwoelkchen","hoehle.name.goldkralle"];
+  /* Alte Spielstände speichern den deutschen Namen als Text – nur fürs Umstellen. */
+  const HOEHLE_NAMEN_ALT = ["Funkenschweif","Glutherz","Mondschuppe","Sternenzahn","Rauchwölkchen","Goldkralle"];
 
-  const hoehle = { ei:false, futter:0, schmuck:[], name:"" };
+  const hoehle = { ei:false, futter:0, schmuck:[], name:-1 };
 
   function hoehleStufeIndex(){
     if(!hoehle.ei) return -1;
@@ -1317,7 +1321,7 @@
   function hoehleAusgewachsen(){ return hoehleStufeIndex() >= HOEHLE_STUFEN.length-1; }
 
   function hoehleLaden(){
-    hoehle.ei = false; hoehle.futter = 0; hoehle.schmuck = []; hoehle.name = "";
+    hoehle.ei = false; hoehle.futter = 0; hoehle.schmuck = []; hoehle.name = -1;
     try{
       const roh = localStorage.getItem(kontoKey(konto.aktiv,"hoehle"));
       if(!roh) return;
@@ -1327,7 +1331,12 @@
       hoehle.schmuck = Array.isArray(d.schmuck)
         ? d.schmuck.filter(id => HOEHLE_SCHMUCK.some(s=>s.id===id))
         : [];
-      hoehle.name = HOEHLE_NAMEN.indexOf(d.name)>=0 ? d.name : "";
+      /* Neues Format: Index. Alte Spielstände (String) werden einmalig umgestellt. */
+      if(typeof d.name === "number"){
+        hoehle.name = (d.name>=0 && d.name<HOEHLE_NAMEN.length) ? d.name : -1;
+      }else{
+        hoehle.name = HOEHLE_NAMEN_ALT.indexOf(d.name);
+      }
     }catch(e){}
   }
   function hoehleSichern(){
@@ -1383,8 +1392,8 @@
       b.type = "button";
       b.className = "hoehle-ware"+(hat ? " gekauft" : (schatz.gold<s.preis ? " zu-teuer" : ""));
       b.innerHTML = '<span class="zeichen">'+s.bild+'</span>'
-        + '<span class="name">'+s.name+'</span>'
-        + '<span class="preis">'+(hat ? "gekauft" : s.preis+" 🪙")+'</span>';
+        + '<span class="name">'+tr(s.nameKey)+'</span>'
+        + '<span class="preis">'+(hat ? tr("gekauft") : s.preis+" 🪙")+'</span>';
       if(!hat) b.addEventListener("click", ()=>hoehleSchmuckKaufen(s.id));
       box.appendChild(b);
     });
@@ -1392,15 +1401,15 @@
 
   function hoehleNamenZeichnen(){
     const box = $("hoehle-namen");
-    const zeigen = hoehle.ei && hoehleStufeIndex()>=1 && !hoehle.name;
+    const zeigen = hoehle.ei && hoehleStufeIndex()>=1 && hoehle.name<0;
     box.hidden = !zeigen;
     box.innerHTML = "";
     if(!zeigen) return;
-    HOEHLE_NAMEN.forEach(n => {
+    HOEHLE_NAMEN.forEach((key, idx) => {
       const b = document.createElement("button");
-      b.type = "button"; b.textContent = n;
+      b.type = "button"; b.textContent = tr(key);
       b.addEventListener("click", ()=>{
-        hoehle.name = n;
+        hoehle.name = idx;
         hoehleSichern(); hoehleZeichnen();
         kChime();
         funken("hoehle-funken","✨",10);
@@ -1418,18 +1427,18 @@
       drache.style.opacity = ".35";
       drache.style.filter = "grayscale(1) drop-shadow(0 8px 10px rgba(0,0,0,.55))";
       $("hoehle-stufe").textContent = "–";
-      $("hoehle-name").textContent = "Drachenhöhle";
+      $("hoehle-name").textContent = tr("karte.hoehle.titel");
     }else{
       const stufe = HOEHLE_STUFEN[i];
       if(stufe.img){
-        drache.innerHTML = '<img src="'+stufe.img+'" alt="'+stufe.name+'">';
+        drache.innerHTML = '<img src="'+stufe.img+'" alt="'+tr(stufe.nameKey)+'">';
       }else{
         drache.textContent = stufe.bild;
       }
       drache.style.opacity = "";
       drache.style.filter = "";
-      $("hoehle-stufe").textContent = stufe.name;
-      $("hoehle-name").textContent = hoehle.name || stufe.name;
+      $("hoehle-stufe").textContent = tr(stufe.nameKey);
+      $("hoehle-name").textContent = hoehle.name>=0 ? tr(HOEHLE_NAMEN[hoehle.name]) : tr(stufe.nameKey);
     }
 
     $("hoehle-zaehler").textContent = hoehle.futter;
@@ -1446,36 +1455,36 @@
 
     if(!hoehle.ei){
       knopf.disabled = schatz.gold < HOEHLE_EI;
-      knopf.textContent = "🥚 Drachenei kaufen – "+HOEHLE_EI+" Gold";
-      text.textContent = "In der Höhle ist es still. Hier könnte dein eigener Drache wohnen.";
+      knopf.textContent = tr("hoehle.ei.kaufen", { n: HOEHLE_EI });
+      text.textContent = tr("hoehle.still");
       balken.style.width = "0%";
       fort.textContent = "";
       hinweis.textContent = schatz.gold < HOEHLE_EI
-        ? "Du brauchst noch "+(HOEHLE_EI-schatz.gold)+" Gold für das Ei."
-        : "Du hast genug Gold – hol dir das Ei!";
+        ? tr("hoehle.brauchst.ei", { n: HOEHLE_EI-schatz.gold })
+        : tr("hoehle.genug.ei");
       return;
     }
 
-    text.textContent = HOEHLE_STUFEN[i].text;
+    text.textContent = tr(HOEHLE_STUFEN[i].textKey);
 
     if(hoehleAusgewachsen()){
       knopf.disabled = true;
-      knopf.textContent = "🐉 Ausgewachsen!";
+      knopf.textContent = tr("hoehle.ausgewachsen");
       balken.style.width = "100%";
-      fort.textContent = "Dein Drache ist fertig gewachsen.";
-      hinweis.textContent = "Schmücke jetzt die Höhle – schöner wohnt er allemal.";
+      fort.textContent = tr("hoehle.fertig");
+      hinweis.textContent = tr("hoehle.schmuecke");
     }else{
       const naechste = HOEHLE_STUFEN[i+1];
       const vorige = HOEHLE_STUFEN[i].ab;
       const fehlt = naechste.ab - hoehle.futter;
       knopf.disabled = schatz.gold < HOEHLE_FUTTER;
-      knopf.textContent = "🍖 Füttern – "+HOEHLE_FUTTER+" Gold";
+      knopf.textContent = tr("hoehle.fuettern", { n: HOEHLE_FUTTER });
       balken.style.width =
         ((hoehle.futter-vorige)/(naechste.ab-vorige)*100)+"%";
-      fort.textContent = "noch "+fehlt+"× füttern bis "+naechste.name;
+      fort.textContent = tr("hoehle.noch", { n: fehlt, name: tr(naechste.nameKey) });
       hinweis.textContent = schatz.gold < HOEHLE_FUTTER
-        ? "Du brauchst noch "+(HOEHLE_FUTTER-schatz.gold)+" Gold fürs Futter."
-        : "Dein Drache hat Hunger!";
+        ? tr("hoehle.brauchst.futter", { n: HOEHLE_FUTTER-schatz.gold })
+        : tr("hoehle.hunger");
     }
   }
 
@@ -1505,7 +1514,7 @@
       bewege($("hoehle-drache"),"waechst",620);
       funken("hoehle-funken","⭐",16);
       $("hoehle-hinweis").textContent =
-        "🎉 Gewachsen! Jetzt ein "+HOEHLE_STUFEN[nachher].name+".";
+        tr("hoehle.gewachsen", { name: tr(HOEHLE_STUFEN[nachher].nameKey) });
     }else{
       kPop();
       bewege($("hoehle-drache"),"huepft",520);
@@ -1522,7 +1531,7 @@
     hoehleZeichnen();
     kMagie();
     funken("hoehle-funken","✨",10);
-    $("hoehle-hinweis").textContent = ware.name+" schmückt jetzt deine Höhle.";
+    $("hoehle-hinweis").textContent = tr("hoehle.schmueckt", { name: tr(ware.nameKey) });
   }
 
   /* ================= SPIEL 5: RECHENMAUER ================= */
@@ -1649,7 +1658,7 @@
     if(!aktiv || !w){ hin.textContent = ""; return; }
     const [z,s] = aktiv;
     if(z < w.hoehe-1){
-      hin.textContent = "Rechne: "+w.zeilen[z+1][s]+" + "+w.zeilen[z+1][s+1];
+      hin.textContent = tr("m.rechne", { a: w.zeilen[z+1][s], b: w.zeilen[z+1][s+1] });
       return;
     }
     for(const [pz,ps] of mEltern(z,s)){
@@ -1659,7 +1668,7 @@
       const pknown = !w.luecken.has(pkey) || m.geloest.has(pkey);
       const gknown = !w.luecken.has(gkey) || m.geloest.has(gkey);
       if(pknown && gknown){
-        hin.textContent = "Rechne rückwärts: "+w.zeilen[pz][ps]+" − "+w.zeilen[geschw[0]][geschw[1]];
+        hin.textContent = tr("m.rechne.rueckwaerts", { a: w.zeilen[pz][ps], b: w.zeilen[geschw[0]][geschw[1]] });
         return;
       }
     }
@@ -1723,7 +1732,7 @@
     m.gesperrt = false;
     mZeichnen();
     mKopf();
-    sagen("m-rueckmeldung","Fülle die leuchtende Lücke der Mauer.","");
+    sagen("m-rueckmeldung", tr("m.frage"), "");
     $("m-tipp").classList.remove("is-offen");
     freigeben("m-zahlen");
   }
@@ -1742,8 +1751,8 @@
   function mZiel(){
     kSieg();
     goldDazu(100);
-    $("mauer-ziel-text").textContent = m.richtig+" Lücken gefüllt, beste Serie: "+m.beste+". "+
-      (m.falsch===0 ? "Und kein einziger Fehler!" : "Weiter so!");
+    $("mauer-ziel-text").textContent = trp("m.ziel.basis", m.richtig, { b: m.beste }) + " " +
+      (m.falsch===0 ? tr("h.ziel.sauber") : tr("h.weiterso"));
     $("ov-mauer").classList.add("is-offen");
     mKopf();
   }
@@ -1773,7 +1782,7 @@
       m.geloest.add(key);
       m.aktiv++;
       m.zuletzt = key; m.flashNeu = true;
-      sagen("m-rueckmeldung",waehle(lobWorte)+"  +"+gewinn+" Gold","gut");
+      sagen("m-rueckmeldung", tr(waehle(lobWorte))+"  "+tr("gold.plus",{n:gewinn}), "gut");
       mZeichnen(); m.flashNeu = false;
       mKopf();
       const truheFaellig = truheZaehlen();
@@ -1788,7 +1797,9 @@
       m.falsch++; m.serie = 0;
       const weg = goldWeg();
       kFalsch();
-      sagen("m-rueckmeldung","Richtig wäre: "+loesung+(weg?"  −"+weg+" Gold":""),"schlecht");
+      sagen("m-rueckmeldung", weg
+        ? tr("m.falsch.gold", { loesung: loesung, n: weg })
+        : tr("m.falsch", { loesung: loesung }), "schlecht");
       mZeichnen();
       const el = $("mauer").querySelector('[data-m-z="'+z+'"][data-m-s="'+s+'"]');
       if(el) el.classList.add("falsch");
@@ -1803,7 +1814,7 @@
   function mNaechsteLuecke(){
     m.gesperrt = false;
     freigeben("m-zahlen");
-    sagen("m-rueckmeldung","Weiter mit der nächsten Lücke.","");
+    sagen("m-rueckmeldung", tr("m.weiter"), "");
     mZeichnen();
   }
 
@@ -1825,10 +1836,10 @@
   const RITT_HIN = 380, RITT_HALT = 240, RITT_ZURUECK = 420;
   const RITT_GESAMT = RITT_HIN + RITT_HALT + RITT_ZURUECK;
   const TURNIER_GEGNER = [
-    { name:"Ritter Blauhelm",  stufen:[1],     beute:50 },
-    { name:"Graf Grauguss",    stufen:[1,2],   beute:75 },
-    { name:"Sir Silberzahn",   stufen:[2,3],   beute:100 },
-    { name:"König Goldhelm",   stufen:[3,4],   beute:150 }
+    { nameKey:"t.gegner.blauhelm",  stufen:[1],     beute:50 },
+    { nameKey:"t.gegner.grauguss",  stufen:[1,2],   beute:75 },
+    { nameKey:"t.gegner.silberzahn",stufen:[2,3],   beute:100 },
+    { nameKey:"t.gegner.goldhelm",  stufen:[3,4],   beute:150 }
   ];
   const t = { gegner:0, richtig:0, falsch:0, serie:0, beste:0,
               aufgabe:null, letzte:"", gesperrt:false, wiederholen:false, beute:0, gewonnen:false };
@@ -1845,15 +1856,15 @@
     return g.stufen;
   }
   function tGegnerName(){
-    return TURNIER_GEGNER[Math.min(t.gegner,TURNIER_GEGNER.length-1)].name;
+    return tr(TURNIER_GEGNER[Math.min(t.gegner,TURNIER_GEGNER.length-1)].nameKey);
   }
   function tZeichnen(){
     const k = kontoAktuell();
-    $("t-name-ich").textContent    = (k && k.name) || "Dein Ritter";
+    $("t-name-ich").textContent    = (k && k.name) || tr("t.dein.ritter");
     $("t-name-gegner").textContent = tGegnerName();
     $("t-treffer-ich").textContent    = "⚔".repeat(t.richtig);
     $("t-treffer-gegner").textContent = "⚔".repeat(t.falsch);
-    $("t-ritt").textContent = "Ritt "+(t.richtig+t.falsch)+"/"+TURNIER_RITTE;
+    $("t-ritt").textContent = tr("t.ritt", { n: t.richtig+t.falsch, m: TURNIER_RITTE });
   }
   function tRittWeg(){
     /* Halbe Bühne minus Ritterbreite: die beiden stehen sich in der Mitte
@@ -1894,7 +1905,7 @@
     }
     t.wiederholen = false;
     zeigeAufgabe("t-aufgabe",t.aufgabe);
-    sagen("t-rueckmeldung","Welche Zahl passt?","");
+    sagen("t-rueckmeldung", tr("frage.zahl"), "");
     $("t-tipp").classList.remove("is-offen");
     bauePunkte("t-punkte",t.aufgabe);
     t.gesperrt = false;
@@ -1919,9 +1930,9 @@
           return;
         }
         $("t-erg-emoji").textContent = "⚔️";
-        $("t-erg-titel").textContent = g.name+" aus dem Sattel!";
-        $("t-erg-text").textContent = "Du hast "+t.richtig+" Treffer gelandet – weiter geht's gegen "+tGegnerName()+".";
-        $("t-erg-gold").textContent = "🪙 +"+beute+" Gold";
+        $("t-erg-titel").textContent = tr("t.aus.sattel", { name: tr(g.nameKey) });
+        $("t-erg-text").textContent = tr("t.weiter.gegen", { n: t.richtig, name: tGegnerName() });
+        $("t-erg-gold").textContent = "🪙 "+tr("gold.plus", { n: beute });
         $("ov-turnier").classList.add("is-offen");
       },RITT_HIN+680);
     } else {
@@ -1931,8 +1942,8 @@
       setTimeout(()=> $("t-ich").classList.add("faellt"), RITT_HIN+160);
       setTimeout(()=>{
         $("t-erg-emoji").textContent = "🛡️";
-        $("t-erg-titel").textContent = tGegnerName()+" war stärker";
-        $("t-erg-text").textContent = "Du hast "+t.richtig+" gelöst, aber "+t.falsch+" Fehler gemacht. Noch ein Versuch?";
+        $("t-erg-titel").textContent = tr("t.staerker", { name: tGegnerName() });
+        $("t-erg-text").textContent = tr("t.verloren", { n: t.richtig, m: t.falsch });
         $("t-erg-gold").textContent = "";
         $("ov-turnier").classList.add("is-offen");
       },RITT_HIN+680);
@@ -1941,9 +1952,9 @@
   function tTurnierSieg(beute){
     kSieg();
     $("t-erg-emoji").textContent = "🏆";
-    $("t-erg-titel").textContent = "Turnier gewonnen!";
-    $("t-erg-text").textContent = "Alle Ritter sind besiegt – "+t.richtig+" gelöste Aufgaben, beste Serie: "+t.beste+".";
-    $("t-erg-gold").textContent = "🪙 +"+beute+" Gold";
+    $("t-erg-titel").textContent = tr("t.sieg");
+    $("t-erg-text").textContent = tr("t.sieg.text", { n: t.richtig, b: t.beste });
+    $("t-erg-gold").textContent = "🪙 "+tr("gold.plus", { n: beute });
     $("ov-turnier").classList.add("is-offen");
   }
   function tAntwort(wert,knopf){
@@ -1958,7 +1969,7 @@
       const gewinn = goldDazu(GRUNDGOLD*mult);
       t.beute += gewinn;
       kRichtig(); kMuenze();
-      sagen("t-rueckmeldung",waehle(lobWorte)+"  +"+gewinn+" Gold","gut");
+      sagen("t-rueckmeldung", tr(waehle(lobWorte))+"  "+tr("gold.plus",{n:gewinn}), "gut");
       const letzter = (t.richtig+t.falsch) >= TURNIER_RITTE;
       /* Beim letzten Ritt übernimmt tKampf() das Anreiten – die Münzen fliegen
          dann schon in der kurzen Pause davor. */
@@ -1983,8 +1994,8 @@
       kFalsch();
       if((t.richtig+t.falsch) < TURNIER_RITTE) tRitt("ich");
       sagen("t-rueckmeldung", weg
-        ? "Daneben! "+t.aufgabe.loesung+"  −"+weg+" Gold."
-        : "Daneben! "+t.aufgabe.loesung, "schlecht");
+        ? tr("t.daneben.gold", { loesung: t.aufgabe.loesung, n: weg })
+        : tr("t.daneben", { loesung: t.aufgabe.loesung }), "schlecht");
       $("t-tipp").classList.add("is-offen");
       t.wiederholen = true;
       tZeichnen();
@@ -2042,8 +2053,8 @@
   });
   function tonUmschalten(){
     opt.ton = !opt.ton;
-    alle("[data-ton]").forEach(b => b.textContent = opt.ton ? "🔊 Ton" : "🔇 Ton aus");
-    $("btn-ton-start").textContent = opt.ton ? "🔊 Ton an" : "🔇 Ton aus";
+    alle("[data-ton]").forEach(b => b.textContent = opt.ton ? tr("ton.kurz") : tr("ton.aus"));
+    $("btn-ton-start").textContent = opt.ton ? tr("ton.an") : tr("ton.aus");
     optSichern();
     if(opt.ton) ton(880,.1,"triangle",0);
   }
@@ -2062,6 +2073,7 @@
     }
   }
   function kontoDatenLaden(){
+    setLang((kontoAktuell() && kontoAktuell().sprache) || "de");
     laden(); optLaden(); optAnwenden();
     puzzleLaden(); burgLaden(); hoehleLaden();
     burg.auswahl = null; burg.geloest = false;
@@ -2083,14 +2095,49 @@
       const neu = document.createElement("button");
       neu.type = "button";
       neu.className = "konto-karte konto-karte--neu";
-      neu.innerHTML = '<span class="plus">➕</span><span class="name">Neues Kind</span>';
+      neu.innerHTML = '<span class="plus">➕</span><span class="name">'+tr("konto.neu")+'</span>';
       neu.addEventListener("click", kontoNeuZeigen);
       g.appendChild(neu);
     }
   }
   function kontoOeffnen(){
     kontoGitterZeichnen();
+    sprachenWahlZeichnen("sprache-wahl-konto", (kontoAktuell() && kontoAktuell().sprache) || "de");
     $("ov-konto").classList.add("is-offen");
+  }
+  /* Sprachwahl (antippbar, kein Tippen). Zwei Einsätze:
+     - im "Wer spielt?"-Overlay: ändert die Sprache des aktiven Kontos
+     - im "Neues Kind"-Overlay: legt die Sprache für das neue Konto fest */
+  function sprachenWahlZeichnen(boxId, aktive){
+    const box = $(boxId);
+    if(!box) return;
+    box.innerHTML = "";
+    SPRACHEN.forEach(code => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "sprache-knopf"+(code===aktive ? " gewaehlt" : "");
+      b.textContent = SPRACH_NAME[code];
+      b.dataset.lang = code;
+      b.addEventListener("click", ()=>spracheKnopf(code, boxId));
+      box.appendChild(b);
+    });
+  }
+  function spracheKnopf(code, boxId){
+    if(boxId === "sprache-wahl-neu"){
+      konto.neuSprache = code;
+      sprachenWahlZeichnen("sprache-wahl-neu", code);
+    }else{
+      const k = kontoAktuell();
+      if(k){ k.sprache = code; kontoListeSichern(); }
+      spracheAnwenden(code);
+      sprachenWahlZeichnen("sprache-wahl-konto", code);
+    }
+  }
+  function spracheAnwenden(code){
+    setLang(code);
+    optAnwenden();
+    schatzZeichnen(); puzzleZeichnen(); galerieZeichnen(); burgZeichnen(); hoehleZeichnen();
+    kontoAnzeigen();
   }
   function kontoWechseln(id){
     if(id===konto.aktiv){ $("ov-konto").classList.remove("is-offen"); return; }
@@ -2115,8 +2162,10 @@
   function kontoNeuZeigen(){
     if(konto.liste.length>=MAX_KONTEN) return;
     konto.neuBild = AVATARE[0];
+    konto.neuSprache = (kontoAktuell() && kontoAktuell().sprache) || "de";
     $("konto-name-eingabe").value = "";
     avatarWahlZeichnen();
+    sprachenWahlZeichnen("sprache-wahl-neu", konto.neuSprache);
     $("ov-konto").classList.remove("is-offen");
     $("ov-konto-neu").classList.add("is-offen");
   }
@@ -2126,8 +2175,9 @@
     const id = kontoNeuId();
     konto.liste.push({
       id:id,
-      name: name || ("Ritter "+(konto.liste.length+1)),
-      bild: konto.neuBild || AVATARE[0]
+      name: name || tr("konto.default.name",{n:konto.liste.length+1}),
+      bild: konto.neuBild || AVATARE[0],
+      sprache: konto.neuSprache || "de"
     });
     kontoListeSichern();
     konto.aktiv = id;
@@ -2204,6 +2254,7 @@
   $("btn-turnier-weiter").addEventListener("click", tWeiter);
 
   kontoInit();
+  setLang((kontoAktuell() && kontoAktuell().sprache) || "de");
   laden();
   optLaden();
   optAnwenden();

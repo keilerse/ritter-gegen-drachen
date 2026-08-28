@@ -75,7 +75,7 @@ body::after{
   background:linear-gradient(#ffe9ae,var(--gold));border-color:var(--gold-tief);
   box-shadow:0 4px 0 var(--gold-tief),inset 0 0 0 2px #fff8;
 }
-.wahl button[aria-pressed="true"]::after{content:"✓ ausgewählt";font-size:.7rem;letter-spacing:.5px;opacity:.75}
+.wahl button[aria-pressed="true"]::after{content:var(--t-ausgewaehlt,"✓ ausgewählt");font-size:.7rem;letter-spacing:.5px;opacity:.75}
 .wahl button:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.18)}
 .spielwahl{display:grid;grid-template-columns:1fr;gap:12px}
 .spielkarte{
@@ -138,10 +138,22 @@ body::after{
 .konto-karte .avatar{font-size:3rem;line-height:1}
 .konto-karte .name{font-family:var(--schrift-display);font-size:1.15rem;line-height:1.1}
 .konto-karte.aktiv{border-color:var(--drache);box-shadow:0 0 0 3px var(--drache),0 6px 0 rgba(0,0,0,.35)}
-.konto-karte.aktiv::after{content:"✓ du bist dran";font-size:.68rem;letter-spacing:.5px;color:#1f7a45;font-weight:700}
+.konto-karte.aktiv::after{content:var(--t-du-bist-dran,"✓ du bist dran");font-size:.68rem;letter-spacing:.5px;color:#1f7a45;font-weight:700}
 .konto-karte--neu{background:rgba(255,255,255,.08);color:var(--pergament);border:3px dashed var(--gold)}
 .konto-karte--neu .plus{font-size:2.4rem;line-height:1;color:var(--gold)}
 .konto-karte--neu .name{color:var(--gold)}
+
+.sprache-feld{display:flex;flex-direction:column;gap:6px;width:100%;margin-top:10px}
+.sprache-label{font-size:.72rem;font-weight:600;letter-spacing:.4px;opacity:.75}
+.sprache-wahl{display:flex;flex-wrap:wrap;gap:6px;width:100%}
+.sprache-knopf{
+  font-family:var(--schrift-text);font-size:.82rem;font-weight:600;
+  background:rgba(255,255,255,.08);color:var(--pergament);
+  border:2px solid rgba(255,255,255,.18);border-radius:999px;padding:6px 12px;
+  cursor:pointer;transition:transform .08s;
+}
+.sprache-knopf:active{transform:translateY(2px)}
+.sprache-knopf.gewaehlt{background:var(--gold);color:var(--tinte);border-color:var(--gold-tief)}
 
 .avatar-wahl{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:100%}
 .avatar-option{

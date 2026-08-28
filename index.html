@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=12">
+<link rel="stylesheet" href="style.css?v=13">
 </head>
 <body>
 <div id="app">
@@ -16,13 +16,13 @@
   <section class="screen is-active" id="screen-start">
     <h1 class="titel">
       <span class="zeile1">Rechen-Ritter</span>
-      <span class="zeile2">Plus und Minus – zwei Spiele, eine Schatzkammer</span>
+      <span class="zeile2" data-i18n="start.untertitel">Plus und Minus – zwei Spiele, eine Schatzkammer</span>
     </h1>
 
-    <button class="spieler-leiste" id="spieler-leiste" type="button" aria-label="Wer spielt?">
+    <button class="spieler-leiste" id="spieler-leiste" type="button" data-i18n-aria="wer.spielt" aria-label="Wer spielt?">
       <span class="avatar" id="spieler-avatar">🦁</span>
       <span class="spieler-info">
-        <span class="kopf">Wer spielt?</span>
+        <span class="kopf" data-i18n="wer.spielt">Wer spielt?</span>
         <span class="name" id="spieler-name">Ritter 1</span>
       </span>
       <span class="pfeil">›</span>
@@ -31,7 +31,7 @@
     <div class="rang-banner">
       <span class="rb-emoji js-rang-emoji">🪙</span>
       <span class="rb-info">
-        <span class="rb-label">Dein Rang</span>
+        <span class="rb-label" data-i18n="dein.rang">Dein Rang</span>
         <span class="rb-name js-rang">Knappe</span>
       </span>
       <span class="rb-fort js-rang-fort">noch 10 bis Ritter</span>
@@ -39,17 +39,17 @@
 
     <div class="tafel">
       <div class="frage-block">
-        <div class="frage">Wie weit rechnen wir?</div>
+        <div class="frage" data-i18n="frage.raum">Wie weit rechnen wir?</div>
         <div class="wahl" id="wahl-raum">
-          <button type="button" data-wert="10" aria-pressed="false"><span class="zeichen">🖐️</span>bis 10</button>
-          <button type="button" data-wert="20" aria-pressed="true"><span class="zeichen">🙌</span>bis 20</button>
+          <button type="button" data-wert="10" aria-pressed="false"><span class="zeichen">🖐️</span><span data-i18n="raum.bis10">bis 10</span></button>
+          <button type="button" data-wert="20" aria-pressed="true"><span class="zeichen">🙌</span><span data-i18n="raum.bis20">bis 20</span></button>
         </div>
       </div>
       <div class="frage-block">
-        <div class="frage">Was üben wir?</div>
+        <div class="frage" data-i18n="frage.art">Was üben wir?</div>
         <div class="wahl" id="wahl-art">
-          <button type="button" data-wert="plus" aria-pressed="false"><span class="zeichen">➕</span>nur Plus</button>
-          <button type="button" data-wert="beides" aria-pressed="true"><span class="zeichen">➕➖</span>Plus und Minus</button>
+          <button type="button" data-wert="plus" aria-pressed="false"><span class="zeichen">➕</span><span data-i18n="art.plus">nur Plus</span></button>
+          <button type="button" data-wert="beides" aria-pressed="true"><span class="zeichen">➕➖</span><span data-i18n="art.beides">Plus und Minus</span></button>
         </div>
       </div>
     </div>
@@ -63,78 +63,78 @@
     </div>
 
     <div class="spielwahl">
-      <div class="spielwahl-titel">🎯 Spielen &amp; Verdienen</div>
+      <div class="spielwahl-titel" data-i18n="spielen.verdienen">🎯 Spielen &amp; Verdienen</div>
       <button class="spielkarte" id="karte-kampf" type="button">
         <span class="bild">🐲</span>
         <span>
-          <h3>Ritter gegen Drachen</h3>
-          <p>Schlag dem Drachen die Giftzähne aus. Jeder Treffer bringt Gold.</p>
+          <h3 data-i18n="karte.kampf.titel">Ritter gegen Drachen</h3>
+          <p data-i18n="karte.kampf.text">Schlag dem Drachen die Giftzähne aus. Jeder Treffer bringt Gold.</p>
         </span>
-        <span class="badge badge--verdienen">Verdienen</span>
+        <span class="badge badge--verdienen" data-i18n="badge.verdienen">Verdienen</span>
       </button>
       <button class="spielkarte" id="karte-hort" type="button">
         <span class="bild">💰</span>
         <span>
-          <h3>Schatzjagd</h3>
-          <p>Sammle Gold in Ruhe – ohne Herzen, ohne Verlieren.</p>
+          <h3 data-i18n="karte.hort.titel">Schatzjagd</h3>
+          <p data-i18n="karte.hort.text">Sammle Gold in Ruhe – ohne Herzen, ohne Verlieren.</p>
         </span>
-        <span class="badge badge--verdienen">Verdienen</span>
+        <span class="badge badge--verdienen" data-i18n="badge.verdienen">Verdienen</span>
       </button>
       <button class="spielkarte" id="karte-mauer" type="button">
         <span class="bild">🧮</span>
         <span>
-          <h3>Rechenmauer</h3>
-          <p>Fülle die Lücken der Zahlenmauer und verdiene Gold.</p>
+          <h3 data-i18n="karte.mauer.titel">Rechenmauer</h3>
+          <p data-i18n="karte.mauer.text">Fülle die Lücken der Zahlenmauer und verdiene Gold.</p>
         </span>
-        <span class="badge badge--verdienen">Verdienen</span>
+        <span class="badge badge--verdienen" data-i18n="badge.verdienen">Verdienen</span>
       </button>
       <button class="spielkarte" id="karte-turnier" type="button">
         <span class="bild">⚔️</span>
         <span>
-          <h3>Ritter-Turnier</h3>
-          <p>Stich mit deiner Lanze zu – rechne dich bis zum Gegner vor.</p>
+          <h3 data-i18n="karte.turnier.titel">Ritter-Turnier</h3>
+          <p data-i18n="karte.turnier.text">Stich mit deiner Lanze zu – rechne dich bis zum Gegner vor.</p>
         </span>
-        <span class="badge badge--verdienen">Verdienen</span>
+        <span class="badge badge--verdienen" data-i18n="badge.verdienen">Verdienen</span>
       </button>
 
-      <div class="spielwahl-titel spielwahl-titel--ausgeben">🪙 Gold ausgeben</div>
+      <div class="spielwahl-titel spielwahl-titel--ausgeben" data-i18n="gold.ausgeben">🪙 Gold ausgeben</div>
       <button class="spielkarte spielkarte--ausgeben" id="karte-puzzle" type="button">
         <span class="bild">🧩</span>
         <span>
-          <h3>Puzzle-Schatz</h3>
-          <p>Kaufe Puzzleteile für 200 Gold und enthülle das Bild Stück für Stück.</p>
+          <h3 data-i18n="karte.puzzle.titel">Puzzle-Schatz</h3>
+          <p data-i18n="karte.puzzle.text">Kaufe Puzzleteile für 200 Gold und enthülle das Bild Stück für Stück.</p>
         </span>
-        <span class="badge badge--ausgeben">Ausgeben</span>
+        <span class="badge badge--ausgeben" data-i18n="badge.ausgeben">Ausgeben</span>
       </button>
       <button class="spielkarte spielkarte--ausgeben" id="karte-galerie" type="button">
         <span class="bild">🖼️</span>
         <span>
-          <h3>Bildergalerie</h3>
-          <p>Schau dir alle Bilder an, die du schon gelöst hast.</p>
+          <h3 data-i18n="karte.galerie.titel">Bildergalerie</h3>
+          <p data-i18n="karte.galerie.text">Schau dir alle Bilder an, die du schon gelöst hast.</p>
         </span>
-        <span class="badge badge--ansehen">Ansehen</span>
+        <span class="badge badge--ansehen" data-i18n="badge.ansehen">Ansehen</span>
       </button>
       <button class="spielkarte spielkarte--ausgeben" id="karte-burg" type="button">
         <span class="bild">🏰</span>
         <span>
-          <h3>Burg bauen</h3>
-          <p>Gib Gold aus und errichte deine Burg Stein für Stein.</p>
+          <h3 data-i18n="karte.burg.titel">Burg bauen</h3>
+          <p data-i18n="karte.burg.text">Gib Gold aus und errichte deine Burg Stein für Stein.</p>
         </span>
-        <span class="badge badge--ausgeben">Ausgeben</span>
+        <span class="badge badge--ausgeben" data-i18n="badge.ausgeben">Ausgeben</span>
       </button>
       <button class="spielkarte spielkarte--ausgeben" id="karte-hoehle" type="button">
         <span class="bild">🐉</span>
         <span>
-          <h3>Drachenhöhle</h3>
-          <p>Kauf ein Drachenei und zieh deinen eigenen Drachen gross.</p>
+          <h3 data-i18n="karte.hoehle.titel">Drachenhöhle</h3>
+          <p data-i18n="karte.hoehle.text">Kauf ein Drachenei und zieh deinen eigenen Drachen gross.</p>
         </span>
-        <span class="badge badge--ausgeben">Ausgeben</span>
+        <span class="badge badge--ausgeben" data-i18n="badge.ausgeben">Ausgeben</span>
       </button>
     </div>
 
     <div class="fusszeile">
       <button class="mini" id="btn-ton-start">🔊 Ton an</button>
-      <button class="mini" data-kammer>🗝️ Schatzkammer</button>
+      <button class="mini" data-kammer data-i18n="kammer">🗝️ Schatzkammer</button>
     </div>
   </section>
 
@@ -142,7 +142,7 @@
   <section class="screen" id="screen-kampf">
     <div class="kampfleiste">
       <div class="partei">
-        <div class="name">Ritter</div>
+        <div class="name" data-i18n="k.partei.ritter">Ritter</div>
         <div class="leben" id="herzen"></div>
       </div>
       <div class="runde" id="runde">Drache 1</div>
@@ -180,10 +180,10 @@
     <div class="zahlenfeld" id="k-zahlen"></div>
 
     <div class="fusszeile">
-      <button class="mini" data-tipp="k">💡 Tipp</button>
-      <button class="mini" data-kammer>🗝️ Schatzkammer</button>
+      <button class="mini" data-tipp="k" data-i18n="tipp">💡 Tipp</button>
+      <button class="mini" data-kammer data-i18n="kammer">🗝️ Schatzkammer</button>
       <button class="mini" data-ton>🔊 Ton</button>
-      <button class="mini" data-heim>🏠 Auswahl</button>
+      <button class="mini" data-heim data-i18n="heim">🏠 Auswahl</button>
     </div>
   </section>
 
@@ -191,11 +191,11 @@
   <section class="screen" id="screen-hort">
     <div class="hort-kopf">
       <div class="anzeige">
-        <div class="kopf">Gold</div>
+        <div class="kopf" data-i18n="gold">Gold</div>
         <div class="wert"><span class="goldbox js-goldbox"><span class="js-gold">0</span></span></div>
       </div>
-      <div class="anzeige anzeige--serie aus" id="anz-serie"><div class="kopf">Serie</div><div class="wert" id="serie-wert">×1</div></div>
-      <div class="anzeige"><div class="kopf">Aufgabe</div><div class="wert" id="runden-wert">1/15</div></div>
+      <div class="anzeige anzeige--serie aus" id="anz-serie"><div class="kopf" data-i18n="serie">Serie</div><div class="wert" id="serie-wert">×1</div></div>
+      <div class="anzeige"><div class="kopf" data-i18n="aufgabe">Aufgabe</div><div class="wert" id="runden-wert">1/15</div></div>
     </div>
 
     <div class="schatzleiste">
@@ -219,10 +219,10 @@
     <div class="zahlenfeld" id="h-zahlen"></div>
 
     <div class="fusszeile">
-      <button class="mini" data-tipp="h">💡 Tipp</button>
-      <button class="mini" data-kammer>🗝️ Schatzkammer</button>
+      <button class="mini" data-tipp="h" data-i18n="tipp">💡 Tipp</button>
+      <button class="mini" data-kammer data-i18n="kammer">🗝️ Schatzkammer</button>
       <button class="mini" data-ton>🔊 Ton</button>
-      <button class="mini" data-heim>🏠 Auswahl</button>
+      <button class="mini" data-heim data-i18n="heim">🏠 Auswahl</button>
     </div>
   </section>
 
@@ -230,15 +230,15 @@
   <section class="screen" id="screen-puzzle">
     <div class="puzzle-kopf">
       <div class="anzeige">
-        <div class="kopf">Gold</div>
+        <div class="kopf" data-i18n="gold">Gold</div>
         <div class="wert"><span class="goldbox js-goldbox"><span class="js-gold">0</span></span></div>
       </div>
       <div class="anzeige">
-        <div class="kopf">Puzzle</div>
+        <div class="kopf" data-i18n="puzzle">Puzzle</div>
         <div class="wert" id="puzzle-nr">1</div>
       </div>
       <div class="anzeige">
-        <div class="kopf">Teile</div>
+        <div class="kopf" data-i18n="teile">Teile</div>
         <div class="wert" id="puzzle-zaehler">0/20</div>
       </div>
     </div>
@@ -246,7 +246,7 @@
     <div class="rang-chip"><span class="js-rang-emoji">🪙</span><span class="js-rang">Knappe</span></div>
 
     <div class="tafel puzzle-tafel">
-      <div class="puzzle-bild" id="puzzle-bild" aria-label="Puzzlebild"></div>
+      <div class="puzzle-bild" id="puzzle-bild" data-i18n-aria="aria.puzzlebild" aria-label="Puzzlebild"></div>
       <div class="funken" id="puzzle-funken"></div>
       <div class="puzzle-fortschritt">
         <div class="puzzle-fortschritt-text" id="puzzle-text">Kaufe ein Teil und enthülle ein Stück des Bildes.</div>
@@ -255,7 +255,7 @@
     </div>
 
     <div class="puzzle-info">
-      <span>🧩 1 Puzzleteil</span>
+      <span data-i18n="puzzle.eins">🧩 1 Puzzleteil</span>
       <strong>200 🪙</strong>
     </div>
 
@@ -263,10 +263,10 @@
     <div class="puzzle-hinweis" id="puzzle-hinweis">Mit jedem gekauften Teil wird das Bild ein bisschen sichtbarer.</div>
 
     <div class="fusszeile">
-      <button class="mini" id="btn-zur-galerie">🖼️ Galerie</button>
-      <button class="mini" data-kammer>🗝️ Schatzkammer</button>
+      <button class="mini" id="btn-zur-galerie" data-i18n="galerie.kurz">🖼️ Galerie</button>
+      <button class="mini" data-kammer data-i18n="kammer">🗝️ Schatzkammer</button>
       <button class="mini" data-ton>🔊 Ton</button>
-      <button class="mini" data-heim>🏠 Auswahl</button>
+      <button class="mini" data-heim data-i18n="heim">🏠 Auswahl</button>
     </div>
   </section>
 
@@ -274,11 +274,11 @@
   <section class="screen" id="screen-galerie">
     <div class="puzzle-kopf">
       <div class="anzeige">
-        <div class="kopf">Gold</div>
+        <div class="kopf" data-i18n="gold">Gold</div>
         <div class="wert"><span class="goldbox js-goldbox"><span class="js-gold">0</span></span></div>
       </div>
       <div class="anzeige">
-        <div class="kopf">Bilder</div>
+        <div class="kopf" data-i18n="bilder">Bilder</div>
         <div class="wert" id="galerie-zaehler">0/5</div>
       </div>
     </div>
@@ -286,16 +286,16 @@
     <div class="rang-chip"><span class="js-rang-emoji">🪙</span><span class="js-rang">Knappe</span></div>
 
     <div class="tafel">
-      <h2 class="galerie-titel">🖼️ Deine Bildergalerie</h2>
+      <h2 class="galerie-titel" data-i18n="galerie.titel">🖼️ Deine Bildergalerie</h2>
       <p class="galerie-text" id="galerie-text">Noch kein Bild fertig.</p>
       <div class="galerie-gitter" id="galerie-gitter"></div>
     </div>
 
     <div class="fusszeile">
-      <button class="mini" id="btn-zum-puzzle">🧩 Puzzle</button>
-      <button class="mini" data-kammer>🗝️ Schatzkammer</button>
+      <button class="mini" id="btn-zum-puzzle" data-i18n="puzzle.kurz">🧩 Puzzle</button>
+      <button class="mini" data-kammer data-i18n="kammer">🗝️ Schatzkammer</button>
       <button class="mini" data-ton>🔊 Ton</button>
-      <button class="mini" data-heim>🏠 Auswahl</button>
+      <button class="mini" data-heim data-i18n="heim">🏠 Auswahl</button>
     </div>
   </section>
 
@@ -303,15 +303,15 @@
   <section class="screen" id="screen-burg">
     <div class="burg-kopf">
       <div class="anzeige">
-        <div class="kopf">Gold</div>
+        <div class="kopf" data-i18n="gold">Gold</div>
         <div class="wert"><span class="goldbox js-goldbox"><span class="js-gold">0</span></span></div>
       </div>
       <div class="anzeige">
-        <div class="kopf">Burgwert</div>
+        <div class="kopf" data-i18n="burgwert">Burgwert</div>
         <div class="wert" id="burg-wert">0</div>
       </div>
       <div class="anzeige">
-        <div class="kopf">Teile</div>
+        <div class="kopf" data-i18n="teile">Teile</div>
         <div class="wert" id="burg-zaehler">0</div>
       </div>
     </div>
@@ -320,7 +320,7 @@
 
     <div class="tafel burg-tafel">
       <div class="burg-buehne">
-        <div class="burg-raster" id="burg-raster" aria-label="Burgbaustelle"></div>
+        <div class="burg-raster" id="burg-raster" data-i18n-aria="aria.burgbaustelle" aria-label="Burgbaustelle"></div>
         <div class="burg-fundament" id="burg-fundament" aria-hidden="true"></div>
       </div>
       <div class="burg-fortschritt">
@@ -328,14 +328,14 @@
       </div>
     </div>
 
-    <div class="burg-palette" id="burg-palette" aria-label="Bauteile"></div>
+    <div class="burg-palette" id="burg-palette" data-i18n-aria="aria.bauteile" aria-label="Bauteile"></div>
 
-    <div class="burg-hinweis" id="burg-hinweis">Wähle ein Bauteil und tippe dann auf ein Feld.</div>
+    <div class="burg-hinweis" id="burg-hinweis" data-i18n="burg.waehle">Wähle ein Bauteil und tippe dann auf ein Feld.</div>
 
     <div class="fusszeile">
-      <button class="mini" data-kammer>🗝️ Schatzkammer</button>
+      <button class="mini" data-kammer data-i18n="kammer">🗝️ Schatzkammer</button>
       <button class="mini" data-ton>🔊 Ton</button>
-      <button class="mini" data-heim>🏠 Auswahl</button>
+      <button class="mini" data-heim data-i18n="heim">🏠 Auswahl</button>
     </div>
   </section>
 
@@ -343,15 +343,15 @@
   <section class="screen" id="screen-hoehle">
     <div class="hoehle-kopf">
       <div class="anzeige">
-        <div class="kopf">Gold</div>
+        <div class="kopf" data-i18n="gold">Gold</div>
         <div class="wert"><span class="goldbox js-goldbox"><span class="js-gold">0</span></span></div>
       </div>
       <div class="anzeige">
-        <div class="kopf">Drache</div>
+        <div class="kopf" data-i18n="drache">Drache</div>
         <div class="wert" id="hoehle-stufe">–</div>
       </div>
       <div class="anzeige">
-        <div class="kopf">Futter</div>
+        <div class="kopf" data-i18n="futter">Futter</div>
         <div class="wert" id="hoehle-zaehler">0</div>
       </div>
     </div>
@@ -402,7 +402,7 @@
         </svg>
         <div class="hoehle-foto"></div>
       </div>
-      <div class="hoehle-name" id="hoehle-name">Drachenhöhle</div>
+      <div class="hoehle-name" id="hoehle-name" data-i18n="karte.hoehle.titel">Drachenhöhle</div>
       <div class="hoehle-schmuck" id="hoehle-schmuck"></div>
       <div class="hoehle-drache" id="hoehle-drache">🥚</div>
       <div class="funken" id="hoehle-funken"></div>
@@ -418,14 +418,14 @@
 
     <div class="hoehle-namen" id="hoehle-namen" hidden></div>
 
-    <div class="hoehle-laden" id="hoehle-laden" aria-label="Höhlenschmuck"></div>
+    <div class="hoehle-laden" id="hoehle-laden" data-i18n-aria="aria.hoehle.schmuck" aria-label="Höhlenschmuck"></div>
 
-    <div class="hoehle-hinweis" id="hoehle-hinweis">Verdiene Gold in den Rechenspielen und bring Leben in die Höhle.</div>
+    <div class="hoehle-hinweis" id="hoehle-hinweis" data-i18n="hoehle.hinweis.start">Verdiene Gold in den Rechenspielen und bring Leben in die Höhle.</div>
 
     <div class="fusszeile">
-      <button class="mini" data-kammer>🗝️ Schatzkammer</button>
+      <button class="mini" data-kammer data-i18n="kammer">🗝️ Schatzkammer</button>
       <button class="mini" data-ton>🔊 Ton</button>
-      <button class="mini" data-heim>🏠 Auswahl</button>
+      <button class="mini" data-heim data-i18n="heim">🏠 Auswahl</button>
     </div>
   </section>
 
@@ -433,15 +433,15 @@
   <section class="screen" id="screen-mauer">
     <div class="hort-kopf">
       <div class="anzeige">
-        <div class="kopf">Gold</div>
+        <div class="kopf" data-i18n="gold">Gold</div>
         <div class="wert"><span class="goldbox js-goldbox"><span class="js-gold">0</span></span></div>
       </div>
       <div class="anzeige anzeige--serie aus" id="m-serie">
-        <div class="kopf">Serie</div>
+        <div class="kopf" data-i18n="serie">Serie</div>
         <div class="wert" id="m-serie-wert">×1</div>
       </div>
       <div class="anzeige">
-        <div class="kopf">Mauer</div>
+        <div class="kopf" data-i18n="mauer">Mauer</div>
         <div class="wert" id="m-runden">1/15</div>
       </div>
     </div>
@@ -455,7 +455,7 @@
     <div class="rang-chip"><span class="js-rang-emoji">🪙</span><span class="js-rang">Knappe</span></div>
 
     <div class="mauer-buehne">
-      <div class="mauer" id="mauer" aria-label="Rechenmauer"></div>
+      <div class="mauer" id="mauer" data-i18n-aria="aria.mauer" aria-label="Rechenmauer"></div>
     </div>
 
     <div class="tafel aufgabe-tafel">
@@ -466,10 +466,10 @@
     <div class="zahlenfeld" id="m-zahlen"></div>
 
     <div class="fusszeile">
-      <button class="mini" data-tipp="m">💡 Tipp</button>
-      <button class="mini" data-kammer>🗝️ Schatzkammer</button>
+      <button class="mini" data-tipp="m" data-i18n="tipp">💡 Tipp</button>
+      <button class="mini" data-kammer data-i18n="kammer">🗝️ Schatzkammer</button>
       <button class="mini" data-ton>🔊 Ton</button>
-      <button class="mini" data-heim>🏠 Auswahl</button>
+      <button class="mini" data-heim data-i18n="heim">🏠 Auswahl</button>
     </div>
   </section>
 
@@ -477,15 +477,15 @@
   <section class="screen" id="screen-turnier">
     <div class="hort-kopf">
       <div class="anzeige">
-        <div class="kopf">Gold</div>
+        <div class="kopf" data-i18n="gold">Gold</div>
         <div class="wert"><span class="goldbox js-goldbox"><span class="js-gold">0</span></span></div>
       </div>
       <div class="anzeige anzeige--serie aus" id="t-serie">
-        <div class="kopf">Serie</div>
+        <div class="kopf" data-i18n="serie">Serie</div>
         <div class="wert" id="t-serie-wert">×1</div>
       </div>
       <div class="anzeige">
-        <div class="kopf">Gegner</div>
+        <div class="kopf" data-i18n="gegner">Gegner</div>
         <div class="wert" id="t-gegner">1/4</div>
       </div>
     </div>
@@ -510,10 +510,10 @@
       </div>
       <div class="turnier-spur"><i class="turnier-mitte"></i></div>
       <div class="turnier-platz turnier-platz--ich" id="t-platz-ich">
-        <img class="turnier-ritter" id="t-ich" src="images/ritter-nach-rechts.svg" alt="Dein Ritter">
+        <img class="turnier-ritter" id="t-ich" src="images/ritter-nach-rechts.svg" data-i18n-alt="t.dein.ritter" alt="Dein Ritter">
       </div>
       <div class="turnier-platz turnier-platz--gegner" id="t-platz-gegner">
-        <img class="turnier-ritter" id="t-gegner-ritter" src="images/ritter-nach-links.svg" alt="Gegner">
+        <img class="turnier-ritter" id="t-gegner-ritter" src="images/ritter-nach-links.svg" data-i18n-alt="gegner" alt="Gegner">
       </div>
       <div class="effekt" id="t-effekt"></div>
       <div class="funken" id="t-funken"></div>
@@ -528,10 +528,10 @@
     <div class="zahlenfeld" id="t-zahlen"></div>
 
     <div class="fusszeile">
-      <button class="mini" data-tipp="t">💡 Tipp</button>
-      <button class="mini" data-kammer>🗝️ Schatzkammer</button>
+      <button class="mini" data-tipp="t" data-i18n="tipp">💡 Tipp</button>
+      <button class="mini" data-kammer data-i18n="kammer">🗝️ Schatzkammer</button>
       <button class="mini" data-ton>🔊 Ton</button>
-      <button class="mini" data-heim>🏠 Auswahl</button>
+      <button class="mini" data-heim data-i18n="heim">🏠 Auswahl</button>
     </div>
   </section>
 
@@ -543,8 +543,8 @@
       <div class="sterne" id="win-sterne">⭐⭐⭐</div>
       <p class="beute" id="win-beute">+50 Gold</p>
       <p id="win-text"></p>
-      <button class="knopf" id="btn-weiter">Nächster Drache</button>
-      <button class="mini" data-heim>🏠 Auswahl</button>
+      <button class="knopf" id="btn-weiter" data-i18n="win.weiter">Nächster Drache</button>
+      <button class="mini" data-heim data-i18n="heim">🏠 Auswahl</button>
     </div>
   </section>
 
@@ -555,12 +555,12 @@
       <h2 id="ende-titel">Der Drache war stärker</h2>
       <p id="ende-text"></p>
       <div class="bilanz">
-        <div><b id="stat-richtig">0</b><span>richtig</span></div>
-        <div><b id="stat-serie">0</b><span>beste Serie</span></div>
-        <div><b id="stat-gold">0</b><span>Gold verdient</span></div>
+        <div><b id="stat-richtig">0</b><span data-i18n="ende.richtig">richtig</span></div>
+        <div><b id="stat-serie">0</b><span data-i18n="ende.serie">beste Serie</span></div>
+        <div><b id="stat-gold">0</b><span data-i18n="ende.gold">Gold verdient</span></div>
       </div>
-      <button class="knopf" id="btn-nochmal">Noch einmal</button>
-      <button class="mini" data-heim>🏠 Auswahl</button>
+      <button class="knopf" id="btn-nochmal" data-i18n="ende.nochmal">Noch einmal</button>
+      <button class="mini" data-heim data-i18n="heim">🏠 Auswahl</button>
     </div>
   </section>
 </div>
@@ -569,10 +569,10 @@
 <div class="overlay" id="ov-truhe">
   <div class="overlay-karte">
     <div class="truhe" id="truhen-bild">🎁</div>
-    <h2 id="truhen-titel">Eine Schatztruhe!</h2>
-    <p id="truhen-text">Tippe die Truhe an.</p>
+    <h2 id="truhen-titel" data-i18n="truhe.titel">Eine Schatztruhe!</h2>
+    <p id="truhen-text" data-i18n="truhe.text">Tippe die Truhe an.</p>
     <p class="gold-plus" id="truhen-gold" style="visibility:hidden">+50 Gold</p>
-    <button class="knopf" id="btn-truhe-zu" style="visibility:hidden">Weiter rechnen</button>
+    <button class="knopf" id="btn-truhe-zu" style="visibility:hidden" data-i18n="truhe.weiter">Weiter rechnen</button>
   </div>
 </div>
 
@@ -582,20 +582,20 @@
   <div class="overlay-karte">
     <h2 class="bild-titel" id="bild-titel">Bild 1</h2>
     <div class="bild-rahmen" id="bild-rahmen">
-      <img id="bild-gross" alt="Gelöstes Puzzlebild">
+      <img id="bild-gross" data-i18n-alt="aria.bild.geloest" alt="Gelöstes Puzzlebild">
     </div>
-    <p class="bild-hinweis" id="bild-hinweis">Tippe das Bild an, um es grösser zu sehen.</p>
-    <button class="knopf" id="btn-bild-zu">Zurück</button>
+    <p class="bild-hinweis" id="bild-hinweis" data-i18n="bild.hinweis">Tippe das Bild an, um es grösser zu sehen.</p>
+    <button class="knopf" id="btn-bild-zu" data-i18n="zurueck">Zurück</button>
   </div>
 </div>
 
 <div class="overlay" id="ov-kammer">
   <div class="overlay-karte">
-    <h2>Deine Schatzkammer</h2>
+    <h2 data-i18n="kammer.titel">Deine Schatzkammer</h2>
     <p id="kammer-text">0 von 12 Schätzen gefunden</p>
     <div class="album-gitter" id="album"></div>
     <p class="gold-plus" id="kammer-gold">🪙 0 Gold</p>
-    <button class="knopf" id="btn-kammer-zu">Zurück</button>
+    <button class="knopf" id="btn-kammer-zu" data-i18n="zurueck">Zurück</button>
   </div>
 </div>
 
@@ -603,11 +603,11 @@
 <div class="overlay" id="ov-ziel">
   <div class="overlay-karte">
     <div class="belohnung">🌟</div>
-    <h2>Tagesziel geschafft!</h2>
+    <h2 data-i18n="ziel.titel">Tagesziel geschafft!</h2>
     <p id="ziel-text"></p>
-    <p class="gold-plus">+100 Bonus-Gold</p>
-    <button class="knopf" id="btn-ziel-weiter">Weiter sammeln</button>
-    <button class="mini" data-heim>🏠 Auswahl</button>
+    <p class="gold-plus" data-i18n="ziel.bonus">+100 Bonus-Gold</p>
+    <button class="knopf" id="btn-ziel-weiter" data-i18n="ziel.weiter">Weiter sammeln</button>
+    <button class="mini" data-heim data-i18n="heim">🏠 Auswahl</button>
   </div>
 </div>
 
@@ -615,11 +615,11 @@
 <div class="overlay" id="ov-mauer">
   <div class="overlay-karte">
     <div class="belohnung">🧮</div>
-    <h2>Alle Rechenmauern geschafft!</h2>
+    <h2 data-i18n="mauer.titel">Alle Rechenmauern geschafft!</h2>
     <p id="mauer-ziel-text"></p>
-    <p class="gold-plus">+100 Bonus-Gold</p>
-    <button class="knopf" id="btn-mauer-weiter">Weiter mauern</button>
-    <button class="mini" data-heim>🏠 Auswahl</button>
+    <p class="gold-plus" data-i18n="ziel.bonus">+100 Bonus-Gold</p>
+    <button class="knopf" id="btn-mauer-weiter" data-i18n="mauer.weiter">Weiter mauern</button>
+    <button class="mini" data-heim data-i18n="heim">🏠 Auswahl</button>
   </div>
 </div>
 
@@ -630,33 +630,42 @@
     <h2 id="t-erg-titel">Sieg!</h2>
     <p id="t-erg-text"></p>
     <p class="gold-plus" id="t-erg-gold">+50 Gold</p>
-    <button class="knopf" id="btn-turnier-weiter">Weiter</button>
-    <button class="mini" data-heim>🏠 Auswahl</button>
+    <button class="knopf" id="btn-turnier-weiter" data-i18n="turnier.weiter">Weiter</button>
+    <button class="mini" data-heim data-i18n="heim">🏠 Auswahl</button>
   </div>
 </div>
 
 <!-- ============ WER SPIELT? ============ -->
 <div class="overlay" id="ov-konto">
   <div class="overlay-karte">
-    <h2>Wer spielt?</h2>
-    <p>Tippe auf dein Bild.</p>
+    <h2 data-i18n="konto.titel">Wer spielt?</h2>
+    <p data-i18n="konto.tippe">Tippe auf dein Bild.</p>
     <div class="konto-gitter" id="konto-gitter"></div>
-    <button class="knopf" id="btn-konto-zu">Zurück</button>
+    <div class="sprache-feld">
+      <span class="sprache-label" data-i18n="sprache.titel">Sprache</span>
+      <div class="sprache-wahl" id="sprache-wahl-konto"></div>
+    </div>
+    <button class="knopf" id="btn-konto-zu" data-i18n="zurueck">Zurück</button>
   </div>
 </div>
 
 <!-- ============ NEUES KONTO ============ -->
 <div class="overlay" id="ov-konto-neu">
   <div class="overlay-karte">
-    <h2>Neues Kind</h2>
-    <p>Wähle ein Bild und schreibe deinen Namen (oder lass ihn frei).</p>
+    <h2 data-i18n="konto.neu">Neues Kind</h2>
+    <p data-i18n="konto.neu.text">Wähle ein Bild und schreibe deinen Namen (oder lass ihn frei).</p>
     <div class="avatar-wahl" id="avatar-wahl"></div>
-    <input class="konto-name" id="konto-name-eingabe" type="text" maxlength="12" placeholder="Dein Name (optional)" autocomplete="off">
-    <button class="knopf" id="btn-konto-anlegen">Fertig</button>
-    <button class="mini" id="btn-konto-neu-zu">Abbrechen</button>
+    <input class="konto-name" id="konto-name-eingabe" type="text" maxlength="12" data-i18n-placeholder="konto.name.placeholder" placeholder="Dein Name (optional)" autocomplete="off">
+    <div class="sprache-feld">
+      <span class="sprache-label" data-i18n="sprache.titel">Sprache</span>
+      <div class="sprache-wahl" id="sprache-wahl-neu"></div>
+    </div>
+    <button class="knopf" id="btn-konto-anlegen" data-i18n="konto.fertig">Fertig</button>
+    <button class="mini" id="btn-konto-neu-zu" data-i18n="konto.abbrechen">Abbrechen</button>
   </div>
 </div>
 
-<script src="app.js?v=12"></script>
+<script src="strings.js?v=13"></script>
+<script src="app.js?v=13"></script>
 </body>
 </html>
