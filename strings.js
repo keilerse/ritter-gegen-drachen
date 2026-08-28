@@ -17,7 +17,7 @@ const I18N = {
   de: {
     "title": "Rechen-Ritter – Plus und Minus bis 20",
     "start.titel": "Rechen-Ritter",
-    "start.untertitel": "Plus und Minus – zwei Spiele, eine Schatzkammer",
+    "start.untertitel": "Rechnen wird zum Abenteuer",
     "wer.spielt": "Wer spielt?",
     "konto.tippe": "Tippe auf dein Bild.",
     "dein.rang": "Dein Rang",
@@ -294,7 +294,7 @@ const I18N = {
   en: {
     "title": "Math Knights – addition and subtraction up to 20",
     "start.titel": "Math Knights",
-    "start.untertitel": "Addition and subtraction – two games, one treasury",
+    "start.untertitel": "Math becomes an adventure",
     "wer.spielt": "Who's playing?",
     "konto.tippe": "Tap your picture.",
     "dein.rang": "Your rank",
@@ -571,7 +571,7 @@ const I18N = {
   es: {
     "title": "Caballeros de las mates – sumas y restas hasta 20",
     "start.titel": "Caballeros de las mates",
-    "start.untertitel": "Sumas y restas – dos juegos, una tesorería",
+    "start.untertitel": "Las mates se convierten en una aventura",
     "wer.spielt": "¿Quién juega?",
     "konto.tippe": "Toca tu dibujo.",
     "dein.rang": "Tu rango",
@@ -848,7 +848,7 @@ const I18N = {
   fr: {
     "title": "Chevaliers des maths – additions et soustractions jusqu'à 20",
     "start.titel": "Chevaliers des maths",
-    "start.untertitel": "Additions et soustractions – deux jeux, un trésor",
+    "start.untertitel": "Les maths deviennent une aventure",
     "wer.spielt": "Qui joue ?",
     "konto.tippe": "Touche ton image.",
     "dein.rang": "Ton rang",
@@ -1125,7 +1125,7 @@ const I18N = {
   tr: {
     "title": "Matematik Şövalyeleri – 20'ye kadar toplama ve çıkarma",
     "start.titel": "Matematik Şövalyeleri",
-    "start.untertitel": "Toplama ve çıkarma – iki oyun, bir hazine",
+    "start.untertitel": "Matematik maceraya dönüşüyor",
     "wer.spielt": "Kim oynuyor?",
     "konto.tippe": "Resmine dokun.",
     "dein.rang": "Senin rütben",
