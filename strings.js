@@ -1449,3 +1449,10 @@ function setLang(code){
   document.documentElement.style.setProperty("--t-du-bist-dran", JSON.stringify(tr("konto.du.bist.dran")));
   i18nAnwenden();
 }
+
+/* Standardsprache des Browsers auf eine der unterstützten Sprachen abbilden. */
+function browserSprache(){
+  const roh = (navigator.language || navigator.userLanguage || "de").toLowerCase();
+  const code = roh.split("-")[0];
+  return SPRACHEN.indexOf(code) >= 0 ? code : "de";
+}

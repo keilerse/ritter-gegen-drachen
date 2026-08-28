@@ -11,7 +11,7 @@
   const KONTEN_KEY = "rechenritter.konten";
   const AKTIV_KEY  = "rechenritter.aktiv";
   const MAX_KONTEN = 4;
-  const AVATARE = ["🦁","🐲","🦄","🐱","🚀","🐼","🦉","🐸"];
+  const AVATARE = ["🦁","🐲","🦄","🐱","🚀","🐼","🦉","🐸","🐶"];
   const konto = { liste:[], aktiv:"", neuBild:"", neuSprache:"de" };
 
   function kontoKey(id, art){ return "rechenritter."+id+"."+art; }
@@ -48,11 +48,9 @@
     let aktiv;
     try{ aktiv = localStorage.getItem(AKTIV_KEY); }catch(e){}
     if(konto.liste.length===0){
-      const id = kontoNeuId();
-      konto.liste.push({ id:id, name:tr("konto.default.name",{n:1}), bild:AVATARE[0], sprache:"de" });
-      konto.aktiv = id;
-      kontoMigriereLegacy(id);
-      kontoListeSichern(); kontoAktivSichern();
+      /* Erststart: kein Standard-Konto mehr – die Namens-/Avatar-/Sprachwahl
+         öffnet sich automatisch, sobald die Seite geladen ist. */
+      konto.aktiv = "";
     }else{
       const gueltig = konto.liste.some(k => k.id===aktiv);
       konto.aktiv = gueltig ? aktiv : konto.liste[0].id;
@@ -2070,6 +2068,10 @@
     if(k){
       $("spieler-avatar").textContent = k.bild;
       $("spieler-name").textContent = k.name;
+    }else{
+      /* Noch kein Konto – die Leiste zeigt einen neutralen Platzhalter. */
+      $("spieler-avatar").textContent = "🙂";
+      $("spieler-name").textContent = "";
     }
   }
   function kontoDatenLaden(){
@@ -2101,6 +2103,7 @@
     }
   }
   function kontoOeffnen(){
+    if(konto.liste.length===0){ kontoNeuZeigen(); return; }
     kontoGitterZeichnen();
     sprachenWahlZeichnen("sprache-wahl-konto", (kontoAktuell() && kontoAktuell().sprache) || "de");
     $("ov-konto").classList.add("is-offen");
@@ -2162,15 +2165,18 @@
   function kontoNeuZeigen(){
     if(konto.liste.length>=MAX_KONTEN) return;
     konto.neuBild = AVATARE[0];
-    konto.neuSprache = (kontoAktuell() && kontoAktuell().sprache) || "de";
+    konto.neuSprache = browserSprache();
     $("konto-name-eingabe").value = "";
     avatarWahlZeichnen();
     sprachenWahlZeichnen("sprache-wahl-neu", konto.neuSprache);
+    /* Erststart: ohne Konto gibt es nichts, wozu man abbrechen könnte. */
+    $("btn-konto-neu-zu").hidden = konto.liste.length===0;
     $("ov-konto").classList.remove("is-offen");
     $("ov-konto-neu").classList.add("is-offen");
   }
   function kontoAnlegen(){
     if(konto.liste.length>=MAX_KONTEN) return;
+    const erste = konto.liste.length===0;
     const name = ($("konto-name-eingabe").value||"").trim();
     const id = kontoNeuId();
     konto.liste.push({
@@ -2182,6 +2188,7 @@
     kontoListeSichern();
     konto.aktiv = id;
     kontoAktivSichern();
+    if(erste) kontoMigriereLegacy(id);
     kontoDatenLaden();
     $("ov-konto-neu").classList.remove("is-offen");
     zeigeScreen("screen-start");
@@ -2254,7 +2261,7 @@
   $("btn-turnier-weiter").addEventListener("click", tWeiter);
 
   kontoInit();
-  setLang((kontoAktuell() && kontoAktuell().sprache) || "de");
+  setLang((kontoAktuell() && kontoAktuell().sprache) || browserSprache());
   laden();
   optLaden();
   optAnwenden();
@@ -2267,4 +2274,6 @@
   burgZeichnen();
   hoehleZeichnen();
   kontoAnzeigen();
+  /* Erststart: noch kein Konto -> direkt die Namens-/Avatar-/Sprachwahl. */
+  if(!kontoAktuell()) kontoNeuZeigen();
 })();
