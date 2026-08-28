@@ -434,7 +434,9 @@ body::after{
 /* ---------- Drachenhöhle ---------- */
 .hoehle-kopf{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 .hoehle-buehne{
-  position:relative;height:200px;margin:0 -6px;
+  /* 572x260 – dasselbe Seitenverhaeltnis, auf das drachenhoehle.png
+     zugeschnitten ist, damit "cover" nichts Wichtiges abschneidet. */
+  position:relative;height:260px;margin:0 -6px;
   display:flex;align-items:flex-end;justify-content:center;
 }
 /* Kulisse + Übergang: Höhlenbild und Farbschleier werden gemeinsam maskiert,
@@ -453,7 +455,8 @@ body::after{
 /* Liegt "drachenhoehle.png" neben der HTML-Datei, deckt das Foto die
    SVG-Kulisse ab. Fehlt die Datei, bleibt diese Ebene leer und die gezeichnete
    Höhle bleibt sichtbar – genau wie bei den Schriften greift ein Ersatz. */
-.hoehle-foto{position:absolute;inset:0;background:url("drachenhoehle.png") center/cover no-repeat}
+.hoehle-foto{position:absolute;inset:0;background:url("drachenhoehle.png") center/cover no-repeat;
+  filter:brightness(.96) saturate(1.12)}
 /* Farbangleich an den Seitenhintergrund – nimmt dem Bildrand den Bruch. */
 .hoehle-kulisse::after{
   content:"";position:absolute;inset:0;pointer-events:none;
@@ -463,7 +466,7 @@ body::after{
 }
 .hoehle-drache{
   position:relative;z-index:1;font-size:clamp(3.2rem,16vw,4.6rem);line-height:1;
-  margin-bottom:30px;filter:drop-shadow(0 8px 10px rgba(0,0,0,.55));
+  margin-bottom:76px;filter:drop-shadow(0 8px 10px rgba(0,0,0,.55));
   animation:schweben 3.4s ease-in-out infinite;
 }
 .hoehle-drache::after{
@@ -2292,7 +2295,7 @@ body::after{
     {id:"fackel",   bild:"🔥", name:"Fackel",       preis:90,  x:85, y:46},
     {id:"gold",     bild:"💰", name:"Goldhaufen",   preis:200, x:77, y:13},
     {id:"kristall", bild:"💎", name:"Kristall",     preis:250, x:25, y:52},
-    {id:"knochen",  bild:"🦴", name:"Knochen",      preis:70,  x:52, y:9},
+    {id:"knochen",  bild:"🦴", name:"Knochen",      preis:70,  x:34, y:7},
     {id:"stern",    bild:"🌟", name:"Sternenlicht", preis:300, x:62, y:60}
   ];
   /* Namen werden angetippt, nicht getippt – im ganzen Spiel wird nichts geschrieben. */

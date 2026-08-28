@@ -72,10 +72,12 @@ Spielstände (Konten, Gold, Schätze, Puzzle, Burg, Drache) liegen als `localSto
 Browser des jeweiligen Kindes. Die Puzzle-Motive liegen als `puzzle1.png` bis
 `puzzle5.png` neben der HTML-Datei.
 
-Die Drachenhöhle bringt ihre Kulisse als Inline-SVG mit. Liegt zusätzlich eine Datei
-`drachenhoehle.png` neben der HTML-Datei, wird die als Hintergrund darübergelegt; fehlt
-sie, bleibt die gezeichnete Höhle sichtbar. Die Kulisse läuft an den Rändern über eine
-Maske weich in den Seitenhintergrund aus, damit der Übergang nicht hart abbricht.
+Die Drachenhöhle nimmt `drachenhoehle.png` als Hintergrund. Darunter liegt als Ersatz
+eine gezeichnete Höhle als Inline-SVG – fehlt die PNG-Datei, bleibt die sichtbar und
+das Spiel funktioniert weiter. Das Bild ist auf 572×260 zugeschnitten, dasselbe
+Seitenverhältnis wie die Bühne; ein Ersatzbild sollte dieses Format haben, sonst
+schneidet `cover` etwas ab. Die Kulisse läuft an den Rändern über eine Maske weich in
+den Seitenhintergrund aus, damit der Übergang nicht hart abbricht.
 
 Die Oberfläche ist für Smartphones gebaut (große Flächen zum Antippen, kein
 horizontales Scrollen) und funktioniert am Tablet und Desktop genauso. Am Handy
