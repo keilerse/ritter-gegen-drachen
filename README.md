@@ -70,6 +70,13 @@ Browser öffnen, das genügt. Die Seite besteht aus drei Dateien:
 - `style.css` – das komplette Design,
 - `app.js` – die gesamte Spiellogik.
 
+`style.css` und `app.js` werden in `index.html` mit einer Versionsnummer eingebunden
+(`app.js?v=7`). Der Browser holt nach einer Änderung dadurch sicher die neue Datei und
+nicht die alte aus dem Cache. **Wichtig:** Nach jeder Änderung an `style.css` oder
+`app.js` die Zahl in beiden Zeilen um eins hochzählen, sonst sehen Kinder mit offener
+Seite unter Umständen noch die alte Version (GitHub Pages liefert die Dateien mit zehn
+Minuten Cache aus).
+
 Die Klänge erzeugt die Web Audio API direkt im Browser, es werden keine Sounddateien
 geladen. Der Ton lässt sich im Spiel abschalten. (Die frühere Ein-Datei-Variante liegt
 als `index-singlefile.html` daneben.)
