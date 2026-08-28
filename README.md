@@ -52,7 +52,12 @@ unterschieden:
 ### Gold ausgeben
 
 - **Puzzle-Schatz** – jedes Puzzleteil kostet 200 Gold. Stück für Stück wird ein Bild
-  enthüllt (fünf verschiedene Motive), bis das Puzzle gelöst ist.
+  enthüllt, bis das Puzzle gelöst ist. Danach geht es mit dem nächsten Motiv weiter,
+  und das fertige Bild bleibt.
+- **Bildergalerie** – alle gelösten Bilder hängen hier nebeneinander; ein Tipp zeigt
+  eines gross, ein zweiter vergrössert es noch einmal zum Verschieben. Noch nicht
+  gelöste Motive sind als Schloss zu sehen. Sind alle Bilder fertig, bleibt das letzte
+  vollständig stehen und es beginnt kein neues Puzzle mehr.
 - **Burg bauen** – Mauern, Tor, Fenster, Flagge und Wappen kosten unterschiedlich viel
   Gold und werden auf einem Raster platziert. Eine vollständige Burg wird belohnt.
 - **Drachenhöhle** – für 500 Gold gibt es ein Drachenei, jede Fütterung kostet 80 Gold.
@@ -77,7 +82,7 @@ Browser öffnen, das genügt. Die Seite besteht aus drei Dateien:
 - `app.js` – die gesamte Spiellogik.
 
 `style.css` und `app.js` werden in `index.html` mit einer Versionsnummer eingebunden
-(`app.js?v=7`). Der Browser holt nach einer Änderung dadurch sicher die neue Datei und
+(`app.js?v=11`). Der Browser holt nach einer Änderung dadurch sicher die neue Datei und
 nicht die alte aus dem Cache. **Wichtig:** Nach jeder Änderung an `style.css` oder
 `app.js` die Zahl in beiden Zeilen um eins hochzählen, sonst sehen Kinder mit offener
 Seite unter Umständen noch die alte Version (GitHub Pages liefert die Dateien mit zehn
@@ -89,7 +94,8 @@ als `index-singlefile.html` daneben.)
 
 Spielstände (Konten, Gold, Schätze, Puzzle, Burg, Drache) liegen als `localStorage` im
 Browser des jeweiligen Kindes. Die Puzzle-Motive liegen als `puzzle1.png` bis
-`puzzle5.png` im Ordner `images/`.
+`puzzle5.png` im Ordner `images/`; welche Bilder schon gelöst sind, merkt sich der
+Spielstand pro Kind.
 
 Die Drachenhöhle nimmt `images/drachenhoehle.png` als Hintergrund. Darunter liegt als Ersatz
 eine gezeichnete Höhle als Inline-SVG – fehlt die PNG-Datei, bleibt die sichtbar und
@@ -113,8 +119,15 @@ Die Drachen stehen als Liste `DRACHEN`, die Schätze als `SCHAETZE` und die Rän
 Beute anpassen. Für die Drachenhöhle gilt dasselbe mit `HOEHLE_STUFEN` (Wachstum),
 `HOEHLE_SCHMUCK` (Deko samt Position in der Höhle), `HOEHLE_NAMEN` sowie den Preisen
 `HOEHLE_EI` und `HOEHLE_FUTTER`. Die Turniergegner liegen als `TURNIER_GEGNER`
-(Name, Schwierigkeit, Beute), die Zahl der Ritte pro Gegner als `TURNIER_RITTE`. Die Aufgaben selbst entstehen in `rohAufgabe()`, jede Stufe hat dort
-ein paar Zeilen. Die Farben liegen als CSS-Variablen ganz oben in der Datei.
+(Name, Schwierigkeit, Beute), die Zahl der Ritte pro Gegner als `TURNIER_RITTE`.
+
+**Ein neues Puzzlebild** kommt in zwei Schritten dazu: die Datei als `images/puzzle6.png`
+ablegen (Seitenverhältnis 4:3) und `PUZZLE_ANZAHL` im Skript um eins erhöhen. Nimmst du
+ein Bild wieder heraus, senke die Zahl entsprechend – gespeicherte Einträge zu Bildern,
+die es nicht mehr gibt, wirft das Spiel beim Laden von allein weg.
+
+Die Aufgaben selbst entstehen in `rohAufgabe()`, jede Stufe hat dort ein paar Zeilen.
+Die Farben liegen als CSS-Variablen ganz oben in der Datei.
 
 ## Lizenz
 

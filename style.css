@@ -100,6 +100,8 @@ body::after{
 }
 .spielkarte .badge--verdienen{background:rgba(87,192,125,.3);color:#0c3f24;border:2px solid #2f7d4e}
 .spielkarte .badge--ausgeben{background:rgba(239,90,53,.18);color:#ffb4a0;border:2px solid var(--feuer)}
+/* Die Galerie kostet nichts, sie wird nur angeschaut. */
+.spielkarte .badge--ansehen{background:rgba(255,255,255,.12);color:#d8e2ff;border:2px solid rgba(255,255,255,.3)}
 .spielkarte--ausgeben{
   background:linear-gradient(#3c2b1d,#28190f);color:var(--pergament);border-color:var(--feuer);
   box-shadow:0 8px 0 rgba(180,45,20,.45);
@@ -332,7 +334,7 @@ body::after{
 
 /* ---------- Puzzle ---------- */
 .puzzle-kopf{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.puzzle-tafel{padding:10px}
+.puzzle-tafel{padding:10px;position:relative}  /* Bezug für .funken */
 .puzzle-bild{
   width:100%;aspect-ratio:4/3;border-radius:16px;overflow:hidden;
   display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(4,1fr);
@@ -363,6 +365,34 @@ body::after{
 .puzzle-info strong{font-family:var(--schrift-display);color:var(--gold);font-size:1.2rem}
 #btn-puzzle-kaufen:disabled{opacity:.5;cursor:not-allowed;filter:grayscale(.5)}
 .puzzle-hinweis{text-align:center;font-size:.86rem;opacity:.7;min-height:1.2em}
+/* ---------- Bildergalerie ---------- */
+.galerie-titel{font-family:var(--schrift-display);font-size:1.35rem;color:var(--gold);line-height:1.15}
+.galerie-text{font-size:.9rem;opacity:.85;margin-top:2px}
+.galerie-gitter{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;width:100%;margin-top:12px}
+.galerie-stueck{position:relative;background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.14);
+  border-radius:var(--r-klein);padding:6px;display:flex;flex-direction:column;align-items:center;gap:4px;
+  cursor:pointer;-webkit-tap-highlight-color:transparent}
+.galerie-stueck img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:8px;display:block}
+.galerie-stueck .galerie-schloss{width:100%;aspect-ratio:4/3;border-radius:8px;display:flex;
+  align-items:center;justify-content:center;font-size:2rem;
+  background:linear-gradient(135deg,#26314f,#0b1122)}
+.galerie-stueck .titel-klein{font-size:.7rem;line-height:1.15;opacity:.85}
+.galerie-stueck.fehlt{opacity:.55;cursor:default}
+.galerie-stueck:not(.fehlt):active{transform:scale(.97)}
+
+/* ---------- Bild gross ansehen ----------
+   Der Rahmen ist das Fenster, das Bild darin normal genau so breit. Mit .gross
+   wird das Bild breiter als der Rahmen – der wird dadurch scrollbar und man
+   schiebt mit dem Finger über das Bild. */
+.bild-rahmen{width:100%;max-height:62vh;overflow:auto;border-radius:12px;
+  border:3px solid var(--gold-tief);background:#0b1122;
+  -webkit-overflow-scrolling:touch;cursor:zoom-in}
+.bild-rahmen img{width:100%;display:block}
+.bild-rahmen.gross{cursor:zoom-out}
+.bild-rahmen.gross img{width:220%;max-width:none}
+.bild-titel{font-family:var(--schrift-display);color:var(--gold)}
+.bild-hinweis{font-size:.8rem;opacity:.75}
+
 @keyframes puzzleAuf{
   0%{filter:brightness(2.2) saturate(1.3);transform:scale(.92)}
   55%{filter:brightness(1.3);transform:scale(1.03)}
@@ -378,11 +408,7 @@ body::after{
   border:3px solid var(--gold-tief);box-shadow:inset 0 0 0 2px rgba(255,255,255,.18);
   padding:10px 6px 6px;
 }
-.burg-zinnen,.burg-fundament{display:grid;grid-template-columns:repeat(9,1fr);gap:0}
-.burg-zinnen{position:relative}
-.burg-zinnen .zinne{aspect-ratio:1.6/1;overflow:hidden}
-.burg-zinnen .zinne.gap{opacity:0}
-.burg-fundament{margin-top:0}
+.burg-fundament{display:grid;grid-template-columns:repeat(9,1fr);gap:0;margin-top:0}
 .burg-fundament .stein{aspect-ratio:2.4/1;overflow:hidden}
 .burg-raster{
   display:grid;grid-template-columns:repeat(9,1fr);gap:0;

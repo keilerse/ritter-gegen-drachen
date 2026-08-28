@@ -747,12 +747,25 @@
   /* ================= SPIEL 3: PUZZLE-SCHATZ ================= */
   const PUZZLE_PREIS = 200;
   const PUZZLE_TEILE = 20;
-  const puzzleBild = () => "images/puzzle"+puzzle.nummer+".png";
+  /* Neues Motiv: images/puzzleN.png ablegen und diese Zahl um eins erhöhen.
+     Sonst zeigt das Spiel auf eine Datei, die es nicht gibt. */
+  const PUZZLE_ANZAHL = 5;
+  const puzzleBild = (nr) => "images/puzzle"+nr+".png";
 
-  const puzzle = { nummer:1, offen:[] };
+  /* geloest: die Nummern der fertigen Bilder – sie bleiben in der Galerie. */
+  const puzzle = { nummer:1, offen:[], geloest:[] };
+
+  /* Kleinste noch nicht gelöste Bildnummer, 0 wenn alle fertig sind. */
+  function puzzleNaechstes(){
+    for(let nr=1; nr<=PUZZLE_ANZAHL; nr++){
+      if(puzzle.geloest.indexOf(nr)<0) return nr;
+    }
+    return 0;
+  }
+  function puzzleFertig(){ return puzzleNaechstes()===0; }
 
   function puzzleLaden(){
-    puzzle.nummer = 1; puzzle.offen = [];
+    puzzle.nummer = 1; puzzle.offen = []; puzzle.geloest = [];
     try{
       const roh = localStorage.getItem(kontoKey(konto.aktiv,"puzzle"));
       if(!roh) return;
@@ -761,6 +774,19 @@
       puzzle.offen = Array.isArray(d.offen)
         ? d.offen.map(Number).filter(x=>x>=0&&x<PUZZLE_TEILE)
         : [];
+      /* Nur Nummern, zu denen es auch ein Bild gibt – nimmst du eines wieder
+         heraus und senkst PUZZLE_ANZAHL, fällt der tote Eintrag von allein weg. */
+      puzzle.geloest = Array.isArray(d.geloest)
+        ? d.geloest.map(Number).filter(x=>x>=1&&x<=PUZZLE_ANZAHL)
+                   .filter((x,i,a)=>a.indexOf(x)===i)
+        : [];
+      /* Ein Bild, das schon in der Galerie hängt, wird nicht noch einmal gepuzzelt.
+         Ist alles gelöst, bleibt das letzte Bild vollständig stehen. */
+      if(puzzle.geloest.indexOf(puzzle.nummer)>=0){
+        const n = puzzleNaechstes();
+        if(n){ puzzle.nummer = n; puzzle.offen = []; }
+        else { puzzle.offen = []; for(let i=0;i<PUZZLE_TEILE;i++) puzzle.offen.push(i); }
+      }
     }catch(e){}
   }
 
@@ -768,7 +794,8 @@
     try{
       localStorage.setItem(kontoKey(konto.aktiv,"puzzle"), JSON.stringify({
         nummer:puzzle.nummer,
-        offen:puzzle.offen
+        offen:puzzle.offen,
+        geloest:puzzle.geloest
       }));
     }catch(e){}
   }
@@ -776,7 +803,7 @@
   function puzzleZeichnen(){
     const box = $("puzzle-bild");
     if(!box) return;
-    const bild = puzzleBild();
+    const bild = puzzleBild(puzzle.nummer);
     box.innerHTML = "";
 
     for(let i=0;i<PUZZLE_TEILE;i++){
@@ -812,12 +839,90 @@
         schatz.gold < PUZZLE_PREIS
           ? "Du brauchst noch "+(PUZZLE_PREIS-schatz.gold)+" Gold."
           : "Du hast genug Gold – welches Stück wird als Nächstes sichtbar?";
+    }else if(puzzleFertig()){
+      kaufen.disabled = true;
+      kaufen.textContent = "🏆 Alle Bilder gesammelt!";
+      $("puzzle-text").textContent = "Geschafft! Du hast jedes Bild vollständig enthüllt.";
+      $("puzzle-hinweis").textContent = "In der Bildergalerie kannst du sie dir alle ansehen.";
     }else{
       kaufen.disabled = true;
       kaufen.textContent = "🏆 Puzzle gelöst!";
       $("puzzle-text").textContent = "Geschafft! Das Bild ist vollständig enthüllt.";
       $("puzzle-hinweis").textContent = "Das nächste Puzzle wird vorbereitet …";
     }
+  }
+
+  /* ---------- Bildergalerie ----------
+     Gelöste Bilder bleiben hier hängen und lassen sich gross ansehen.
+     Aufbau wie kammerZeigen(): eine Kachel je Motiv, gefundene und fehlende. */
+  function galerieZeichnen(){
+    const gitter = $("galerie-gitter");
+    if(!gitter) return;
+    gitter.innerHTML = "";
+
+    for(let nr=1; nr<=PUZZLE_ANZAHL; nr++){
+      const fertig = puzzle.geloest.indexOf(nr)>=0;
+      const dran = !fertig && nr===puzzle.nummer;
+      const el = document.createElement("div");
+      el.className = "galerie-stueck"+(fertig ? "" : " fehlt");
+
+      if(fertig){
+        const bild = document.createElement("img");
+        bild.src = puzzleBild(nr);
+        bild.alt = "Bild "+nr;
+        bild.loading = "lazy";
+        bild.decoding = "async";
+        el.appendChild(bild);
+        el.addEventListener("click", ()=> bildZeigen(nr));
+      } else {
+        const platz = document.createElement("span");
+        platz.className = "galerie-schloss";
+        platz.textContent = dran ? "🧩" : "🔒";
+        el.appendChild(platz);
+      }
+
+      const titel = document.createElement("span");
+      titel.className = "titel-klein";
+      titel.textContent = fertig ? "Bild "+nr
+        : dran ? puzzle.offen.length+"/"+PUZZLE_TEILE+" Teile"
+        : "noch zu";
+      el.appendChild(titel);
+      gitter.appendChild(el);
+    }
+
+    const fertige = puzzle.geloest.length;
+    $("galerie-zaehler").textContent = fertige+"/"+PUZZLE_ANZAHL;
+    $("galerie-text").textContent = fertige===0
+      ? "Noch kein Bild fertig – löse ein Puzzle, dann hängt es hier."
+      : fertige>=PUZZLE_ANZAHL
+        ? "Alle "+PUZZLE_ANZAHL+" Bilder gesammelt! Tippe eines an."
+        : fertige+" von "+PUZZLE_ANZAHL+" Bildern fertig. Tippe eines an.";
+  }
+
+  /* Lupe: Das Bild füllt den Rahmen. Ein Tipp schaltet auf gross um, dann
+     lässt sich der Rahmen scrollen – so schiebt man mit dem Finger über
+     das Bild, ganz ohne Zoom-Bibliothek. */
+  function bildZeigen(nr){
+    const rahmen = $("bild-rahmen"), bild = $("bild-gross");
+    rahmen.classList.remove("gross");
+    rahmen.scrollTop = rahmen.scrollLeft = 0;
+    bild.src = puzzleBild(nr);
+    bild.alt = "Bild "+nr;
+    $("bild-titel").textContent = "Bild "+nr;
+    $("bild-hinweis").textContent = "Tippe das Bild an, um es grösser zu sehen.";
+    $("ov-bild").classList.add("is-offen");
+  }
+  function bildZoomen(){
+    const rahmen = $("bild-rahmen");
+    const gross = rahmen.classList.toggle("gross");
+    $("bild-hinweis").textContent = gross
+      ? "Schieb mit dem Finger über das Bild. Nochmal tippen macht es wieder klein."
+      : "Tippe das Bild an, um es grösser zu sehen.";
+    if(!gross) rahmen.scrollTop = rahmen.scrollLeft = 0;
+  }
+  function galerieZeigen(){
+    galerieZeichnen();
+    zeigeScreen("screen-galerie");
   }
 
   function puzzleKaufen(){
@@ -846,15 +951,21 @@
     kMuenze();
 
     if(puzzle.offen.length===PUZZLE_TEILE){
+      if(puzzle.geloest.indexOf(puzzle.nummer)<0) puzzle.geloest.push(puzzle.nummer);
+      puzzleSichern();
+      const naechstes = puzzleNaechstes();
       setTimeout(()=>{
         kSieg();
         $("puzzle-text").textContent = "🎉 Puzzle gelöst!";
-        $("puzzle-hinweis").textContent = "Das nächste Abenteuer wartet!";
+        $("puzzle-hinweis").textContent = naechstes
+          ? "Es wandert in die Bildergalerie – das nächste Abenteuer wartet!"
+          : "Alle Bilder hängen jetzt in deiner Bildergalerie!";
+        funken("puzzle-funken","✨",14);
         setTimeout(()=>{
-          puzzle.nummer++;
-          puzzle.offen = [];
-          puzzleSichern();
+          /* Das letzte Bild bleibt stehen, wenn es kein nächstes mehr gibt. */
+          if(naechstes){ puzzle.nummer = naechstes; puzzle.offen = []; puzzleSichern(); }
           puzzleZeichnen();
+          galerieZeichnen();
         },1800);
       },500);
     }
@@ -1040,18 +1151,6 @@
   }
 
   function burgDekoZeichnen(){
-    const zinnen = $("burg-zinnen");
-    if(zinnen){
-      zinnen.style.gridTemplateColumns = "repeat("+BURG_SPALTEN+",1fr)";
-      zinnen.innerHTML = "";
-      for(let s=0;s<BURG_SPALTEN;s++){
-        const z = document.createElement("div");
-        const gap = s%2===1;                       /* Zinnenlücke */
-        z.className = "zinne"+(gap ? " gap" : "");
-        if(!gap) z.innerHTML = svgWrap(steinRahmen());
-        zinnen.appendChild(z);
-      }
-    }
     const fundament = $("burg-fundament");
     if(fundament){
       fundament.style.gridTemplateColumns = "repeat("+BURG_SPALTEN+",1fr)";
@@ -1966,7 +2065,7 @@
     laden(); optLaden(); optAnwenden();
     puzzleLaden(); burgLaden(); hoehleLaden();
     burg.auswahl = null; burg.geloest = false;
-    schatzZeichnen(); puzzleZeichnen(); burgZeichnen(); hoehleZeichnen();
+    schatzZeichnen(); puzzleZeichnen(); galerieZeichnen(); burgZeichnen(); hoehleZeichnen();
     kontoAnzeigen();
   }
   function kontoGitterZeichnen(){
@@ -2069,6 +2168,15 @@
   });
   $("btn-puzzle-kaufen").addEventListener("click", puzzleKaufen);
 
+  $("karte-galerie").addEventListener("click", galerieZeigen);
+  $("btn-zur-galerie").addEventListener("click", galerieZeigen);
+  $("btn-zum-puzzle").addEventListener("click", ()=>{
+    puzzleZeichnen();
+    zeigeScreen("screen-puzzle");
+  });
+  $("bild-gross").addEventListener("click", bildZoomen);
+  $("btn-bild-zu").addEventListener("click", ()=> $("ov-bild").classList.remove("is-offen"));
+
   $("karte-burg").addEventListener("click", ()=>{
     burgZeichnen();
     zeigeScreen("screen-burg");
@@ -2104,6 +2212,7 @@
   hoehleLaden();
   schatzZeichnen();
   puzzleZeichnen();
+  galerieZeichnen();
   burgZeichnen();
   hoehleZeichnen();
   kontoAnzeigen();

@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=10">
+<link rel="stylesheet" href="style.css?v=12">
 </head>
 <body>
 <div id="app">
@@ -105,6 +105,14 @@
           <p>Kaufe Puzzleteile für 200 Gold und enthülle das Bild Stück für Stück.</p>
         </span>
         <span class="badge badge--ausgeben">Ausgeben</span>
+      </button>
+      <button class="spielkarte spielkarte--ausgeben" id="karte-galerie" type="button">
+        <span class="bild">🖼️</span>
+        <span>
+          <h3>Bildergalerie</h3>
+          <p>Schau dir alle Bilder an, die du schon gelöst hast.</p>
+        </span>
+        <span class="badge badge--ansehen">Ansehen</span>
       </button>
       <button class="spielkarte spielkarte--ausgeben" id="karte-burg" type="button">
         <span class="bild">🏰</span>
@@ -239,6 +247,7 @@
 
     <div class="tafel puzzle-tafel">
       <div class="puzzle-bild" id="puzzle-bild" aria-label="Puzzlebild"></div>
+      <div class="funken" id="puzzle-funken"></div>
       <div class="puzzle-fortschritt">
         <div class="puzzle-fortschritt-text" id="puzzle-text">Kaufe ein Teil und enthülle ein Stück des Bildes.</div>
         <div class="balken"><i id="puzzle-balken"></i></div>
@@ -254,6 +263,36 @@
     <div class="puzzle-hinweis" id="puzzle-hinweis">Mit jedem gekauften Teil wird das Bild ein bisschen sichtbarer.</div>
 
     <div class="fusszeile">
+      <button class="mini" id="btn-zur-galerie">🖼️ Galerie</button>
+      <button class="mini" data-kammer>🗝️ Schatzkammer</button>
+      <button class="mini" data-ton>🔊 Ton</button>
+      <button class="mini" data-heim>🏠 Auswahl</button>
+    </div>
+  </section>
+
+  <!-- ============ BILDERGALERIE ============ -->
+  <section class="screen" id="screen-galerie">
+    <div class="puzzle-kopf">
+      <div class="anzeige">
+        <div class="kopf">Gold</div>
+        <div class="wert"><span class="goldbox js-goldbox"><span class="js-gold">0</span></span></div>
+      </div>
+      <div class="anzeige">
+        <div class="kopf">Bilder</div>
+        <div class="wert" id="galerie-zaehler">0/5</div>
+      </div>
+    </div>
+
+    <div class="rang-chip"><span class="js-rang-emoji">🪙</span><span class="js-rang">Knappe</span></div>
+
+    <div class="tafel">
+      <h2 class="galerie-titel">🖼️ Deine Bildergalerie</h2>
+      <p class="galerie-text" id="galerie-text">Noch kein Bild fertig.</p>
+      <div class="galerie-gitter" id="galerie-gitter"></div>
+    </div>
+
+    <div class="fusszeile">
+      <button class="mini" id="btn-zum-puzzle">🧩 Puzzle</button>
       <button class="mini" data-kammer>🗝️ Schatzkammer</button>
       <button class="mini" data-ton>🔊 Ton</button>
       <button class="mini" data-heim>🏠 Auswahl</button>
@@ -281,7 +320,6 @@
 
     <div class="tafel burg-tafel">
       <div class="burg-buehne">
-        <div class="burg-zinnen" id="burg-zinnen" aria-hidden="true"></div>
         <div class="burg-raster" id="burg-raster" aria-label="Burgbaustelle"></div>
         <div class="burg-fundament" id="burg-fundament" aria-hidden="true"></div>
       </div>
@@ -539,6 +577,18 @@
 </div>
 
 <!-- ============ SCHATZKAMMER ============ -->
+<!-- ============ BILD GROSS ANSEHEN ============ -->
+<div class="overlay" id="ov-bild">
+  <div class="overlay-karte">
+    <h2 class="bild-titel" id="bild-titel">Bild 1</h2>
+    <div class="bild-rahmen" id="bild-rahmen">
+      <img id="bild-gross" alt="Gelöstes Puzzlebild">
+    </div>
+    <p class="bild-hinweis" id="bild-hinweis">Tippe das Bild an, um es grösser zu sehen.</p>
+    <button class="knopf" id="btn-bild-zu">Zurück</button>
+  </div>
+</div>
+
 <div class="overlay" id="ov-kammer">
   <div class="overlay-karte">
     <h2>Deine Schatzkammer</h2>
@@ -607,6 +657,6 @@
   </div>
 </div>
 
-<script src="app.js?v=10"></script>
+<script src="app.js?v=12"></script>
 </body>
 </html>
