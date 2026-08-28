@@ -1704,6 +1704,180 @@
     mNeueWand();
   }
 
+  /* ================= SPIEL 7: RITTER-TURNIER =================
+     Zwei Ritter treffen sich auf der Bahn. Jede richtige Antwort bringt den
+     eigenen Ritter einen Schritt vor, jede falsche den Gegner. Nach 8 Schritten
+     treffen sie aufeinander – wer mehr Aufgaben gelöst hat, gewinnt (bei
+     Gleichstand gewinnt der Spieler). */
+  const TURNIER_SCHRITTE = 8;
+  const TURNIER_GEGNER = [
+    { name:"Ritter Blauhelm",  stufen:[1],     beute:50 },
+    { name:"Graf Grauguss",    stufen:[1,2],   beute:75 },
+    { name:"Sir Silberzahn",   stufen:[2,3],   beute:100 },
+    { name:"König Goldhelm",   stufen:[3,4],   beute:150 }
+  ];
+  const t = { gegner:0, richtig:0, falsch:0, serie:0, beste:0,
+              aufgabe:null, letzte:"", gesperrt:false, wiederholen:false, beute:0, gewonnen:false };
+
+  function tKopf(){
+    const mult = multiplikator(t.serie);
+    $("t-serie-wert").textContent = "×"+mult;
+    $("t-serie").classList.toggle("aus",mult===1);
+    $("t-gegner").textContent = (t.gegner+1)+"/"+TURNIER_GEGNER.length;
+    schatzZeichnen();
+  }
+  function tStufen(){
+    const g = TURNIER_GEGNER[Math.min(t.gegner,TURNIER_GEGNER.length-1)];
+    return g.stufen;
+  }
+  function tGegnerName(){
+    return TURNIER_GEGNER[Math.min(t.gegner,TURNIER_GEGNER.length-1)].name;
+  }
+  function tPosition(){
+    /* 0..1: wie weit der eigene Ritter in Richtung Mitte gekommen ist.
+       Der Gegner bekommt dieselbe Spanne von der anderen Seite. */
+    return t.richtig / TURNIER_SCHRITTE;
+  }
+  function tGegnerPosition(){
+    return t.falsch / TURNIER_SCHRITTE;
+  }
+  function tZeichnen(){
+    const ich = $("t-ich"), gegner = $("t-gegner-ritter");
+    if(!ich || !gegner) return;
+    /* Bahn von 4% bis 96% der Breite. Der eigene Ritter steht bei
+       "richtig/TURNIER_SCHRITTE", der Gegner bei "falsch/TURNIER_SCHRITTE"
+       von der anderen Seite – wenn richtig+falsch = 8, stehen sie exakt
+       an derselben Stelle (Treffen). */
+    const span = 92;
+    ich.style.left = (4 + span * tPosition()) + "%";
+    gegner.style.right = (4 + span * tGegnerPosition()) + "%";
+  }
+  function tNeueAufgabe(){
+    if(!t.wiederholen){
+      t.aufgabe = neuAufgabe(tStufen(), t.letzte);
+      t.letzte = t.aufgabe.text;
+    }
+    t.wiederholen = false;
+    zeigeAufgabe("t-aufgabe",t.aufgabe);
+    sagen("t-rueckmeldung","Welche Zahl passt?","");
+    $("t-tipp").classList.remove("is-offen");
+    bauePunkte("t-punkte",t.aufgabe);
+    t.gesperrt = false;
+    freigeben("t-zahlen");
+    tKopf();
+  }
+  function tKampf(){
+    const gewonnen = t.richtig >= t.falsch;   /* Gleichstand zählt für den Spieler */
+    t.gewonnen = gewonnen;
+    if(gewonnen){
+      const g = TURNIER_GEGNER[Math.min(t.gegner,TURNIER_GEGNER.length-1)];
+      const beute = goldDazu(g.beute);
+      t.beute += beute;
+      kSieg();
+      bewege($("t-ich"),"angriff",460);
+      bewege($("t-gegner-ritter"),"getroffen",460);
+      funken("t-funken","⭐",14);
+      setTimeout(()=>{
+        $("t-gegner-ritter").classList.add("faellt");
+        t.gegner++;
+        if(t.gegner >= TURNIER_GEGNER.length){
+          setTimeout(()=> tTurnierSieg(beute), 700);
+          return;
+        }
+        $("t-erg-emoji").textContent = "⚔️";
+        $("t-erg-titel").textContent = g.name+" aus dem Sattel!";
+        $("t-erg-text").textContent = "Du hast "+t.richtig+" Treffer gelandet – weiter geht's gegen "+tGegnerName()+".";
+        $("t-erg-gold").textContent = "🪙 +"+beute+" Gold";
+        $("ov-turnier").classList.add("is-offen");
+      },800);
+    } else {
+      kAus();
+      bewege($("t-ich"),"getroffen",460);
+      setTimeout(()=>{
+        $("t-ich").classList.add("faellt");
+        $("t-erg-emoji").textContent = "🛡️";
+        $("t-erg-titel").textContent = tGegnerName()+" war stärker";
+        $("t-erg-text").textContent = "Du hast "+t.richtig+" gelöst, aber "+t.falsch+" Fehler gemacht. Noch ein Versuch?";
+        $("t-erg-gold").textContent = "";
+        $("ov-turnier").classList.add("is-offen");
+      },800);
+    }
+  }
+  function tTurnierSieg(beute){
+    kSieg();
+    $("t-erg-emoji").textContent = "🏆";
+    $("t-erg-titel").textContent = "Turnier gewonnen!";
+    $("t-erg-text").textContent = "Alle Ritter sind besiegt – "+t.richtig+" gelöste Aufgaben, beste Serie: "+t.beste+".";
+    $("t-erg-gold").textContent = "🪙 +"+beute+" Gold";
+    $("ov-turnier").classList.add("is-offen");
+  }
+  function tAntwort(wert,knopf){
+    if(t.gesperrt) return;
+    t.gesperrt = true; sperren("t-zahlen");
+
+    if(wert===t.aufgabe.antwort){
+      knopf.classList.add("richtig");
+      t.richtig++; t.serie++; t.beste = Math.max(t.beste,t.serie);
+      problemGeloest();
+      const mult = multiplikator(t.serie);
+      const gewinn = goldDazu(GRUNDGOLD*mult);
+      t.beute += gewinn;
+      kRichtig(); kMuenze();
+      sagen("t-rueckmeldung",waehle(lobWorte)+"  +"+gewinn+" Gold","gut");
+      bewege($("t-ich"),"angriff",460);
+      const e = $("t-effekt"); e.textContent = "⚔️"; bewege(e,"schlag",750);
+      funken("t-funken","🪙",mult*4);
+      tZeichnen();
+      tKopf();
+      const truheFaellig = truheZaehlen();
+      setTimeout(()=>{
+        const weiter = () => { (t.richtig+t.falsch) >= TURNIER_SCHRITTE ? tKampf() : tNeueAufgabe(); };
+        truheFaellig ? truheZeigen(weiter) : weiter();
+      },1050);
+    } else {
+      knopf.classList.add("falsch");
+      zeigeLoesung("t-zahlen",t.aufgabe.antwort);
+      t.falsch++; t.serie = 0;
+      const weg = goldWeg();
+      kFalsch();
+      bewege($("t-gegner-ritter"),"angriff",460);
+      const e = $("t-effekt"); e.textContent = "🛡️"; bewege(e,"schlag",750);
+      sagen("t-rueckmeldung", weg
+        ? "Daneben! "+t.aufgabe.loesung+"  −"+weg+" Gold."
+        : "Daneben! "+t.aufgabe.loesung, "schlecht");
+      $("t-tipp").classList.add("is-offen");
+      t.wiederholen = true;
+      tZeichnen();
+      tKopf();
+      setTimeout(()=>{
+        (t.richtig+t.falsch) >= TURNIER_SCHRITTE ? tKampf() : tNeueAufgabe();
+      },2600);
+    }
+  }
+  function tStart(){
+    t.gegner=0; t.richtig=0; t.falsch=0; t.serie=0; t.beste=0;
+    t.beute=0; t.letzte=""; t.wiederholen=false; t.gewonnen=false;
+    $("t-gegner-ritter").classList.remove("faellt");
+    $("t-ich").classList.remove("faellt");
+    baueZahlen("t-zahlen",tAntwort);
+    zeigeScreen("screen-turnier");
+    tZeichnen();
+    tNeueAufgabe();
+  }
+  /* Nächster Gegner (nach Sieg): Gegner-Index bleibt, nur die Runde wird neu gesetzt. */
+  function tNaechsterGegner(){
+    t.richtig=0; t.falsch=0; t.serie=0; t.letzte=""; t.wiederholen=false;
+    $("t-gegner-ritter").classList.remove("faellt");
+    $("t-ich").classList.remove("faellt");
+    tZeichnen();
+    tNeueAufgabe();
+  }
+  function tWeiter(){
+    $("ov-turnier").classList.remove("is-offen");
+    if(t.gewonnen && t.gegner < TURNIER_GEGNER.length) tNaechsterGegner();
+    else tStart();
+  }
+
   /* ================= Auswahl & Bedienung ================= */
   function wahlSetzen(gruppeId,wert){
     alle("#"+gruppeId+" button").forEach(b =>
@@ -1871,6 +2045,9 @@
 
   $("karte-mauer").addEventListener("click", mStart);
   $("btn-mauer-weiter").addEventListener("click", mWeiterMauern);
+
+  $("karte-turnier").addEventListener("click", tStart);
+  $("btn-turnier-weiter").addEventListener("click", tWeiter);
 
   kontoInit();
   laden();

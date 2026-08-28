@@ -88,6 +88,14 @@
         </span>
         <span class="badge badge--verdienen">Verdienen</span>
       </button>
+      <button class="spielkarte" id="karte-turnier" type="button">
+        <span class="bild">⚔️</span>
+        <span>
+          <h3>Ritter-Turnier</h3>
+          <p>Stich mit deiner Lanze zu – rechne dich bis zum Gegner vor.</p>
+        </span>
+        <span class="badge badge--verdienen">Verdienen</span>
+      </button>
 
       <div class="spielwahl-titel spielwahl-titel--ausgeben">🪙 Gold ausgeben</div>
       <button class="spielkarte spielkarte--ausgeben" id="karte-puzzle" type="button">
@@ -164,7 +172,7 @@
 
     <div class="fusszeile">
       <button class="mini" data-tipp="k">💡 Tipp</button>
-      <button class="mini" data-kammer>🗝️ Kammer</button>
+      <button class="mini" data-kammer>🗝️ Schatzkammer</button>
       <button class="mini" data-ton>🔊 Ton</button>
       <button class="mini" data-heim>🏠 Auswahl</button>
     </div>
@@ -426,6 +434,55 @@
     </div>
   </section>
 
+  <!-- ============ SPIEL 7: RITTER-TURNIER ============ -->
+  <section class="screen" id="screen-turnier">
+    <div class="hort-kopf">
+      <div class="anzeige">
+        <div class="kopf">Gold</div>
+        <div class="wert"><span class="goldbox js-goldbox"><span class="js-gold">0</span></span></div>
+      </div>
+      <div class="anzeige anzeige--serie aus" id="t-serie">
+        <div class="kopf">Serie</div>
+        <div class="wert" id="t-serie-wert">×1</div>
+      </div>
+      <div class="anzeige">
+        <div class="kopf">Gegner</div>
+        <div class="wert" id="t-gegner">1/4</div>
+      </div>
+    </div>
+
+    <div class="schatzleiste">
+      <span class="schild">🎁</span>
+      <span class="balken"><i class="js-truhe-balken"></i></span>
+      <span class="zaehler js-truhe-zaehler">0/5</span>
+    </div>
+
+    <div class="rang-chip"><span class="js-rang-emoji">🪙</span><span class="js-rang">Knappe</span></div>
+
+    <div class="turnier-buehne" id="turnier-buehne">
+      <div class="turnier-spur"><i class="turnier-mitte"></i></div>
+      <img class="turnier-ritter turnier-ritter--ich" id="t-ich" src="images/knightlinksnachrechts-small.svg" alt="Dein Ritter">
+      <img class="turnier-ritter turnier-ritter--gegner" id="t-gegner-ritter" src="images/knightrechtsnachlinks-small.svg" alt="Gegner">
+      <div class="effekt" id="t-effekt"></div>
+      <div class="funken" id="t-funken"></div>
+    </div>
+
+    <div class="tafel aufgabe-tafel">
+      <div class="aufgabe" id="t-aufgabe">7 + 5 = ?</div>
+      <div class="rueckmeldung" id="t-rueckmeldung">Tippe die richtige Zahl an.</div>
+      <div class="tipp-feld" id="t-tipp"><div class="zahlenfeldpunkte" id="t-punkte"></div></div>
+    </div>
+
+    <div class="zahlenfeld" id="t-zahlen"></div>
+
+    <div class="fusszeile">
+      <button class="mini" data-tipp="t">💡 Tipp</button>
+      <button class="mini" data-kammer>🗝️ Schatzkammer</button>
+      <button class="mini" data-ton>🔊 Ton</button>
+      <button class="mini" data-heim>🏠 Auswahl</button>
+    </div>
+  </section>
+
   <!-- ============ DRACHE BESIEGT ============ -->
   <section class="screen" id="screen-win">
     <div class="ergebnis">
@@ -498,6 +555,18 @@
     <p id="mauer-ziel-text"></p>
     <p class="gold-plus">+100 Bonus-Gold</p>
     <button class="knopf" id="btn-mauer-weiter">Weiter mauern</button>
+    <button class="mini" data-heim>🏠 Auswahl</button>
+  </div>
+</div>
+
+<!-- ============ TURNIER ERGEBNIS ============ -->
+<div class="overlay" id="ov-turnier">
+  <div class="overlay-karte">
+    <div class="belohnung" id="t-erg-emoji">⚔️</div>
+    <h2 id="t-erg-titel">Sieg!</h2>
+    <p id="t-erg-text"></p>
+    <p class="gold-plus" id="t-erg-gold">+50 Gold</p>
+    <button class="knopf" id="btn-turnier-weiter">Weiter</button>
     <button class="mini" data-heim>🏠 Auswahl</button>
   </div>
 </div>
