@@ -268,6 +268,30 @@ body::after{
   font-family:var(--schrift-display);font-size:.95rem;color:var(--gold);
   background:var(--stein);border:2px solid var(--gold-tief);border-radius:999px;padding:4px 14px;white-space:nowrap}
 
+/* ---------- Rang-Anzeige (Startseite + Spiele) ---------- */
+.rang-banner{display:flex;align-items:center;gap:12px;margin-bottom:12px;
+  background:linear-gradient(var(--pergament),var(--pergament-tief));color:var(--tinte);
+  border:3px solid var(--gold-tief);border-radius:var(--r-gross);padding:10px 14px;box-shadow:0 6px 0 rgba(0,0,0,.28)}
+.rang-banner .rb-emoji{font-size:2rem;line-height:1;filter:drop-shadow(0 3px 3px rgba(0,0,0,.35))}
+.rang-banner .rb-info{display:flex;flex-direction:column;line-height:1.15;margin-right:auto}
+.rang-banner .rb-label{font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;opacity:.7}
+.rang-banner .rb-name{font-family:var(--schrift-display);font-size:1.2rem;color:var(--gold-tief)}
+.rang-banner .rb-fort{font-size:.72rem;font-weight:600;opacity:.78;text-align:right;max-width:40%}
+.rang-chip{display:flex;align-items:center;gap:6px;width:fit-content;margin:2px auto 8px;
+  background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.2);border-radius:999px;
+  padding:3px 12px;font-family:var(--schrift-text);font-weight:600;font-size:.85rem;color:var(--pergament)}
+.rang-chip .js-rang-emoji{font-size:1.1rem;line-height:1}
+.rang-feier{position:fixed;left:50%;top:34%;transform:translate(-50%,-50%);z-index:40;
+  display:flex;flex-direction:column;align-items:center;gap:2px;pointer-events:none;
+  background:linear-gradient(var(--pergament),var(--pergament-tief));color:var(--tinte);
+  border:3px solid var(--gold-tief);border-radius:20px;padding:16px 26px;
+  box-shadow:0 12px 30px rgba(0,0,0,.5);animation:aufpoppen .5s ease-out}
+.rang-feier.weg{animation:wegblenden .5s ease-in forwards}
+.rang-feier .rf-emoji{font-size:2.8rem;line-height:1;filter:drop-shadow(0 4px 5px rgba(0,0,0,.4))}
+.rang-feier .rf-label{font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;opacity:.7}
+.rang-feier .rf-name{font-family:var(--schrift-display);font-size:1.5rem;color:var(--gold-tief)}
+@keyframes wegblenden{to{opacity:0;transform:translate(-50%,-64%) scale(.9)}}
+
 /* ---------- Overlay ---------- */
 .overlay{position:fixed;inset:0;background:rgba(6,10,22,.88);z-index:20;
   display:none;align-items:center;justify-content:center;padding:16px}
@@ -480,6 +504,15 @@ body::after{
       <span class="pfeil">›</span>
     </button>
 
+    <div class="rang-banner">
+      <span class="rb-emoji js-rang-emoji">🪙</span>
+      <span class="rb-info">
+        <span class="rb-label">Dein Rang</span>
+        <span class="rb-name js-rang">Knappe</span>
+      </span>
+      <span class="rb-fort js-rang-fort">noch 10 bis Ritter</span>
+    </div>
+
     <div class="tafel">
       <div class="frage-block">
         <div class="frage">Wie weit rechnen wir?</div>
@@ -579,6 +612,8 @@ body::after{
       <span class="zaehler js-truhe-zaehler">0/5</span>
     </div>
 
+    <div class="rang-chip"><span class="js-rang-emoji">🪙</span><span class="js-rang">Knappe</span></div>
+
     <div class="arena">
       <div class="figur" id="ritter">🤺</div>
       <div class="figur figur--drache" id="drache">🐲</div>
@@ -658,6 +693,8 @@ body::after{
       </div>
     </div>
 
+    <div class="rang-chip"><span class="js-rang-emoji">🪙</span><span class="js-rang">Knappe</span></div>
+
     <div class="tafel puzzle-tafel">
       <div class="puzzle-bild" id="puzzle-bild" aria-label="Puzzlebild"></div>
       <div class="puzzle-fortschritt">
@@ -697,6 +734,8 @@ body::after{
         <div class="wert" id="burg-zaehler">0</div>
       </div>
     </div>
+
+    <div class="rang-chip"><span class="js-rang-emoji">🪙</span><span class="js-rang">Knappe</span></div>
 
     <div class="tafel burg-tafel">
       <div class="burg-buehne">
@@ -742,6 +781,8 @@ body::after{
       <span class="balken"><i class="js-truhe-balken"></i></span>
       <span class="zaehler js-truhe-zaehler">0/5</span>
     </div>
+
+    <div class="rang-chip"><span class="js-rang-emoji">🪙</span><span class="js-rang">Knappe</span></div>
 
     <div class="mauer-buehne">
       <div class="mauer" id="mauer" aria-label="Rechenmauer"></div>
@@ -988,29 +1029,32 @@ body::after{
     perle:      {p:"🫧", glow:"#b6f0ff", anim:"puls",     sound:kPop}
   };
   const SCHATZ_FX_STD = {p:"✨", glow:"#ffe7a8", anim:"puls", sound:kChime};
+  /* Rang richtet sich nach der Gesamtzahl gelöster Aufgaben (schatz.geloest),
+     nicht mehr nach dem aktuellen Gold – so kostet Ausgeben keinen Rang.
+     "ab" = benötigte gelöste Aufgaben insgesamt. */
   const RAENGE = [
-    {ab:0,     name:"Knappe",          bild:"🪙"},
-    {ab:150,   name:"Ritter",          bild:"💰"},
-    {ab:400,   name:"Schatzmeister",   bild:"💎"},
-    {ab:800,   name:"Drachenreiter",   bild:"🐲"},
-    {ab:1500,  name:"Legende",         bild:"👑"},
-    {ab:2500,  name:"Baron",           bild:"🏰"},
-    {ab:4000,  name:"Graf",            bild:"⚜️"},
-    {ab:6000,  name:"Herzog",          bild:"🛡️"},
-    {ab:9000,  name:"Fürst",           bild:"🌟"},
-    {ab:13000, name:"König",           bild:"🤴"},
-    {ab:18000, name:"Kaiser",          bild:"🏛️"},
-    {ab:25000, name:"Drachentöter",    bild:"🗡️"},
-    {ab:35000, name:"Unsterblicher",   bild:"✨"},
-    {ab:50000, name:"Gott des Goldes", bild:"🌠"}
+    {ab:0,    name:"Knappe",          bild:"🪙"},
+    {ab:10,   name:"Ritter",          bild:"💰"},
+    {ab:25,   name:"Schatzmeister",   bild:"💎"},
+    {ab:45,   name:"Drachenreiter",   bild:"🐲"},
+    {ab:75,   name:"Legende",         bild:"👑"},
+    {ab:120,  name:"Baron",           bild:"🏰"},
+    {ab:180,  name:"Graf",            bild:"⚜️"},
+    {ab:260,  name:"Herzog",          bild:"🛡️"},
+    {ab:370,  name:"Fürst",           bild:"🌟"},
+    {ab:520,  name:"König",           bild:"🤴"},
+    {ab:720,  name:"Kaiser",          bild:"🏛️"},
+    {ab:1000, name:"Drachentöter",    bild:"🗡️"},
+    {ab:1400, name:"Unsterblicher",   bild:"✨"},
+    {ab:2000, name:"Gott des Goldes", bild:"🌠"}
   ];
   const TRUHE_ALLE = 5;
   const VERLUST = 5, GRUNDGOLD = 10;
 
-  const schatz = { gold:0, album:[], bisTruhe:0, neu:[] };
+  const schatz = { gold:0, album:[], bisTruhe:0, neu:[], geloest:0 };
 
   function laden(){
-    schatz.gold = 0; schatz.album = []; schatz.bisTruhe = 0; schatz.neu = [];
+    schatz.gold = 0; schatz.album = []; schatz.bisTruhe = 0; schatz.neu = []; schatz.geloest = 0;
     try{
       const roh = localStorage.getItem(kontoKey(konto.aktiv,"schatz"));
       if(roh){
@@ -1019,6 +1063,15 @@ body::after{
         schatz.album = Array.isArray(d.album) ? d.album : [];
         schatz.bisTruhe = Math.min(TRUHE_ALLE-1, Number(d.bisTruhe)||0);
         schatz.neu = Array.isArray(d.neu) ? d.neu : [];
+        if(d.geloest === undefined){
+          /* Einmalige Migration: alten, gold-basierten Rang beibehalten, damit
+             bestehende Spieler nicht sichtbar auf "Knappe" zurückfallen. */
+          const altGold = [0,150,400,800,1500,2500,4000,6000,9000,13000,18000,25000,35000,50000];
+          let idx = 0; altGold.forEach((g,i)=>{ if(schatz.gold>=g) idx=i; });
+          schatz.geloest = RAENGE[idx].ab;
+        }else{
+          schatz.geloest = Math.max(0, Number(d.geloest)||0);
+        }
       }
     }catch(e){}
   }
@@ -1046,10 +1099,42 @@ body::after{
     alle("[data-ton]").forEach(b => b.textContent = opt.ton ? "🔊 Ton" : "🔇 Ton aus");
     $("btn-ton-start").textContent = opt.ton ? "🔊 Ton an" : "🔇 Ton aus";
   }
-  function rang(){
+  function rangFuer(n){
     let r = RAENGE[0];
-    RAENGE.forEach(x => { if(schatz.gold>=x.ab) r = x; });
+    RAENGE.forEach(x => { if(n>=x.ab) r = x; });
     return r;
+  }
+  function rang(){ return rangFuer(schatz.geloest); }
+  function naechsterRang(){
+    const i = RAENGE.indexOf(rang());
+    return i < RAENGE.length-1 ? RAENGE[i+1] : null;
+  }
+  function rangFortschrittText(){
+    const n = naechsterRang();
+    if(!n) return "Höchster Rang erreicht! 🌠";
+    return "noch "+(n.ab - schatz.geloest)+" bis "+n.name;
+  }
+  /* Wird bei jeder gelösten Aufgabe (in allen Spielen) aufgerufen: zählt hoch,
+     speichert, aktualisiert die Anzeigen und feiert einen Rangaufstieg. */
+  function problemGeloest(){
+    const vorher = rang();
+    schatz.geloest++;
+    const jetzt = rang();
+    sichern();
+    schatzZeichnen();
+    if(jetzt !== vorher) rangFeier(jetzt);
+  }
+  function rangFeier(r){
+    kSieg();
+    const b = document.createElement("div");
+    b.className = "rang-feier";
+    b.innerHTML = '<span class="rf-emoji">'+r.bild+'</span>'+
+                  '<span class="rf-label">Neuer Rang!</span>'+
+                  '<span class="rf-name">'+r.name+'</span>';
+    $("app").appendChild(b);
+    funkenEl(b, "✨", 16);
+    setTimeout(()=>b.classList.add("weg"), 1700);
+    setTimeout(()=>b.remove(), 2200);
   }
   function schatzZeichnen(){
     alle(".js-gold").forEach(el => el.textContent = schatz.gold);
@@ -1057,6 +1142,8 @@ body::after{
     alle(".js-truhe-zaehler").forEach(el => el.textContent = schatz.bisTruhe+"/"+TRUHE_ALLE);
     alle(".js-rang").forEach(el => el.textContent = rang().name);
     alle(".js-haufen").forEach(el => el.textContent = rang().bild);
+    alle(".js-rang-emoji").forEach(el => el.textContent = rang().bild);
+    alle(".js-rang-fort").forEach(el => el.textContent = rangFortschrittText());
   }
   function goldDazu(betrag){
     schatz.gold += betrag;
@@ -1380,6 +1467,7 @@ body::after{
     if(wert===k.aufgabe.antwort){
       knopf.classList.add("richtig");
       k.richtig++; k.serie++; k.beste = Math.max(k.beste,k.serie); k.zaehne--;
+      problemGeloest();
       const mult = multiplikator(k.serie);
       const gewinn = goldDazu(GRUNDGOLD*mult);
       k.beute += gewinn;
@@ -1501,6 +1589,7 @@ body::after{
     if(wert===h.aufgabe.antwort){
       knopf.classList.add("richtig");
       h.richtig++; h.serie++; h.beste = Math.max(h.beste,h.serie);
+      problemGeloest();
       const mult = multiplikator(h.serie);
       const gewinn = goldDazu(GRUNDGOLD*mult);
       kMuenze();
@@ -2226,6 +2315,7 @@ body::after{
       m.gesperrt = true; sperren("m-zahlen");
       knopf.classList.add("richtig");
       m.richtig++; m.serie++; m.beste = Math.max(m.beste,m.serie);
+      problemGeloest();
       const mult = multiplikator(m.serie);
       const gewinn = goldDazu(GRUNDGOLD*mult);
       kRichtig(); kMuenze();
