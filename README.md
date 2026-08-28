@@ -1,27 +1,59 @@
-# Ritter gegen Drachen
+# Rechen-Ritter
 
-Ein kleines Rechenspiel für die erste und zweite Klasse: Addition und Subtraktion
-im Zahlenraum bis 20. Jede richtig gelöste Aufgabe schlägt dem Drachen einen Zahn
-aus, jede falsche kostet eines von drei Herzen.
+Ein Rechenspiel für die erste und zweite Klasse: Plus und Minus im Zahlenraum bis 20.
+Richtig gerechnet wird belohnt – mit Gold, Schätzen und einer eigenen Burg.
 
-**Spielen:** https://BENUTZERNAME.github.io/ritter-gegen-drachen/
+**Spielen:** https://keilerse.github.io/ritter-gegen-drachen/
 
-## Wie es funktioniert
+## Die Idee
 
-Fünf Drachen warten hintereinander, jeder etwas schwerer als der vorige:
+Kinder rechnen Plus- und Minusaufgaben, tippen die Antwort über ein Zahlenfeld an
+(nichts wird getippt) und verdienen dabei Gold. Das Gold lässt sich für Puzzle-Bilder
+und eine Burg ausgeben – so entsteht ein kleiner Anreiz zum Weiterrechnen. Bis zu vier
+Kinder spielen mit eigenen Konten, eigenem Gold und eigenen Einstellungen.
 
-| Drache | Aufgaben |
-|---|---|
-| Glutzahn | im Zahlenraum bis 10 |
-| Nebelschwinge | bis 10 und bis 20 ohne Zehnerübergang |
-| Frostkralle | bis 20, teils mit Zehnerübergang |
-| Schattenhorn | mit Zehnerübergang |
-| Königsdrache | zusätzlich Platzhalter-Aufgaben wie 7 + ? = 15 |
+Vor dem Spiel lässt sich einstellen, ob im Zahlenraum bis 10 oder bis 20 gerechnet
+wird und ob nur Plus oder Plus und Minus vorkommen.
 
-Die Antwort wird über ein Zahlenfeld von 0 bis 20 eingegeben, es muss also nichts
-getippt werden. Wer unsicher ist, kann sich per Knopfdruck ein Zwanzigerfeld
-einblenden lassen, das die Aufgabe als Punktebild zeigt. Am Ende jedes Drachen
-gibt es je nach verbliebenen Herzen ein bis drei Sterne.
+## Die Spiele
+
+Auf dem Startbildschirm wird zwischen „Spielen &amp; Verdienen“ und „Gold ausgeben“
+unterschieden:
+
+### Spielen &amp; Verdienen
+
+- **Ritter gegen Drachen** – das Herzstück. Fünf Drachen warten hintereinander, jeder
+  etwas schwerer als der vorige. Jede richtige Antwort schlägt dem Drachen einen Zahn
+  aus, jede falsche kostet eines von drei Herzen. Am Ende jedes Drachen gibt es je nach
+  verbliebenen Herzen ein bis drei Sterne und Drachengold.
+
+  | Drache | Zähne | Aufgaben |
+  |---|---|---|
+  | Glutzahn | 4 | im Zahlenraum bis 10 |
+  | Nebelschwinge | 5 | bis 10 und bis 20 ohne Zehnerübergang |
+  | Frostkralle | 5 | bis 20, teils mit Zehnerübergang |
+  | Schattenhorn | 6 | mit Zehnerübergang |
+  | Königsdrache | 6 | zusätzlich Platzhalter-Aufgaben wie 7 + ? = 15 |
+
+- **Schatzjagd** – Rechnen in Ruhe, ohne Herzen und ohne Verlieren. Eine Serie richtiger
+  Antworten bringt den zwei- und dreifachen Goldbetrag, nach 15 Aufgaben winkt Bonus-Gold.
+
+- **Rechenmauer** – Lücken in der Zahlenmauer füllen. Jede Mauer ist so aufgebaut, dass
+  sich die Lücken Schritt für Schritt lösen lassen; ein Knopf zeigt den nächsten
+  Rechenschritt als Hilfestellung an.
+
+### Gold ausgeben
+
+- **Puzzle-Schatz** – jedes Puzzleteil kostet 200 Gold. Stück für Stück wird ein Bild
+  enthüllt (fünf verschiedene Motive), bis das Puzzle gelöst ist.
+- **Burg bauen** – Mauern, Tor, Fenster, Flagge und Wappen kosten unterschiedlich viel
+  Gold und werden auf einem Raster platziert. Eine vollständige Burg wird belohnt.
+
+### Schatzkammer, Truhen und Ränge
+
+Alle Spiele zahlen in dieselbe Schatzkammer ein. Nach fünf richtigen Antworten öffnet
+sich eine Schatztruhe mit Gold und einem von zwölf sammelbaren Schätzen. Mit steigendem
+Goldbesitz steigt man im Rang auf – vom Knappen bis zum Gott des Goldes.
 
 ## Technisches
 
@@ -30,19 +62,23 @@ Einfach `index.html` im Browser öffnen, das genügt. Die Klänge erzeugt die We
 API direkt im Browser, es werden keine Sounddateien geladen. Der Ton lässt sich im
 Spiel abschalten.
 
+Spielstände (Konten, Gold, Schätze, Puzzle, Burg) liegen als `localStorage` im Browser
+des jeweiligen Kindes. Die Puzzle-Motive liegen als `puzzle1.png` bis `puzzle5.png`
+neben der HTML-Datei.
+
 Die Oberfläche ist für Smartphones gebaut (große Flächen zum Antippen, kein
 horizontales Scrollen) und funktioniert am Tablet und Desktop genauso. Am Handy
-lässt sich die Seite über "Zum Home-Bildschirm hinzufügen" wie eine App ablegen.
+lässt sich die Seite über „Zum Home-Bildschirm hinzufügen“ wie eine App ablegen.
 
 Die Schriften Luckiest Guy und Fredoka werden von Google Fonts geladen. Ohne
 Internetverbindung greift eine Systemschrift, das Spiel bleibt spielbar.
 
 ## Ändern
 
-Die Drachen stehen als Liste `DRACHEN` am Anfang des Skripts, dort lassen sich
-Namen, Zahnzahl und Schwierigkeitsstufen anpassen. Die Aufgaben selbst entstehen
-in `baueAufgabe()`, jede Stufe hat dort ein paar Zeilen. Die Farben liegen als
-CSS-Variablen ganz oben in der Datei.
+Die Drachen stehen als Liste `DRACHEN`, die Schätze als `SCHAETZE` und die Ränge als
+`RAENGE` im Skript – dort lassen sich Namen, Zahnzahl, Schwierigkeit, Preise und
+Beute anpassen. Die Aufgaben selbst entstehen in `rohAufgabe()`, jede Stufe hat dort
+ein paar Zeilen. Die Farben liegen als CSS-Variablen ganz oben in der Datei.
 
 ## Lizenz
 
