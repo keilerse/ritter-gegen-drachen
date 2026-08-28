@@ -63,16 +63,22 @@ Goldbesitz steigt man im Rang auf – vom Knappen bis zum Gott des Goldes.
 
 ## Technisches
 
-Eine einzige HTML-Datei ohne Framework, ohne Build-Schritt und ohne Abhängigkeiten.
-Einfach `index.html` im Browser öffnen, das genügt. Die Klänge erzeugt die Web Audio
-API direkt im Browser, es werden keine Sounddateien geladen. Der Ton lässt sich im
-Spiel abschalten.
+Kein Framework, kein Build-Schritt, keine Abhängigkeiten. Einfach `index.html` im
+Browser öffnen, das genügt. Die Seite besteht aus drei Dateien:
+
+- `index.html` – die Struktur,
+- `style.css` – das komplette Design,
+- `app.js` – die gesamte Spiellogik.
+
+Die Klänge erzeugt die Web Audio API direkt im Browser, es werden keine Sounddateien
+geladen. Der Ton lässt sich im Spiel abschalten. (Die frühere Ein-Datei-Variante liegt
+als `index-singlefile.html` daneben.)
 
 Spielstände (Konten, Gold, Schätze, Puzzle, Burg, Drache) liegen als `localStorage` im
 Browser des jeweiligen Kindes. Die Puzzle-Motive liegen als `puzzle1.png` bis
-`puzzle5.png` neben der HTML-Datei.
+`puzzle5.png` im Ordner `images/`.
 
-Die Drachenhöhle nimmt `drachenhoehle.png` als Hintergrund. Darunter liegt als Ersatz
+Die Drachenhöhle nimmt `images/drachenhoehle.png` als Hintergrund. Darunter liegt als Ersatz
 eine gezeichnete Höhle als Inline-SVG – fehlt die PNG-Datei, bleibt die sichtbar und
 das Spiel funktioniert weiter. Das Bild ist auf 572×260 zugeschnitten, dasselbe
 Seitenverhältnis wie die Bühne; ein Ersatzbild sollte dieses Format haben, sonst
@@ -80,7 +86,8 @@ schneidet `cover` etwas ab. Die Kulisse läuft an den Rändern über eine Maske 
 den Seitenhintergrund aus, damit der Übergang nicht hart abbricht.
 
 Die Oberfläche ist für Smartphones gebaut (große Flächen zum Antippen, kein
-horizontales Scrollen) und funktioniert am Tablet und Desktop genauso. Am Handy
+horizontales Scrollen) und funktioniert am Tablet und Desktop genauso. Querformat am
+Handy und Geräte mit Notch werden über eigene CSS-Regeln berücksichtigt. Am Handy
 lässt sich die Seite über „Zum Home-Bildschirm hinzufügen“ wie eine App ablegen.
 
 Die Schriften Luckiest Guy und Fredoka werden von Google Fonts geladen. Ohne
