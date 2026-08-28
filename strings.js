@@ -16,6 +16,7 @@ const SPRACH_NAME = {
 const I18N = {
   de: {
     "title": "Rechen-Ritter – Plus und Minus bis 20",
+    "start.titel": "Rechen-Ritter",
     "start.untertitel": "Plus und Minus – zwei Spiele, eine Schatzkammer",
     "wer.spielt": "Wer spielt?",
     "konto.tippe": "Tippe auf dein Bild.",
@@ -292,6 +293,7 @@ const I18N = {
 
   en: {
     "title": "Math Knights – addition and subtraction up to 20",
+    "start.titel": "Math Knights",
     "start.untertitel": "Addition and subtraction – two games, one treasury",
     "wer.spielt": "Who's playing?",
     "konto.tippe": "Tap your picture.",
@@ -568,6 +570,7 @@ const I18N = {
 
   es: {
     "title": "Caballeros de las mates – sumas y restas hasta 20",
+    "start.titel": "Caballeros de las mates",
     "start.untertitel": "Sumas y restas – dos juegos, una tesorería",
     "wer.spielt": "¿Quién juega?",
     "konto.tippe": "Toca tu dibujo.",
@@ -844,6 +847,7 @@ const I18N = {
 
   fr: {
     "title": "Chevaliers des maths – additions et soustractions jusqu'à 20",
+    "start.titel": "Chevaliers des maths",
     "start.untertitel": "Additions et soustractions – deux jeux, un trésor",
     "wer.spielt": "Qui joue ?",
     "konto.tippe": "Touche ton image.",
@@ -1120,6 +1124,7 @@ const I18N = {
 
   tr: {
     "title": "Matematik Şövalyeleri – 20'ye kadar toplama ve çıkarma",
+    "start.titel": "Matematik Şövalyeleri",
     "start.untertitel": "Toplama ve çıkarma – iki oyun, bir hazine",
     "wer.spielt": "Kim oynuyor?",
     "konto.tippe": "Resmine dokun.",
