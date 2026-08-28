@@ -201,6 +201,10 @@ body::after{
 .effekt{position:absolute;top:35%;left:10%;font-size:2.6rem;opacity:0;pointer-events:none}
 .effekt.schlag{animation:schlag .55s ease-out}
 .effekt.flamme{animation:flamme .7s ease-in}
+/* Feuer des Begleiters: startet über der Schulter des Ritters und fliegt
+   zum Drachen, parallel zum Schwert. */
+.effekt--feuer{top:16%;left:8%}
+.effekt--feuer.feuer{animation:feuer .8s ease-out}
 .funken{position:absolute;inset:0;overflow:hidden;pointer-events:none}
 .funke{position:absolute;font-size:1.4rem;animation:funke 1.1s ease-out forwards}
 
@@ -467,6 +471,9 @@ body::after{
   width:170%;height:130%;border-radius:50%;z-index:-1;pointer-events:none;
   background:radial-gradient(circle,rgba(245,181,60,.3),transparent 68%);
 }
+.hoehle-drache img{
+  display:block;width:clamp(4.5rem,20vw,6.5rem);height:auto;
+}
 .hoehle-drache.huepft{animation:huepfen .5s ease-out}
 .hoehle-drache.waechst{animation:aufpoppen .6s ease-out}
 .hoehle-name{
@@ -623,6 +630,7 @@ body::after{
 @keyframes faellt{to{transform:scaleX(-1) translateY(60px) rotate(80deg);opacity:0}}
 @keyframes schlag{0%{opacity:0;transform:translateX(0) rotate(-40deg) scale(.6)}30%{opacity:1}100%{opacity:0;transform:translateX(190px) rotate(30deg) scale(1.3)}}
 @keyframes flamme{0%{opacity:0;transform:translateX(190px) scale(.5)}30%{opacity:1}100%{opacity:0;transform:translateX(0) scale(1.4)}}
+@keyframes feuer{0%{opacity:0;transform:translateX(0) rotate(10deg) scale(.6)}30%{opacity:1}100%{opacity:0;transform:translateX(200px) rotate(-8deg) scale(1.3)}}
 @keyframes funke{0%{opacity:1;transform:translate(0,0) rotate(0)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) rotate(var(--dr))}}
 @keyframes verlust{0%{transform:scale(1)}40%{transform:scale(1.7) rotate(12deg)}100%{transform:scale(.75)}}
 @keyframes puls{0%{transform:scale(1)}45%{transform:scale(1.3)}100%{transform:scale(1)}}

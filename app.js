@@ -572,6 +572,9 @@
       bewege($("ritter"),"angriff",460);
       const e = $("effekt"); e.textContent = "⚔️"; bewege(e,"schlag",750);
       hoehleBegleiterJubelt();
+      if(hoehleBegleiterAktiv()){
+        const feuer = $("effekt-feuer"); feuer.textContent = "🔥"; bewege(feuer,"feuer",800);
+      }
       setTimeout(()=>{
         bewege($("drache"),"getroffen",460);
         funken("funken","🪙",mult*4);
@@ -1182,7 +1185,7 @@
   const HOEHLE_STUFEN = [
     {ab:0,  bild:"🥚", name:"Ei",
      text:"Ein warmes Ei liegt in der Höhle. Füttere es, damit es schlüpft."},
-    {ab:3,  bild:"🐣", name:"Schlüpfling",
+    {ab:3,  bild:"🐣", img:"images/schluepfling.svg", name:"Schlüpfling",
      text:"Geschlüpft! Ein winziger Drache blinzelt dich an."},
     {ab:8,  bild:"🐲", name:"Jungdrache",
      text:"Er wächst – und fliegt ab jetzt im Drachenkampf an deiner Seite mit."},
@@ -1253,6 +1256,10 @@
     const el = $("kampf-begleiter");
     if(el && !el.classList.contains("aus")) bewege(el,"jubelt",520);
   }
+  function hoehleBegleiterAktiv(){
+    const el = $("kampf-begleiter");
+    return !!el && !el.classList.contains("aus");
+  }
 
   function hoehleSchmuckZeichnen(){
     const box = $("hoehle-schmuck");
@@ -1315,7 +1322,11 @@
       $("hoehle-name").textContent = "Drachenhöhle";
     }else{
       const stufe = HOEHLE_STUFEN[i];
-      drache.textContent = stufe.bild;
+      if(stufe.img){
+        drache.innerHTML = '<img src="'+stufe.img+'" alt="'+stufe.name+'">';
+      }else{
+        drache.textContent = stufe.bild;
+      }
       drache.style.opacity = "";
       drache.style.filter = "";
       $("hoehle-stufe").textContent = stufe.name;
