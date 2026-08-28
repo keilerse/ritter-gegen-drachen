@@ -8,8 +8,9 @@ Richtig gerechnet wird belohnt – mit Gold, Schätzen und einer eigenen Burg.
 ## Die Idee
 
 Kinder rechnen Plus- und Minusaufgaben, tippen die Antwort über ein Zahlenfeld an
-(nichts wird getippt) und verdienen dabei Gold. Das Gold lässt sich für Puzzle-Bilder
-und eine Burg ausgeben – so entsteht ein kleiner Anreiz zum Weiterrechnen. Bis zu vier
+(nichts wird getippt) und verdienen dabei Gold. Das Gold lässt sich für Puzzle-Bilder,
+eine Burg und einen eigenen Drachen ausgeben – so entsteht ein kleiner Anreiz zum
+Weiterrechnen. Bis zu vier
 Kinder spielen mit eigenen Konten, eigenem Gold und eigenen Einstellungen.
 
 Vor dem Spiel lässt sich einstellen, ob im Zahlenraum bis 10 oder bis 20 gerechnet
@@ -48,6 +49,11 @@ unterschieden:
   enthüllt (fünf verschiedene Motive), bis das Puzzle gelöst ist.
 - **Burg bauen** – Mauern, Tor, Fenster, Flagge und Wappen kosten unterschiedlich viel
   Gold und werden auf einem Raster platziert. Eine vollständige Burg wird belohnt.
+- **Drachenhöhle** – für 500 Gold gibt es ein Drachenei, jede Fütterung kostet 80 Gold.
+  Der Drache wächst in vier Stufen vom Ei über den Schlüpfling und den Jungdrachen bis
+  zum Hausdrachen. Ab dem Jungdrachen fliegt er im Drachenkampf als Begleiter mit und
+  jubelt bei jedem Treffer. Sein Name wird aus einer Liste angetippt, und die Höhle
+  lässt sich mit Nest, Fackel, Goldhaufen, Kristall, Knochen und Sternenlicht schmücken.
 
 ### Schatzkammer, Truhen und Ränge
 
@@ -62,9 +68,14 @@ Einfach `index.html` im Browser öffnen, das genügt. Die Klänge erzeugt die We
 API direkt im Browser, es werden keine Sounddateien geladen. Der Ton lässt sich im
 Spiel abschalten.
 
-Spielstände (Konten, Gold, Schätze, Puzzle, Burg) liegen als `localStorage` im Browser
-des jeweiligen Kindes. Die Puzzle-Motive liegen als `puzzle1.png` bis `puzzle5.png`
-neben der HTML-Datei.
+Spielstände (Konten, Gold, Schätze, Puzzle, Burg, Drache) liegen als `localStorage` im
+Browser des jeweiligen Kindes. Die Puzzle-Motive liegen als `puzzle1.png` bis
+`puzzle5.png` neben der HTML-Datei.
+
+Die Drachenhöhle bringt ihre Kulisse als Inline-SVG mit. Liegt zusätzlich eine Datei
+`drachenhoehle.png` neben der HTML-Datei, wird die als Hintergrund darübergelegt; fehlt
+sie, bleibt die gezeichnete Höhle sichtbar. Die Kulisse läuft an den Rändern über eine
+Maske weich in den Seitenhintergrund aus, damit der Übergang nicht hart abbricht.
 
 Die Oberfläche ist für Smartphones gebaut (große Flächen zum Antippen, kein
 horizontales Scrollen) und funktioniert am Tablet und Desktop genauso. Am Handy
@@ -77,7 +88,9 @@ Internetverbindung greift eine Systemschrift, das Spiel bleibt spielbar.
 
 Die Drachen stehen als Liste `DRACHEN`, die Schätze als `SCHAETZE` und die Ränge als
 `RAENGE` im Skript – dort lassen sich Namen, Zahnzahl, Schwierigkeit, Preise und
-Beute anpassen. Die Aufgaben selbst entstehen in `rohAufgabe()`, jede Stufe hat dort
+Beute anpassen. Für die Drachenhöhle gilt dasselbe mit `HOEHLE_STUFEN` (Wachstum),
+`HOEHLE_SCHMUCK` (Deko samt Position in der Höhle), `HOEHLE_NAMEN` sowie den Preisen
+`HOEHLE_EI` und `HOEHLE_FUTTER`. Die Aufgaben selbst entstehen in `rohAufgabe()`, jede Stufe hat dort
 ein paar Zeilen. Die Farben liegen als CSS-Variablen ganz oben in der Datei.
 
 ## Lizenz
