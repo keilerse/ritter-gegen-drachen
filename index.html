@@ -334,45 +334,39 @@ body::after{
   border:3px solid var(--gold-tief);box-shadow:inset 0 0 0 2px rgba(255,255,255,.18);
   padding:10px 6px 6px;
 }
-.burg-zinnen,.burg-fundament{display:grid;grid-template-columns:repeat(8,1fr);gap:0}
+.burg-zinnen,.burg-fundament{display:grid;grid-template-columns:repeat(9,1fr);gap:0}
 .burg-zinnen{position:relative}
-.burg-zinnen .zinne{
-  aspect-ratio:1;display:flex;align-items:center;justify-content:center;
-  font-size:clamp(1.4rem,5.6vw,2.1rem);line-height:1;overflow:hidden;
-}
+.burg-zinnen .zinne{aspect-ratio:1.6/1;overflow:hidden}
 .burg-zinnen .zinne.gap{opacity:0}
 .burg-fundament{margin-top:0}
-.burg-fundament .stein{
-  aspect-ratio:1;display:flex;align-items:center;justify-content:center;
-  font-size:clamp(1.6rem,6.4vw,2.4rem);line-height:1;overflow:hidden;
-}
+.burg-fundament .stein{aspect-ratio:2.4/1;overflow:hidden}
 .burg-raster{
-  display:grid;grid-template-columns:repeat(8,1fr);gap:0;
+  display:grid;grid-template-columns:repeat(9,1fr);gap:0;
   border-radius:4px;background:rgba(0,0,0,.28);
   box-shadow:inset 0 0 0 2px rgba(255,255,255,.08);
   position:relative;margin:2px 0;
 }
 .burg-zelle{
-  aspect-ratio:1;display:flex;align-items:center;justify-content:center;
-  font-size:clamp(1.6rem,6.6vw,2.5rem);line-height:1;overflow:hidden;cursor:pointer;
+  aspect-ratio:1;overflow:hidden;cursor:pointer;padding:0;border:0;
   border-radius:0;background:rgba(0,0,0,.14);
   box-shadow:inset 0 0 0 1px rgba(0,0,0,.22);
   transition:transform .08s,background .15s;
 }
 .burg-zelle.kann{background:rgba(245,181,60,.28);box-shadow:inset 0 0 0 3px var(--gold)}
 .burg-zelle:active{transform:scale(.94)}
-.burg-zelle.besetzt{background:transparent;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+.burg-zelle.besetzt{background:transparent;box-shadow:none}
+.kachel-svg{display:block;width:100%;height:100%}
 .burg-zelle.neu{animation:burgAuf .5s ease-out}
-.burg-palette{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.burg-palette{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .burg-werkzeug{
-  display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;
   background:rgba(255,255,255,.08);color:var(--pergament);
-  border:2px solid rgba(255,255,255,.16);border-radius:var(--r-klein);padding:8px 4px;
+  border:2px solid rgba(255,255,255,.16);border-radius:var(--r-klein);padding:7px 3px;
   font-family:var(--schrift-text);transition:transform .08s,box-shadow .08s;
 }
-.burg-werkzeug .zeichen{font-size:1.7rem;line-height:1}
-.burg-werkzeug .name{font-size:.78rem;font-weight:600}
-.burg-werkzeug .preis{font-size:.72rem;opacity:.8}
+.burg-werkzeug .zeichen{width:34px;height:34px;line-height:0;border-radius:5px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.35)}
+.burg-werkzeug .name{font-size:.72rem;font-weight:600;text-align:center;line-height:1.1}
+.burg-werkzeug .preis{font-size:.68rem;opacity:.8}
 .burg-werkzeug:active{transform:translateY(2px)}
 .burg-werkzeug.gewaehlt{background:linear-gradient(#ffe9ae,var(--gold));color:var(--tinte);border-color:var(--gold-tief);box-shadow:0 0 0 2px #fff8}
 .burg-werkzeug.zu-teuer{opacity:.45;filter:grayscale(.5);cursor:not-allowed}
@@ -1559,25 +1553,130 @@ body::after{
   }
 
   /* ================= SPIEL 4: BURG BAUEN ================= */
-  const BURG_SPALTEN = 8, BURG_REIHEN = 5;
+  const BURG_SPALTEN = 9, BURG_REIHEN = 6;
   const BURG_ZELLEN = BURG_SPALTEN*BURG_REIHEN;
+
+  /* Bauteile werden als randfüllende SVG-Kacheln gezeichnet (kein Emoji mehr),
+     damit benachbarte Mauern zu einer durchgehenden Wand verschmelzen.
+     "gruppe:wand" fasst alle Mauer-Varianten fürs Ziel zusammen.
+     Alte IDs (mauer/tor/fenster/flagge/wappen) bleiben erhalten -> gespeicherte
+     Burgen behalten ihre Teile. */
   const BURG_TEILE = [
-    {id:"mauer",   bild:"🧱", name:"Mauer",   preis:100, erlaubt:(z,s)=>true},
-    {id:"tor",     bild:"🚪", name:"Tor",     preis:300, erlaubt:(z,s)=>z===BURG_REIHEN-1},
-    {id:"fenster", bild:"🪟", name:"Fenster", preis:80,  erlaubt:(z,s)=>z===1||z===2},
-    {id:"flagge",  bild:"🚩", name:"Flagge",  preis:200, erlaubt:(z,s)=>z===0},
-    {id:"wappen",  bild:"🛡️", name:"Wappen",  preis:150, erlaubt:(z,s)=>true}
+    {id:"mauer",      name:"Mauer",     preis:100, gruppe:"wand", erlaubt:(z,s)=>true},
+    {id:"rote-mauer", name:"Backstein", preis:100, gruppe:"wand", erlaubt:(z,s)=>true},
+    {id:"turmstein",  name:"Turmstein", preis:120, gruppe:"wand", erlaubt:(z,s)=>true},
+    {id:"tor",        name:"Tor",       preis:300, erlaubt:(z,s)=>z>=BURG_REIHEN-2},
+    {id:"fenster",    name:"Fenster",   preis:80,  erlaubt:(z,s)=>true},
+    {id:"dach",       name:"Dach",      preis:150, erlaubt:(z,s)=>z<BURG_REIHEN-1},
+    {id:"flagge",     name:"Flagge",    preis:200, erlaubt:(z,s)=>z<=1},
+    {id:"wappen",     name:"Wappen",    preis:150, erlaubt:(z,s)=>true},
+    {id:"fackel",     name:"Fackel",    preis:90,  erlaubt:(z,s)=>true},
+    {id:"busch",      name:"Busch",     preis:60,  erlaubt:(z,s)=>z===BURG_REIHEN-1},
+    {id:"fass",       name:"Fass",      preis:60,  erlaubt:(z,s)=>z===BURG_REIHEN-1}
   ];
   const BURG_ZIEL = [
-    {text:"🚪 Tor",       min:1, n:()=>burgZaehlen("tor")},
-    {text:"🛡️ Wappen",    min:1, n:()=>burgZaehlen("wappen")},
-    {text:"🚩 Flagge",    min:1, n:()=>burgZaehlen("flagge")},
-    {text:"🧱 4 Mauern",  min:4, n:()=>burgZaehlen("mauer")}
+    {text:"🚪 Tor",      min:1, n:()=>burgZaehlen("tor")},
+    {text:"🛡️ Wappen",   min:1, n:()=>burgZaehlen("wappen")},
+    {text:"🚩 Flagge",   min:1, n:()=>burgZaehlen("flagge")},
+    {text:"🧱 6 Mauern", min:6, n:()=>burgZaehlenGruppe("wand")}
   ];
 
   const burg = { feld:new Array(BURG_ZELLEN).fill(""), auswahl:null, geloest:false };
 
   function burgTeil(id){ return BURG_TEILE.find(x=>x.id===id)||null; }
+
+  /* ---- Kachel-Grafik: jedes Teil ist ein randfüllendes SVG (kein Emoji) ---- */
+  function svgWrap(inner){
+    return '<svg class="kachel-svg" viewBox="0 0 100 100" preserveAspectRatio="none">'+inner+'</svg>';
+  }
+  /* Mauer-Kachel im Läuferverband; Fugen laufen bis an den Zellenrand,
+     sodass anliegende Zellen (Raster hat gap:0) eine durchgehende Wand ergeben. */
+  function wandSVG(basis, fuge, hell){
+    return svgWrap(
+        '<rect width="100" height="100" fill="'+fuge+'"/>'
+      + '<g fill="'+basis+'">'
+      +   '<rect x="1.5" y="1.5" width="47" height="45" rx="3"/>'
+      +   '<rect x="51.5" y="1.5" width="47" height="45" rx="3"/>'
+      +   '<rect x="-23" y="53.5" width="47" height="45" rx="3"/>'
+      +   '<rect x="27" y="53.5" width="47" height="45" rx="3"/>'
+      +   '<rect x="77" y="53.5" width="47" height="45" rx="3"/>'
+      + '</g>'
+      + '<g fill="'+hell+'" opacity=".55">'
+      +   '<rect x="1.5" y="1.5" width="47" height="7" rx="3"/>'
+      +   '<rect x="51.5" y="1.5" width="47" height="7" rx="3"/>'
+      +   '<rect x="1.5" y="53.5" width="22" height="7" rx="3"/>'
+      +   '<rect x="27" y="53.5" width="47" height="7" rx="3"/>'
+      +   '<rect x="77" y="53.5" width="21" height="7" rx="3"/>'
+      + '</g>');
+  }
+  /* Grauer Steinblock als Hintergrund für "eingelassene" Teile (Tor, Fenster …). */
+  function steinRahmen(){
+    return '<rect width="100" height="100" fill="#575a5e"/>'
+      + '<rect x="2.5" y="2.5" width="95" height="95" rx="4" fill="#83868b"/>'
+      + '<rect x="2.5" y="2.5" width="95" height="26" rx="4" fill="#94979c"/>';
+  }
+  function kachelSVG(id){
+    switch(id){
+      case "mauer":      return wandSVG("#8d8f93","#4c4e52","#b9bcc0");
+      case "rote-mauer": return wandSVG("#b1502f","#6d2f1c","#cf6a45");
+      case "turmstein":  return wandSVG("#c9c3b4","#8a8577","#e6e1d4");
+      case "tor": return svgWrap(steinRahmen()
+        + '<path d="M22 100 L22 46 A28 26 0 0 1 78 46 L78 100 Z" fill="#7c4a24"/>'
+        + '<g stroke="#5a3316" stroke-width="2">'
+        +   '<line x1="37" y1="30" x2="37" y2="100"/>'
+        +   '<line x1="50" y1="24" x2="50" y2="100"/>'
+        +   '<line x1="63" y1="30" x2="63" y2="100"/>'
+        + '</g>'
+        + '<path d="M22 100 L22 46 A28 26 0 0 1 78 46 L78 100 Z" fill="none" stroke="#3f2611" stroke-width="4"/>'
+        + '<circle cx="70" cy="74" r="3" fill="#e8c34a"/>');
+      case "fenster": return svgWrap(steinRahmen()
+        + '<path d="M32 84 L32 44 A18 18 0 0 1 68 44 L68 84 Z" fill="#28304a"/>'
+        + '<g stroke="#aeb6c6" stroke-width="3">'
+        +   '<line x1="50" y1="28" x2="50" y2="84"/>'
+        +   '<line x1="32" y1="58" x2="68" y2="58"/>'
+        + '</g>'
+        + '<path d="M32 84 L32 44 A18 18 0 0 1 68 44 L68 84 Z" fill="none" stroke="#4a4d51" stroke-width="4"/>');
+      case "dach": return svgWrap(
+          '<polygon points="50,6 98,66 2,66" fill="#c0392b"/>'
+        + '<polygon points="50,6 98,66 50,66" fill="#9e2d20" opacity=".55"/>'
+        + '<rect x="2" y="66" width="96" height="30" fill="#83868b"/>'
+        + '<rect x="2" y="66" width="96" height="6" fill="#94979c"/>'
+        + '<polygon points="50,6 98,66 2,66" fill="none" stroke="#7d2318" stroke-width="3"/>'
+        + '<circle cx="50" cy="7" r="4" fill="#e8c34a"/>');
+      case "flagge": return svgWrap(
+          '<rect x="27" y="8" width="5" height="88" rx="2" fill="#6b5236"/>'
+        + '<circle cx="29.5" cy="8" r="4.5" fill="#e8c34a"/>'
+        + '<path d="M32 12 L88 24 L32 40 Z" fill="#d64545"/>'
+        + '<path d="M32 12 L88 24 L32 40 Z" fill="none" stroke="#9e2d2d" stroke-width="2"/>');
+      case "wappen": return svgWrap(steinRahmen()
+        + '<path d="M50 18 L78 27 Q78 62 50 84 Q22 62 22 27 Z" fill="#2f5aa8"/>'
+        + '<path d="M50 18 L78 27 Q78 62 50 84 Q22 62 22 27 Z" fill="none" stroke="#e8c34a" stroke-width="4"/>'
+        + '<g stroke="#f4e3a1" stroke-width="4">'
+        +   '<line x1="50" y1="22" x2="50" y2="78"/>'
+        +   '<line x1="26" y1="40" x2="74" y2="40"/>'
+        + '</g>');
+      case "fackel": return svgWrap(steinRahmen()
+        + '<rect x="46" y="46" width="8" height="46" rx="3" fill="#6b4a2b"/>'
+        + '<rect x="39" y="43" width="22" height="8" rx="3" fill="#3f3f42"/>'
+        + '<path d="M50 12 C39 26 44 39 50 45 C56 39 61 26 50 12 Z" fill="#f0932b"/>'
+        + '<path d="M50 22 C44 31 47 40 50 44 C53 40 56 31 50 22 Z" fill="#ffd45e"/>');
+      case "busch": return svgWrap(
+          '<ellipse cx="50" cy="74" rx="36" ry="22" fill="#3f8b3a"/>'
+        + '<circle cx="33" cy="60" r="18" fill="#4a9e44"/>'
+        + '<circle cx="66" cy="58" r="20" fill="#57b04f"/>'
+        + '<circle cx="50" cy="66" r="21" fill="#4a9e44"/>'
+        + '<circle cx="44" cy="54" r="5" fill="#7fce6f" opacity=".7"/>');
+      case "fass": return svgWrap(
+          '<path d="M30 34 Q50 28 70 34 L66 90 Q50 96 34 90 Z" fill="#9c6b3b"/>'
+        + '<g stroke="#7a5024" stroke-width="2">'
+        +   '<line x1="42" y1="31" x2="40" y2="93"/>'
+        +   '<line x1="58" y1="31" x2="60" y2="93"/>'
+        + '</g>'
+        + '<path d="M29 47 Q50 43 71 47" stroke="#4a2e15" stroke-width="5" fill="none"/>'
+        + '<path d="M31 76 Q50 80 69 76" stroke="#4a2e15" stroke-width="5" fill="none"/>');
+    }
+    return "";
+  }
 
   function burgLaden(){
     burg.feld = new Array(BURG_ZELLEN).fill("");
@@ -1585,17 +1684,30 @@ body::after{
       const roh = localStorage.getItem(kontoKey(konto.aktiv,"burg"));
       if(!roh) return;
       const d = JSON.parse(roh);
-      /* Alte Burgen mit anderer Rastergröße werden verworfen */
-      if(Array.isArray(d.feld) && d.feld.length===BURG_ZELLEN){
-        burg.feld = d.feld.map(v =>
-          BURG_TEILE.some(x=>x.id===v) ? v : "");
+      if(!Array.isArray(d.feld)) return;
+      const gueltig = v => BURG_TEILE.some(x=>x.id===v) ? v : "";
+      const altSp = d.spalten || 8;   /* frühere Version: festes 8x5-Raster */
+      const altRe = d.reihen  || 5;
+      if(d.feld.length===BURG_ZELLEN && altSp===BURG_SPALTEN && altRe===BURG_REIHEN){
+        burg.feld = d.feld.map(gueltig);
+      }else if(d.feld.length===altSp*altRe){
+        /* Ins neue Raster umrechnen statt verwerfen: gleiche Spalte,
+           Reihen am Boden verankern, damit die Mauer auf der Wiese stehen bleibt. */
+        for(let i=0;i<d.feld.length;i++){
+          const az = Math.floor(i/altSp), as = i%altSp;
+          const nz = BURG_REIHEN - (altRe - az);
+          if(nz>=0 && nz<BURG_REIHEN && as>=0 && as<BURG_SPALTEN){
+            burg.feld[nz*BURG_SPALTEN+as] = gueltig(d.feld[i]);
+          }
+        }
       }
     }catch(e){}
   }
 
   function burgSichern(){
     try{
-      localStorage.setItem(kontoKey(konto.aktiv,"burg"), JSON.stringify({ feld:burg.feld }));
+      localStorage.setItem(kontoKey(konto.aktiv,"burg"),
+        JSON.stringify({ feld:burg.feld, spalten:BURG_SPALTEN, reihen:BURG_REIHEN }));
     }catch(e){}
   }
 
@@ -1605,6 +1717,10 @@ body::after{
 
   function burgZaehlen(id){
     return burg.feld.filter(v=>v===id).length;
+  }
+
+  function burgZaehlenGruppe(gruppe){
+    return burg.feld.filter(v=>{ const t=burgTeil(v); return t && t.gruppe===gruppe; }).length;
   }
 
   function burgCheckliste(){
@@ -1622,8 +1738,9 @@ body::after{
       zinnen.innerHTML = "";
       for(let s=0;s<BURG_SPALTEN;s++){
         const z = document.createElement("div");
-        z.className = "zinne"+(s%2===1 ? " gap" : "");
-        z.textContent = "🧱";
+        const gap = s%2===1;                       /* Zinnenlücke */
+        z.className = "zinne"+(gap ? " gap" : "");
+        if(!gap) z.innerHTML = svgWrap(steinRahmen());
         zinnen.appendChild(z);
       }
     }
@@ -1634,7 +1751,7 @@ body::after{
       for(let s=0;s<BURG_SPALTEN;s++){
         const st = document.createElement("div");
         st.className = "stein";
-        st.textContent = "🪨";
+        st.innerHTML = wandSVG("#8d8f93","#4c4e52","#b9bcc0");
         fundament.appendChild(st);
       }
     }
@@ -1658,7 +1775,7 @@ body::after{
       el.setAttribute("aria-label","Feld "+(i+1));
       if(teil){
         el.classList.add("besetzt");
-        el.textContent = teil.bild;
+        el.innerHTML = kachelSVG(teil.id);
         el.title = teil.name;
       }else if(gewaehlt && gewaehlt.erlaubt(z,s) && schatz.gold>=gewaehlt.preis){
         el.classList.add("kann");
@@ -1678,7 +1795,7 @@ body::after{
       b.className = "burg-werkzeug";
       if(burg.auswahl===t.id) b.classList.add("gewaehlt");
       if(schatz.gold<t.preis) b.classList.add("zu-teuer");
-      b.innerHTML = '<span class="zeichen">'+t.bild+'</span>'+
+      b.innerHTML = '<span class="zeichen">'+kachelSVG(t.id)+'</span>'+
         '<span class="name">'+t.name+'</span>'+
         '<span class="preis">'+t.preis+' 🪙</span>';
       b.addEventListener("click", ()=>burgWaehle(t.id));
