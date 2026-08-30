@@ -1453,6 +1453,7 @@
     HOEHLE_SCHMUCK.forEach(s => {
       if(hoehle.schmuck.indexOf(s.id)<0) return;
       const el = document.createElement("span");
+      el.className = "schmuck-" + s.id;
       el.textContent = s.bild;
       el.style.left = s.x+"%";
       el.style.bottom = s.y+"%";
