@@ -164,6 +164,23 @@ WebP bei Qualität 88 sind es 1,1 MB, ohne dass man am Bild einen Unterschied
 sieht. Wer ein Motiv austauscht, sollte es also ebenfalls als WebP speichern
 (`Image.save(..., "WEBP", quality=88, method=6)` oder `cwebp -q 88`).
 
+**Die Turnier-Ritter** (`images/ritter-nach-*.svg`) sind nachgezeichnete Grafiken:
+jede Farbfläche liegt als genau ein `<path>` vor. Umfärben geht deshalb über die
+Füllfarbe – mit zwei Fallstricken. Erstens haben die beiden Dateien für dieselbe
+Sache leicht verschiedene Werte (das Pferd ist links `#aeb7c1`, rechts `#aeb8c1`),
+ein globales Suchen-und-Ersetzen greift also daneben. Zweitens teilen sich
+Satteldecke und Rüstung eine Farbe. Die Decke wird darum über eine beschnittene
+Kopie des Rüstungspfades eingefärbt; das Polygon in `clipPath#cDecke` folgt der
+Sattelkante, damit keine Rüstung mitgefärbt wird. Wer die Decke verschieben will,
+ändert dieses Polygon. Die Verläufe (`gRuest`, `gPferd`, `gDecke`, `gFahne`) stehen
+oben in der Datei und geben den Figuren etwas Tiefe.
+
+**Die beiden Drachen** (`jungdrache.svg`, `schluepfling.svg`) benutzen dieselbe
+grüne Palette, damit sie wie dasselbe Tier aussehen und die freigeschalteten
+Drachenfarben bei beiden gleich wirken. Die Sättigung ist bewusst mittelhoch: Bei
+einem blassen Grün liefert `hue-rotate` nur matte Farben. Die Eierschale beim
+Schlüpfling bleibt cremefarben – sie ist kein Drache.
+
 Die Aufgaben selbst entstehen in `rohAufgabe()`, jede Stufe hat dort ein paar Zeilen.
 Die Farben liegen als CSS-Variablen ganz oben in der Datei.
 
