@@ -1288,7 +1288,7 @@
      textKey:"hoehle.text.schluepfling"},
     {ab:8,  bild:"🐲", img:"images/jungdrache.svg", nameKey:"hoehle.stufe.jungdrache",
       textKey:"hoehle.text.jungdrache"},
-    {ab:15, bild:"🐉", nameKey:"hoehle.stufe.hausdrache",
+    {ab:15, bild:"🐉", img:"images/hausdrache.svg", nameKey:"hoehle.stufe.hausdrache",
      textKey:"hoehle.text.hausdrache"}
   ];
   /* Ab dieser Stufe erscheint der Drache in der Kampfarena. */
