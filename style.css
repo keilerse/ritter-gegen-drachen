@@ -471,7 +471,7 @@ body::after{
 /* ---------- Drachenhöhle ---------- */
 .hoehle-kopf{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 .hoehle-buehne{
-  /* 572x260 – dasselbe Seitenverhaeltnis, auf das images/drachenhoehle.png
+  /* 572x260 – dasselbe Seitenverhaeltnis, auf das images/drachenhoehle.webp
      zugeschnitten ist, damit "cover" nichts Wichtiges abschneidet.
      aspect-ratio statt fester Höhe, damit die Bühne auf schmalen Geräten
      proportional mitskaliert. */
@@ -491,10 +491,10 @@ body::after{
   mask-image:radial-gradient(ellipse farthest-corner at 50% 45%,#000 30%,rgba(0,0,0,.5) 60%,transparent 85%);
 }
 .hoehle-kulisse svg{position:absolute;inset:0;width:100%;height:100%;display:block}
-/* Liegt "images/drachenhoehle.png" vor, deckt das Foto die
+/* Liegt "images/drachenhoehle.webp" vor, deckt das Foto die
    SVG-Kulisse ab. Fehlt die Datei, bleibt diese Ebene leer und die gezeichnete
    Höhle bleibt sichtbar – genau wie bei den Schriften greift ein Ersatz. */
-.hoehle-foto{position:absolute;inset:0;background:url("images/drachenhoehle.png") center/cover no-repeat;
+.hoehle-foto{position:absolute;inset:0;background:url("images/drachenhoehle.webp") center/cover no-repeat;
   filter:brightness(.96) saturate(1.12)}
 /* Farbangleich an den Seitenhintergrund – nimmt dem Bildrand den Bruch. */
 .hoehle-kulisse::after{

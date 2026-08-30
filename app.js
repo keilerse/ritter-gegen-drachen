@@ -748,10 +748,10 @@
   /* ================= SPIEL 3: PUZZLE-SCHATZ ================= */
   const PUZZLE_PREIS = 200;
   const PUZZLE_TEILE = 20;
-  /* Neues Motiv: images/puzzleN.png ablegen und diese Zahl um eins erhöhen.
+  /* Neues Motiv: images/puzzleN.webp ablegen und diese Zahl um eins erhöhen.
      Sonst zeigt das Spiel auf eine Datei, die es nicht gibt. */
   const PUZZLE_ANZAHL = 5;
-  const puzzleBild = (nr) => "images/puzzle"+nr+".png";
+  const puzzleBild = (nr) => "images/puzzle"+nr+".webp";
 
   /* geloest: die Nummern der fertigen Bilder – sie bleiben in der Galerie. */
   const puzzle = { nummer:1, offen:[], geloest:[] };

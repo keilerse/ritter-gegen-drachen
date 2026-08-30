@@ -116,11 +116,11 @@ geladen. Der Ton lässt sich im Spiel abschalten. (Die frühere Ein-Datei-Varian
 als `index-singlefile.html` daneben.)
 
 Spielstände (Konten, Gold, Schätze, Puzzle, Burg, Drache) liegen als `localStorage` im
-Browser des jeweiligen Kindes. Die Puzzle-Motive liegen als `puzzle1.png` bis
-`puzzle5.png` im Ordner `images/`; welche Bilder schon gelöst sind, merkt sich der
+Browser des jeweiligen Kindes. Die Puzzle-Motive liegen als `puzzle1.webp` bis
+`puzzle5.webp` im Ordner `images/`; welche Bilder schon gelöst sind, merkt sich der
 Spielstand pro Kind.
 
-Die Drachenhöhle nimmt `images/drachenhoehle.png` als Hintergrund. Darunter liegt als Ersatz
+Die Drachenhöhle nimmt `images/drachenhoehle.webp` als Hintergrund. Darunter liegt als Ersatz
 eine gezeichnete Höhle als Inline-SVG – fehlt die PNG-Datei, bleibt die sichtbar und
 das Spiel funktioniert weiter. Das Bild ist auf 572×260 zugeschnitten, dasselbe
 Seitenverhältnis wie die Bühne; ein Ersatzbild sollte dieses Format haben, sonst
@@ -153,10 +153,16 @@ frei wählbar – `hue-rotate` dreht ab deren Grundfarbe, und die ist grün. Des
 Grün 0° und Rot liegt bei 240°. Den Hunger steuern `HUNGER_STUFE_MS` (Standard
 20 Stunden) und `HUNGER_MAX` (höchstens drei offene Portionen).
 
-**Ein neues Puzzlebild** kommt in zwei Schritten dazu: die Datei als `images/puzzle6.png`
+**Ein neues Puzzlebild** kommt in zwei Schritten dazu: die Datei als `images/puzzle6.webp`
 ablegen (Seitenverhältnis 4:3) und `PUZZLE_ANZAHL` im Skript um eins erhöhen. Nimmst du
 ein Bild wieder heraus, senke die Zahl entsprechend – gespeicherte Einträge zu Bildern,
 die es nicht mehr gibt, wirft das Spiel beim Laden von allein weg.
+
+Die Bilder liegen als **WebP** vor, nicht als PNG: Als PNG waren die fünf Motive
+zusammen 8,8 MB schwer, in der Bildergalerie hängen sie alle nebeneinander. Mit
+WebP bei Qualität 88 sind es 1,1 MB, ohne dass man am Bild einen Unterschied
+sieht. Wer ein Motiv austauscht, sollte es also ebenfalls als WebP speichern
+(`Image.save(..., "WEBP", quality=88, method=6)` oder `cwebp -q 88`).
 
 Die Aufgaben selbst entstehen in `rohAufgabe()`, jede Stufe hat dort ein paar Zeilen.
 Die Farben liegen als CSS-Variablen ganz oben in der Datei.
