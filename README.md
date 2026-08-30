@@ -170,9 +170,13 @@ Füllfarbe – mit zwei Fallstricken. Erstens haben die beiden Dateien für dies
 Sache leicht verschiedene Werte (das Pferd ist links `#aeb7c1`, rechts `#aeb8c1`),
 ein globales Suchen-und-Ersetzen greift also daneben. Zweitens teilen sich
 Satteldecke und Rüstung eine Farbe. Die Decke wird darum über eine beschnittene
-Kopie des Rüstungspfades eingefärbt; das Polygon in `clipPath#cDecke` folgt der
-Sattelkante, damit keine Rüstung mitgefärbt wird. Wer die Decke verschieben will,
-ändert dieses Polygon. Die Verläufe (`gRuest`, `gPferd`, `gDecke`, `gFahne`) stehen
+Kopie des Rüstungspfades eingefärbt.
+
+Dabei ist die Decke **zweiteilig**: die große Fläche hinter dem Sattel und ein
+schmaler Lappen vor dem Reiterbein. `clipPath#cDecke` enthält deshalb zwei
+Polygone. Deren Umrisse sind nicht geschätzt, sondern aus einer Flächenanalyse
+der gerenderten Grafik gewonnen – von Hand gesetzte Rechtecke erwischten
+zuverlässig den Hüftpanzer des Reiters mit. Die Verläufe (`gRuest`, `gPferd`, `gDecke`, `gFahne`) stehen
 oben in der Datei und geben den Figuren etwas Tiefe.
 
 **Die beiden Drachen** (`jungdrache.svg`, `schluepfling.svg`) benutzen dieselbe
