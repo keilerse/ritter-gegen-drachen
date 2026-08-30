@@ -208,7 +208,7 @@ body::after{
 .figur--begleiter{
   position:absolute;left:6px;top:0;z-index:1;pointer-events:none;
   font-size:clamp(1.4rem,6vw,2rem);
-  filter:drop-shadow(0 3px 4px rgba(0,0,0,.5)) hue-rotate(var(--drachen-hue,0deg));
+  filter:drop-shadow(0 3px 4px rgba(0,0,0,.5)) hue-rotate(var(--drachen-hue,0deg)) brightness(1.18) contrast(1.06);
   animation:schweben 3.2s ease-in-out infinite;
 }
 .figur--begleiter.aus{display:none}
@@ -506,18 +506,18 @@ body::after{
 .hoehle-drache{
   position:relative;z-index:1;font-size:clamp(3.2rem,16vw,4.6rem);line-height:1;
   margin-bottom:76px;
-  filter:drop-shadow(0 8px 10px rgba(0,0,0,.55)) hue-rotate(var(--drachen-hue,0deg));
+  filter:drop-shadow(0 8px 10px rgba(0,0,0,.55)) hue-rotate(var(--drachen-hue,0deg)) brightness(1.22) contrast(1.08);
   animation:schweben 3.4s ease-in-out infinite;
 }
 .hoehle-drache::after{
   content:"";position:absolute;left:50%;top:56%;transform:translate(-50%,-50%);
   width:170%;height:130%;border-radius:50%;z-index:-1;pointer-events:none;
-  background:radial-gradient(circle,rgba(245,181,60,.3),transparent 68%);
+  background:radial-gradient(circle,rgba(245,181,60,.46),transparent 70%);
 }
 .hoehle-drache img{
   display:block;width:clamp(4.5rem,20vw,6.5rem);height:auto;
 }
-.hoehle-drache.hungrig{filter:drop-shadow(0 8px 10px rgba(0,0,0,.55)) hue-rotate(var(--drachen-hue,0deg)) saturate(.45) brightness(.85)}
+.hoehle-drache.hungrig{filter:drop-shadow(0 8px 10px rgba(0,0,0,.55)) hue-rotate(var(--drachen-hue,0deg)) brightness(1.05) saturate(.5) contrast(1.05)}
 .hoehle-drache.huepft{animation:huepfen .5s ease-out}
 .hoehle-drache.waechst{animation:aufpoppen .6s ease-out}
 .hoehle-name{
