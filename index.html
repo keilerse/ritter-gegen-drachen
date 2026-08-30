@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=14">
+<link rel="stylesheet" href="style.css?v=15">
 </head>
 <body>
 <div id="app">
@@ -36,6 +36,16 @@
       </span>
       <span class="rb-fort js-rang-fort">noch 10 bis Ritter</span>
     </div>
+
+    <!-- Erscheint nur, wenn der Drache Hunger hat; fuehrt in die Hoehle. -->
+    <button class="hunger-banner" id="hunger-banner" type="button" hidden>
+      <span class="hb-emoji">🍖</span>
+      <span class="hb-info">
+        <span class="hb-titel" id="hunger-titel">Dein Drache hat Hunger</span>
+        <span class="hb-text" id="hunger-text">Ab in die Höhle und füttern!</span>
+      </span>
+      <span class="pfeil">›</span>
+    </button>
 
     <div class="tafel">
       <div class="frage-block">
@@ -96,6 +106,14 @@
         </span>
         <span class="badge badge--verdienen" data-i18n="badge.verdienen">Verdienen</span>
       </button>
+      <button class="spielkarte" id="karte-turm" type="button">
+        <span class="bild">🗼</span>
+        <span>
+          <h3 data-i18n="karte.turm.titel">Drachenturm</h3>
+          <p data-i18n="karte.turm.text">Steig die Leiter hinauf zum Schatz – und wieder hinunter.</p>
+        </span>
+        <span class="badge badge--verdienen" data-i18n="badge.verdienen">Verdienen</span>
+      </button>
 
       <div class="spielwahl-titel spielwahl-titel--ausgeben" data-i18n="gold.ausgeben">🪙 Gold ausgeben</div>
       <button class="spielkarte spielkarte--ausgeben" id="karte-puzzle" type="button">
@@ -129,6 +147,7 @@
           <p data-i18n="karte.hoehle.text">Kauf ein Drachenei und zieh deinen eigenen Drachen gross.</p>
         </span>
         <span class="badge badge--ausgeben" data-i18n="badge.ausgeben">Ausgeben</span>
+        <span class="karte-punkt" id="hoehle-punkt" hidden>🍖</span>
       </button>
     </div>
 
@@ -418,9 +437,18 @@
 
     <button class="knopf" id="btn-hoehle-haupt" type="button">🥚 Drachenei kaufen – 500 Gold</button>
 
-    <div class="hoehle-namen" id="hoehle-namen" hidden></div>
+    <div class="hoehle-namenwahl" id="hoehle-namenwahl" hidden>
+      <div class="hoehle-namen-titel" data-i18n="hoehle.name.titel">Wie soll dein Drache heißen?</div>
+      <div class="hoehle-namen-text" data-i18n="hoehle.name.text">Tippe einen Namen an – er bleibt für immer.</div>
+      <div class="hoehle-namen" id="hoehle-namen"></div>
+    </div>
 
     <div class="hoehle-laden" id="hoehle-laden" data-i18n-aria="aria.hoehle.schmuck" aria-label="Höhlenschmuck"></div>
+
+    <div class="hoehle-farbwahl" id="hoehle-farbwahl" hidden>
+      <div class="hoehle-namen-titel" data-i18n="hoehle.farben.titel">Drachenfarbe</div>
+      <div class="hoehle-laden" id="hoehle-farben"></div>
+    </div>
 
     <div class="hoehle-hinweis" id="hoehle-hinweis" data-i18n="hoehle.hinweis.start">Verdiene Gold in den Rechenspielen und bring Leben in die Höhle.</div>
 
@@ -469,6 +497,52 @@
 
     <div class="fusszeile">
       <button class="mini" data-tipp="m" data-i18n="tipp">💡 Tipp</button>
+      <button class="mini" data-kammer data-i18n="kammer">🗝️ Schatzkammer</button>
+      <button class="mini" data-ton>🔊 Ton</button>
+      <button class="mini" data-heim data-i18n="heim">🏠 Auswahl</button>
+    </div>
+  </section>
+
+  <!-- ============ SPIEL 8: DRACHENTURM ============ -->
+  <section class="screen" id="screen-turm">
+    <div class="hort-kopf">
+      <div class="anzeige">
+        <div class="kopf" data-i18n="gold">Gold</div>
+        <div class="wert"><span class="goldbox js-goldbox"><span class="js-gold">0</span></span></div>
+      </div>
+      <div class="anzeige anzeige--serie aus" id="turm-serie">
+        <div class="kopf" data-i18n="serie">Serie</div>
+        <div class="wert" id="turm-serie-wert">×1</div>
+      </div>
+      <div class="anzeige">
+        <div class="kopf" data-i18n="turm">Turm</div>
+        <div class="wert" id="turm-runden">1/3</div>
+      </div>
+    </div>
+
+    <div class="schatzleiste">
+      <span class="schild">🎁</span>
+      <span class="balken"><i class="js-truhe-balken"></i></span>
+      <span class="zaehler js-truhe-zaehler">0/5</span>
+    </div>
+
+    <div class="rang-chip"><span class="js-rang-emoji">🪙</span><span class="js-rang">Knappe</span></div>
+
+    <div class="turm-buehne">
+      <div class="turm-leiter" id="turm-leiter" data-i18n-aria="aria.turm" aria-label="Drachenturm"></div>
+      <div class="funken" id="turm-funken"></div>
+    </div>
+
+    <div class="tafel aufgabe-tafel">
+      <div class="aufgabe" id="turm-aufgabe">1 + 1 = ?</div>
+      <div class="rueckmeldung" id="turm-rueckmeldung">Noch einmal so viel – eine Sprosse höher!</div>
+      <div class="tipp-feld" id="turm-tipp"><div class="zahlenfeldpunkte" id="turm-punkte"></div></div>
+    </div>
+
+    <div class="zahlenfeld" id="turm-zahlen"></div>
+
+    <div class="fusszeile">
+      <button class="mini" data-tipp="turm" data-i18n="tipp">💡 Tipp</button>
       <button class="mini" data-kammer data-i18n="kammer">🗝️ Schatzkammer</button>
       <button class="mini" data-ton>🔊 Ton</button>
       <button class="mini" data-heim data-i18n="heim">🏠 Auswahl</button>
@@ -627,6 +701,19 @@
   </div>
 </div>
 
+<!-- ============ DRACHENTURM ERGEBNIS ============ -->
+<div class="overlay" id="ov-turm">
+  <div class="overlay-karte">
+    <div class="belohnung">🗼</div>
+    <h2 data-i18n="turm.titel">Alle Türme erklommen!</h2>
+    <p id="turm-ziel-text"></p>
+    <p class="gold-plus" data-i18n="ziel.bonus">+100 Bonus-Gold</p>
+    <p class="farbe-frei" id="turm-farbe-frei" hidden></p>
+    <button class="knopf" id="btn-turm-weiter" data-i18n="turm.weiter">Weiter klettern</button>
+    <button class="mini" data-heim data-i18n="heim">🏠 Auswahl</button>
+  </div>
+</div>
+
 <!-- ============ TURNIER ERGEBNIS ============ -->
 <div class="overlay" id="ov-turnier">
   <div class="overlay-karte">
@@ -669,7 +756,7 @@
   </div>
 </div>
 
-<script src="strings.js?v=14"></script>
-<script src="app.js?v=14"></script>
+<script src="strings.js?v=15"></script>
+<script src="app.js?v=15"></script>
 </body>
 </html>

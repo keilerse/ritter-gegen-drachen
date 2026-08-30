@@ -511,6 +511,7 @@
     alle(".screen").forEach(el=>el.classList.remove("is-active"));
     $(id).classList.add("is-active");
     schatzZeichnen();
+    hoehleHungerZeichnen();
     window.scrollTo(0,0);
   }
   const lobWorte = ["lob.treffer","lob.stark","lob.volltreffer","lob.genau","lob.perfekt","lob.super"];
@@ -1308,7 +1309,30 @@
   /* Alte Spielstände speichern den deutschen Namen als Text – nur fürs Umstellen. */
   const HOEHLE_NAMEN_ALT = ["Funkenschweif","Glutherz","Mondschuppe","Sternenzahn","Rauchwölkchen","Goldkralle"];
 
-  const hoehle = { ei:false, futter:0, schmuck:[], name:-1 };
+  /* Drachenfarben: hue-rotate auf den eigenen Drachen. Farbe i wird frei, sobald
+     im Drachenturm i Türme fehlerfrei geschafft wurden – Farbe 0 also sofort. */
+  /* Die Gradzahlen sind am Drachen ausgemessen, nicht geraten: hue-rotate dreht
+     ab der Grundfarbe der Grafik, und die ist grün. Deshalb ist Grün 0° (der
+     Standard, unverändert) und Rot liegt bei 240°, nicht bei 0°. */
+  const DRACHEN_FARBEN = [
+    {id:"wald",  hue:0,   nameKey:"farbe.wald"},
+    {id:"eis",   hue:90,  nameKey:"farbe.eis"},
+    {id:"nacht", hue:150, nameKey:"farbe.nacht"},
+    {id:"rosen", hue:210, nameKey:"farbe.rosen"},
+    {id:"feuer", hue:240, nameKey:"farbe.feuer"},
+    {id:"gold",  hue:300, nameKey:"farbe.gold"}
+  ];
+
+  /* Hunger: 20 Stunden statt 24, damit ein Kind, das jeden Tag nach der Schule
+     spielt, den Drachen zuverlässig hungrig antrifft und nicht je nach Uhrzeit
+     mal so, mal so. "hunger" ist ein Zähler (0–3), keine Uhr – er sagt, wie viele
+     Portionen nachzuholen sind. Der Drache verliert nie etwas; die Portionen
+     kosten nur Gold. */
+  const HUNGER_STUFE_MS = 20*60*60*1000;
+  const HUNGER_MAX = 3;
+
+  const hoehle = { ei:false, futter:0, schmuck:[], name:-1,
+                   farbe:0, goldTuerme:0, gefuettert:0, hunger:0 };
 
   function hoehleStufeIndex(){
     if(!hoehle.ei) return -1;
@@ -1320,6 +1344,7 @@
 
   function hoehleLaden(){
     hoehle.ei = false; hoehle.futter = 0; hoehle.schmuck = []; hoehle.name = -1;
+    hoehle.farbe = 0; hoehle.goldTuerme = 0; hoehle.gefuettert = 0; hoehle.hunger = 0;
     try{
       const roh = localStorage.getItem(kontoKey(konto.aktiv,"hoehle"));
       if(!roh) return;
@@ -1335,14 +1360,64 @@
       }else{
         hoehle.name = HOEHLE_NAMEN_ALT.indexOf(d.name);
       }
+      hoehle.goldTuerme = Math.max(0, Number(d.goldTuerme)||0);
+      const f = Number(d.farbe)||0;
+      hoehle.farbe = (f>=0 && f<DRACHEN_FARBEN.length && f<=hoehle.goldTuerme) ? f : 0;
+      hoehle.gefuettert = Math.max(0, Number(d.gefuettert)||0);
+      hoehle.hunger = Math.min(HUNGER_MAX, Math.max(0, Number(d.hunger)||0));
+      /* Spielstände von vor dem Hunger kennen keinen Zeitpunkt. Ohne diese Zeile
+         stünde beim ersten Start nach dem Update sofort ein hungriger Drache da. */
+      if(hoehle.ei && !hoehle.gefuettert){
+        hoehle.gefuettert = Date.now();
+        hoehleSichern();
+      }
     }catch(e){}
   }
   function hoehleSichern(){
     try{
       localStorage.setItem(kontoKey(konto.aktiv,"hoehle"), JSON.stringify({
-        ei:hoehle.ei, futter:hoehle.futter, schmuck:hoehle.schmuck, name:hoehle.name
+        ei:hoehle.ei, futter:hoehle.futter, schmuck:hoehle.schmuck, name:hoehle.name,
+        farbe:hoehle.farbe, goldTuerme:hoehle.goldTuerme,
+        gefuettert:hoehle.gefuettert, hunger:hoehle.hunger
       }));
     }catch(e){}
+  }
+
+  /* Hunger holt höchstens EINE Portion je Spielstart auf: zwei Wochen Ferien
+     kosten damit nicht mehr als ein einzelner vergessener Tag. Läuft deshalb nur
+     beim Start und beim Kontowechsel – niemals aus einer Zeichnen-Funktion. */
+  function hoehleHungerAufholen(){
+    if(!hoehle.ei || hoehleStufeIndex() < 1) return;   /* das Ei wird nicht hungrig */
+    if(!hoehle.gefuettert){ hoehle.gefuettert = Date.now(); hoehleSichern(); return; }
+    const her = Date.now() - hoehle.gefuettert;
+    if(her < 0){ hoehle.gefuettert = Date.now(); hoehleSichern(); return; }  /* Uhr verstellt */
+    if(her < HUNGER_STUFE_MS) return;
+    hoehle.hunger = Math.min(HUNGER_MAX, hoehle.hunger + 1);
+    hoehle.gefuettert = Date.now();
+    hoehleSichern();
+  }
+  function hoehleHungrig(){ return hoehle.ei && hoehle.hunger > 0; }
+  function hoehleDrachenName(){
+    const i = hoehleStufeIndex();
+    return hoehle.name>=0 ? tr(HOEHLE_NAMEN[hoehle.name])
+                          : tr(HOEHLE_STUFEN[Math.max(0,i)].nameKey);
+  }
+  /* Reines Zeichnen ohne Seiteneffekt – darf beliebig oft laufen. */
+  function hoehleHungerZeichnen(){
+    const banner = $("hunger-banner"), punkt = $("hoehle-punkt");
+    const hungrig = hoehleHungrig();
+    if(punkt) punkt.hidden = !hungrig;
+    if(!banner) return;
+    banner.hidden = !hungrig;
+    if(!hungrig) return;
+    $("hunger-titel").textContent = tr("hunger.banner.titel");
+    $("hunger-text").textContent = hoehle.hunger>1
+      ? trp("hoehle.hunger.mehr", hoehle.hunger)
+      : tr("hunger.banner.text");
+  }
+  function hoehleFarbeAnwenden(){
+    const f = DRACHEN_FARBEN[hoehle.farbe] || DRACHEN_FARBEN[0];
+    document.documentElement.style.setProperty("--drachen-hue", f.hue+"deg");
   }
 
   /* Der Begleiter in der Kampfarena – wird auch beim Kontowechsel neu gesetzt. */
@@ -1403,9 +1478,11 @@
   }
 
   function hoehleNamenZeichnen(){
-    const box = $("hoehle-namen");
+    const box = $("hoehle-namen"), wahl = $("hoehle-namenwahl");
     const zeigen = hoehle.ei && hoehleStufeIndex()>=1 && hoehle.name<0;
-    box.hidden = !zeigen;
+    /* Überschrift und Erklärsatz stehen im Wrapper – der wird versteckt, nicht
+       nur die Knöpfe, sonst bliebe die Frage ohne Antwortmöglichkeit stehen. */
+    wahl.hidden = !zeigen;
     box.innerHTML = "";
     if(!zeigen) return;
     HOEHLE_NAMEN.forEach((key, idx) => {
@@ -1416,6 +1493,35 @@
         hoehleSichern(); hoehleZeichnen();
         kChime();
         funken("hoehle-funken","✨",10);
+      });
+      box.appendChild(b);
+    });
+  }
+
+  /* Farbwahl: baugleich zum Deko-Laden, aber nichts kostet Gold – die Farben
+     werden im Drachenturm verdient. */
+  function hoehleFarbenZeichnen(){
+    const wahl = $("hoehle-farbwahl"), box = $("hoehle-farben");
+    if(!wahl || !box) return;
+    wahl.hidden = !hoehle.ei;
+    box.innerHTML = "";
+    if(!hoehle.ei) return;
+    DRACHEN_FARBEN.forEach((f, idx) => {
+      const frei = hoehle.goldTuerme >= idx;
+      const aktiv = hoehle.farbe === idx;
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "hoehle-ware"+(aktiv ? " gekauft" : (frei ? "" : " zu-teuer"));
+      b.innerHTML = '<span class="zeichen farbtupfer" style="filter:hue-rotate('+f.hue+'deg)">🐉</span>'
+        + '<span class="name">'+tr(f.nameKey)+'</span>'
+        + '<span class="preis">'+(aktiv ? tr("gekauft")
+            : frei ? "✓" : "🔒 "+tr("farbe.gesperrt",{ n: idx-hoehle.goldTuerme }))+'</span>';
+      if(frei && !aktiv) b.addEventListener("click", ()=>{
+        hoehle.farbe = idx;
+        hoehleSichern(); hoehleFarbeAnwenden(); hoehleFarbenZeichnen();
+        kMagie();
+        funken("hoehle-funken","✨",10);
+        $("hoehle-hinweis").textContent = tr("hoehle.schmueckt", { name: tr(f.nameKey) });
       });
       box.appendChild(b);
     });
@@ -1439,16 +1545,21 @@
         drache.textContent = stufe.bild;
       }
       drache.style.opacity = "";
+      /* Leer lassen, damit die CSS-Regel mit hue-rotate(var(--drachen-hue)) greift. */
       drache.style.filter = "";
       $("hoehle-stufe").textContent = tr(stufe.nameKey);
       $("hoehle-name").textContent = hoehle.name>=0 ? tr(HOEHLE_NAMEN[hoehle.name]) : tr(stufe.nameKey);
     }
+    drache.classList.toggle("hungrig", hoehleHungrig());
 
     $("hoehle-zaehler").textContent = hoehle.futter;
+    hoehleFarbeAnwenden();
     hoehleSchmuckZeichnen();
     hoehleLadenZeichnen();
     hoehleNamenZeichnen();
+    hoehleFarbenZeichnen();
     hoehleBegleiterZeichnen();
+    hoehleHungerZeichnen();
 
     const knopf = $("btn-hoehle-haupt");
     const text = $("hoehle-text");
@@ -1470,12 +1581,23 @@
 
     text.textContent = tr(HOEHLE_STUFEN[i].textKey);
 
+    /* Der Hungertext geht allem anderen vor – er ist das, was jetzt zu tun ist. */
+    const hungerText = hoehle.hunger>1 ? trp("hoehle.hunger.mehr", hoehle.hunger)
+                     : hoehle.hunger===1 ? tr("hoehle.hunger") : "";
+
     if(hoehleAusgewachsen()){
-      knopf.disabled = true;
-      knopf.textContent = tr("hoehle.ausgewachsen");
+      /* Ausgewachsen und hungrig: füttern bleibt möglich, sonst stünde die
+         Warnung da und der Knopf wäre tot. Es kostet normal, wächst aber nicht. */
+      knopf.disabled = hoehle.hunger===0 || schatz.gold < HOEHLE_FUTTER;
+      knopf.textContent = hoehle.hunger>0
+        ? tr("hoehle.fuettern", { n: HOEHLE_FUTTER })
+        : tr("hoehle.ausgewachsen");
       balken.style.width = "100%";
       fort.textContent = tr("hoehle.fertig");
-      hinweis.textContent = tr("hoehle.schmuecke");
+      hinweis.textContent = hungerText
+        || tr("hoehle.schmuecke");
+      if(hungerText && schatz.gold < HOEHLE_FUTTER)
+        hinweis.textContent = tr("hoehle.brauchst.futter", { n: HOEHLE_FUTTER-schatz.gold });
     }else{
       const naechste = HOEHLE_STUFEN[i+1];
       const vorige = HOEHLE_STUFEN[i].ab;
@@ -1487,13 +1609,15 @@
       fort.textContent = tr("hoehle.noch", { n: fehlt, name: tr(naechste.nameKey) });
       hinweis.textContent = schatz.gold < HOEHLE_FUTTER
         ? tr("hoehle.brauchst.futter", { n: HOEHLE_FUTTER-schatz.gold })
-        : tr("hoehle.hunger");
+        : (hungerText || tr("hoehle.hunger"));
     }
   }
 
   function hoehleEiKaufen(){
     if(hoehle.ei || !goldAusgeben(HOEHLE_EI)) return;
     hoehle.ei = true;
+    hoehle.gefuettert = Date.now();
+    hoehle.hunger = 0;
     hoehleSichern();
     hoehleZeichnen();
     kZirp();
@@ -1502,11 +1626,15 @@
   }
 
   function hoehleFuettern(){
-    if(!hoehle.ei || hoehleAusgewachsen()) return;
+    if(!hoehle.ei) return;
+    /* Ausgewachsen: nur noch füttern, wenn er wirklich Hunger hat. */
+    if(hoehleAusgewachsen() && hoehle.hunger === 0) return;
     const vorher = hoehleStufeIndex();
     if(!goldAusgeben(HOEHLE_FUTTER)) return;
 
-    hoehle.futter++;
+    if(!hoehleAusgewachsen()) hoehle.futter++;
+    hoehle.hunger = Math.max(0, hoehle.hunger - 1);
+    hoehle.gefuettert = Date.now();
     hoehleSichern();
     hoehleZeichnen();
 
@@ -2037,6 +2165,254 @@
     else tStart();
   }
 
+  /* ================= SPIEL 8: DRACHENTURM =================
+     Verdoppeln und Halbieren – aber nie mit diesen Wörtern. Hoch geht es mit
+     ganz normalen Plusaufgaben (8 + 8 = ?), runter mit Platzhaltern, bei denen
+     BEIDE Lücken dieselbe Zahl sind (? + ? = 16). Stünde links schon die 8,
+     würde das Kind sie nur abschreiben statt zu halbieren.
+
+     Die Leiter baut sich aus der Startzahl von allein: verdoppeln, bis 20
+     überschritten wäre. Nur ungerade Startzahlen, weil eine gerade mitten in
+     einer Zweierpotenz landet – 8+8 käme dann viermal so oft wie 7+7. Mit den
+     fünf ungeraden Starts kommt jede Verdopplung von 1 bis 10 genau einmal vor. */
+  const TURM_ANZAHL = 3;
+  const TURM_STARTS = [1,3,5,7,9];
+  const TURM_GIPFEL_GOLD = 25, TURM_UNTEN_GOLD = 50, TURM_UNTEN_SILBER = 25;
+  /* Nach so vielen Fehlern auf derselben Sprosse geht es ohne Abrutschen weiter –
+     damit niemand zwischen zwei Sprossen hin- und herpendelt. */
+  const TURM_FEHLER_HALT = 3;
+
+  const turm = { turmNr:0, starts:[], leiter:[], sprosse:0, richtung:"hoch",
+                 richtig:0, falsch:0, serie:0, beste:0,
+                 fehlerImTurm:false, fehlerHier:0, gesperrt:false, neueFarbe:-1 };
+
+  function turmLeiter(start){
+    const s = [start];
+    while(s[s.length-1]*2 <= opt.max) s.push(s[s.length-1]*2);
+    return s;
+  }
+  /* Im Zahlenraum bis 10 fallen 7 und 9 raus – 14 und 18 lägen über der Grenze
+     und der Turm hätte keine einzige Sprosse. */
+  function turmStartsMoeglich(){
+    return TURM_STARTS.filter(s => s*2 <= opt.max);
+  }
+  function turmZiehe(arr,n){
+    const rest = arr.slice(), aus = [];
+    while(aus.length<n && rest.length) aus.push(rest.splice(zufall(0,rest.length-1),1)[0]);
+    /* Weniger mögliche Starts als Türme: dann darf sich einer wiederholen. */
+    while(aus.length<n) aus.push(waehle(arr));
+    return aus;
+  }
+
+  function turmKopf(){
+    const mult = multiplikator(turm.serie);
+    $("turm-serie-wert").textContent = "×"+mult;
+    $("turm-serie").classList.toggle("aus", mult===1);
+    $("turm-runden").textContent = Math.min(turm.turmNr+1,TURM_ANZAHL)+"/"+TURM_ANZAHL;
+    schatzZeichnen();
+  }
+
+  /* Alle Türme sind gleich hoch gezeichnet, nur unterschiedlich unterteilt:
+     der 1er-Turm hat fünf enge Sprossen, der 9er zwei weite. So sieht man auf
+     einen Blick, dass die Sprünge dort größer sind. */
+  function turmZeichnen(){
+    const box = $("turm-leiter");
+    box.innerHTML = "";
+    for(let i=turm.leiter.length-1; i>=0; i--){
+      const el = document.createElement("div");
+      el.className = "turm-sprosse";
+      /* Beim Aufstieg ist alles oberhalb noch unbekannt, beim Abstieg kennt das
+         Kind die ganze Leiter schon – es war ja oben. */
+      const bekannt = turm.richtung==="runter" || i<=turm.sprosse;
+      if(i===turm.sprosse) el.classList.add("aktiv");
+      if(!bekannt) el.classList.add("verdeckt");
+      const zahl = document.createElement("span");
+      zahl.className = "turm-zahl";
+      zahl.textContent = bekannt ? turm.leiter[i] : "?";
+      el.appendChild(zahl);
+      if(i===turm.sprosse){
+        const ritter = document.createElement("span");
+        ritter.className = "turm-ritter";
+        ritter.textContent = "🧗";
+        el.appendChild(ritter);
+      }
+      if(i===turm.leiter.length-1){
+        const schatz = document.createElement("span");
+        schatz.className = "turm-schatz";
+        schatz.textContent = turm.richtung==="runter" ? "🥈" : "💰";
+        el.appendChild(schatz);
+      }
+      box.appendChild(el);
+    }
+  }
+
+  function turmAktuell(){
+    /* Gibt die Aufgabe der aktuellen Sprosse zurück – beide Richtungen rechnen
+       mit derselben Verdopplung, nur die Anzeige unterscheidet sich. */
+    const i = turm.sprosse;
+    if(turm.richtung==="hoch"){
+      const n = turm.leiter[i];
+      return { n:n, antwort:turm.leiter[i+1], hoch:true,
+               loesung: n+" + "+n+" = "+turm.leiter[i+1] };
+    }
+    const n = turm.leiter[i-1];
+    return { n:n, antwort:n, hoch:false,
+             loesung: turm.leiter[i]+" = "+n+" + "+n };
+  }
+  function turmAufgabeZeigen(a){
+    /* zeigeAufgabe() kennt die Form "? + ? = 16" nicht; die vier bestehenden
+       Spiele sollen dafür nicht angefasst werden. */
+    $("turm-aufgabe").innerHTML = a.hoch
+      ? a.n+" + "+a.n+' = <span class="luecke">?</span>'
+      : '<span class="luecke">?</span> + <span class="luecke">?</span> = '+(a.n*2);
+    bauePunkte("turm-punkte", fertig(a.n,a.n,"+",false));
+  }
+  function turmNeueAufgabe(){
+    const a = turmAktuell();
+    turmAufgabeZeigen(a);
+    sagen("turm-rueckmeldung", tr(a.hoch ? "turm.frage.hoch" : "turm.frage.runter"), "");
+    $("turm-tipp").classList.remove("is-offen");
+    turmZeichnen();
+    turmKopf();
+    turm.gesperrt = false;
+    freigeben("turm-zahlen");
+  }
+
+  function turmNeuerTurm(){
+    turm.leiter = turmLeiter(turm.starts[turm.turmNr]);
+    turm.sprosse = 0;
+    turm.richtung = "hoch";
+    turm.fehlerImTurm = false;
+    turm.fehlerHier = 0;
+    turmNeueAufgabe();
+  }
+
+  function turmGipfel(){
+    kSieg();
+    turm.richtung = "runter";
+    turm.fehlerHier = 0;
+    goldDazu(TURM_GIPFEL_GOLD);
+    /* Die gerade gelöste Aufgabe ausgeschrieben stehen lassen, statt die alte
+       Lücke – sonst klebt während der Gipfelpause eine Frage auf der Tafel,
+       die schon beantwortet ist. */
+    const oben = turm.leiter[turm.leiter.length-1], drunter = oben/2;
+    $("turm-aufgabe").textContent = drunter+" + "+drunter+" = "+oben;
+    turmZeichnen();
+    sagen("turm-rueckmeldung", tr("turm.gipfel"), "gut");
+    funken("turm-funken","🥈",14);
+    setTimeout(turmNeueAufgabe, 1400);
+  }
+
+  function turmFertig(){
+    const gold = !turm.fehlerImTurm;
+    kSieg();
+    goldDazu(gold ? TURM_UNTEN_GOLD : TURM_UNTEN_SILBER);
+    if(gold){
+      /* Fehlerfreier Turm schaltet die nächste Drachenfarbe frei. */
+      if(hoehle.goldTuerme < DRACHEN_FARBEN.length-1) turm.neueFarbe = hoehle.goldTuerme+1;
+      hoehle.goldTuerme++;
+      hoehleSichern();
+    }
+    sagen("turm-rueckmeldung", tr(gold ? "turm.unten.gold" : "turm.unten.silber"), "gut");
+    funken("turm-funken", gold ? "🥇" : "🥈", 16);
+    turm.turmNr++;
+    setTimeout(()=>{
+      if(turm.turmNr >= TURM_ANZAHL) turmZiel();
+      else turmNeuerTurm();
+    }, 1500);
+  }
+
+  function turmZiel(){
+    kSieg();
+    goldDazu(100);
+    $("turm-ziel-text").textContent =
+      trp("turm.ziel.basis", turm.richtig, { b: turm.beste }) + " " +
+      (turm.falsch===0 ? tr("h.ziel.sauber") : tr("h.weiterso"));
+    const frei = $("turm-farbe-frei");
+    if(turm.neueFarbe >= 0){
+      frei.hidden = false;
+      frei.textContent = tr("turm.farbe.frei", { name: tr(DRACHEN_FARBEN[turm.neueFarbe].nameKey) });
+    }else{
+      frei.hidden = true;
+    }
+    $("ov-turm").classList.add("is-offen");
+    turmKopf();
+  }
+
+  function turmAntwort(wert,knopf){
+    if(turm.gesperrt) return;
+    turm.gesperrt = true; sperren("turm-zahlen");
+    const a = turmAktuell();
+
+    if(wert===a.antwort){
+      knopf.classList.add("richtig");
+      turm.richtig++; turm.serie++; turm.beste = Math.max(turm.beste,turm.serie);
+      turm.fehlerHier = 0;
+      problemGeloest();
+      const gewinn = goldDazu(GRUNDGOLD*multiplikator(turm.serie));
+      kRichtig(); kMuenze();
+      sagen("turm-rueckmeldung", tr(waehle(lobWorte))+"  "+tr("gold.plus",{n:gewinn}), "gut");
+      funken("turm-funken","🪙",multiplikator(turm.serie)*4);
+
+      if(turm.richtung==="hoch") turm.sprosse++;
+      else turm.sprosse--;
+      turmZeichnen();
+      turmKopf();
+
+      const oben   = turm.richtung==="hoch"   && turm.sprosse===turm.leiter.length-1;
+      const unten  = turm.richtung==="runter" && turm.sprosse===0;
+      const truheFaellig = truheZaehlen();
+      setTimeout(()=>{
+        const weiter = () => { oben ? turmGipfel() : unten ? turmFertig() : turmNeueAufgabe(); };
+        truheFaellig ? truheZeigen(weiter) : weiter();
+      }, 1050);
+
+    }else{
+      knopf.classList.add("falsch");
+      zeigeLoesung("turm-zahlen", a.antwort);
+      turm.falsch++; turm.serie = 0;
+      turm.fehlerImTurm = true;
+      turm.fehlerHier++;
+      const weg = goldWeg();
+      kFalsch();
+      $("turm-tipp").classList.add("is-offen");
+
+      /* Abrutschen: beim Aufstieg eine Sprosse runter, beim Abstieg wieder hoch.
+         Ganz unten bzw. ganz oben gibt es kein Zurück, und nach drei Fehlern auf
+         derselben Sprosse bleibt der Ritter stehen. */
+      const halt = turm.fehlerHier >= TURM_FEHLER_HALT;
+      let gerutscht = false;
+      if(!halt){
+        if(turm.richtung==="hoch" && turm.sprosse>0){ turm.sprosse--; gerutscht = true; }
+        else if(turm.richtung==="runter" && turm.sprosse<turm.leiter.length-1){ turm.sprosse++; gerutscht = true; }
+      }
+      sagen("turm-rueckmeldung", gerutscht
+        ? (weg ? tr("turm.abgerutscht.gold", { loesung:a.loesung, n:weg })
+               : tr("turm.abgerutscht", { loesung:a.loesung }))
+        : tr("turm.halt", { loesung:a.loesung }), "schlecht");
+      if(gerutscht){
+        const box = $("turm-leiter");
+        bewege(box,"rutscht",520);
+      }
+      turmZeichnen();
+      turmKopf();
+      setTimeout(turmNeueAufgabe, 2400);
+    }
+  }
+
+  function turmStart(){
+    turm.turmNr=0; turm.richtig=0; turm.falsch=0; turm.serie=0; turm.beste=0;
+    turm.neueFarbe=-1;
+    turm.starts = turmZiehe(turmStartsMoeglich(), TURM_ANZAHL);
+    baueZahlen("turm-zahlen", turmAntwort);
+    zeigeScreen("screen-turm");
+    turmNeuerTurm();
+  }
+  function turmWeiter(){
+    $("ov-turm").classList.remove("is-offen");
+    turmStart();
+  }
+
   /* ================= Auswahl & Bedienung ================= */
   function wahlSetzen(gruppeId,wert){
     alle("#"+gruppeId+" button").forEach(b =>
@@ -2083,8 +2459,11 @@
     setLang((kontoAktuell() && kontoAktuell().sprache) || "de");
     laden(); optLaden(); optAnwenden();
     puzzleLaden(); burgLaden(); hoehleLaden();
+    hoehleHungerAufholen();
     burg.auswahl = null; burg.geloest = false;
+    hoehleFarbeAnwenden();
     schatzZeichnen(); puzzleZeichnen(); galerieZeichnen(); burgZeichnen(); hoehleZeichnen();
+    hoehleHungerZeichnen();
     kontoAnzeigen();
   }
   function kontoGitterZeichnen(){
@@ -2145,6 +2524,7 @@
     setLang(code);
     optAnwenden();
     schatzZeichnen(); puzzleZeichnen(); galerieZeichnen(); burgZeichnen(); hoehleZeichnen();
+    hoehleHungerZeichnen();
     kontoAnzeigen();
   }
   function kontoWechseln(id){
@@ -2265,6 +2645,11 @@
   $("karte-turnier").addEventListener("click", tStart);
   $("btn-turnier-weiter").addEventListener("click", tWeiter);
 
+  $("karte-turm").addEventListener("click", turmStart);
+  $("btn-turm-weiter").addEventListener("click", turmWeiter);
+
+  $("hunger-banner").addEventListener("click", ()=>{ hoehleZeichnen(); zeigeScreen("screen-hoehle"); });
+
   kontoInit();
   setLang((kontoAktuell() && kontoAktuell().sprache) || browserSprache());
   laden();
@@ -2273,11 +2658,14 @@
   puzzleLaden();
   burgLaden();
   hoehleLaden();
+  hoehleHungerAufholen();
+  hoehleFarbeAnwenden();
   schatzZeichnen();
   puzzleZeichnen();
   galerieZeichnen();
   burgZeichnen();
   hoehleZeichnen();
+  hoehleHungerZeichnen();
   kontoAnzeigen();
   /* Erststart: noch kein Konto -> direkt die Namens-/Avatar-/Sprachwahl. */
   if(!kontoAktuell()) kontoNeuZeigen();

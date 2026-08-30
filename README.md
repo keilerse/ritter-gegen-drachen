@@ -49,6 +49,17 @@ unterschieden:
   falsche einen für den Gegner. Nach acht Ritten muss der Verlierer aus dem Sattel –
   bei Gleichstand gewinnt das Kind.
 
+- **Drachenturm** – Verdoppeln und Halbieren, ohne dass diese Wörter je fallen. Der
+  Ritter steigt eine Leiter zum Schatz hinauf und wieder hinunter. Hoch geht es mit
+  ganz normalen Plusaufgaben (`8 + 8 = ?`), runter mit Platzhaltern, bei denen beide
+  Lücken dieselbe Zahl sind (`? + ? = 16`). Die Leiter baut sich aus ihrer Startzahl
+  von allein – verdoppeln, bis der Zahlenraum überschritten wäre –, deshalb sind die
+  Türme unterschiedlich hoch: `1 · 2 · 4 · 8 · 16`, aber nur `9 · 18`. Gestartet wird
+  nur auf ungeraden Zahlen; so kommt jede Verdopplung von 1 bis 10 genau einmal vor.
+  Oben gibt es eine silberne Truhe, unten eine goldene, wenn der Turm fehlerfrei war.
+  Eine falsche Antwort lässt den Ritter eine Sprosse abrutschen. Drei Türme pro
+  Durchgang; jeder fehlerfreie Turm schaltet eine Drachenfarbe frei.
+
 ### Gold ausgeben
 
 - **Puzzle-Schatz** – jedes Puzzleteil kostet 200 Gold. Stück für Stück wird ein Bild
@@ -65,6 +76,18 @@ unterschieden:
   zum Hausdrachen. Ab dem Jungdrachen fliegt er im Drachenkampf als Begleiter mit und
   jubelt bei jedem Treffer. Sein Name wird aus einer Liste angetippt, und die Höhle
   lässt sich mit Nest, Fackel, Goldhaufen, Kristall, Knochen und Sternenlicht schmücken.
+
+  Der Drache **bekommt Hunger**: Nach 20 Stunden meldet ein Banner auf dem
+  Startbildschirm, dass gefüttert werden will, und mit jedem weiteren Tag kommt eine
+  Portion dazu (höchstens drei). Wichtig dabei: Der Rückstand wächst **höchstens um
+  eine Portion je Spielstart** – zwei Wochen Ferien kosten also nicht mehr als ein
+  einzelner vergessener Tag. Der Drache verliert nie etwas, er wird nicht kleiner und
+  fliegt auch hungrig weiter mit; die nachzuholenden Portionen kosten nur Gold. Einen
+  ausgewachsenen Drachen kann man deshalb weiterhin füttern, wenn er Hunger hat.
+
+  Seine **Farbe** wird im Drachenturm verdient: Jeder fehlerfrei geschaffte Turm
+  schaltet eine der sechs Farben frei, umgestellt wird in der Höhle. Die Farbe gilt
+  für den Drachen in der Höhle und für den Begleiter im Drachenkampf.
 
 ### Schatzkammer, Truhen und Ränge
 
@@ -120,6 +143,15 @@ Beute anpassen. Für die Drachenhöhle gilt dasselbe mit `HOEHLE_STUFEN` (Wachst
 `HOEHLE_SCHMUCK` (Deko samt Position in der Höhle), `HOEHLE_NAMEN` sowie den Preisen
 `HOEHLE_EI` und `HOEHLE_FUTTER`. Die Turniergegner liegen als `TURNIER_GEGNER`
 (Name, Schwierigkeit, Beute), die Zahl der Ritte pro Gegner als `TURNIER_RITTE`.
+
+Für den Drachenturm gibt es `TURM_ANZAHL` (Türme je Durchgang), `TURM_STARTS` (die
+Startzahlen der Leitern – nur ungerade, sonst häufen sich die Zweierpotenzen) und
+`TURM_FEHLER_HALT` (nach so vielen Fehlern auf derselben Sprosse rutscht der Ritter
+nicht weiter ab, damit niemand hängenbleibt). Die Drachenfarben stehen als
+`DRACHEN_FARBEN`; die Gradzahlen sind an der Drachengrafik ausgemessen und nicht
+frei wählbar – `hue-rotate` dreht ab deren Grundfarbe, und die ist grün. Deshalb ist
+Grün 0° und Rot liegt bei 240°. Den Hunger steuern `HUNGER_STUFE_MS` (Standard
+20 Stunden) und `HUNGER_MAX` (höchstens drei offene Portionen).
 
 **Ein neues Puzzlebild** kommt in zwei Schritten dazu: die Datei als `images/puzzle6.png`
 ablegen (Seitenverhältnis 4:3) und `PUZZLE_ANZAHL` im Skript um eins erhöhen. Nimmst du

@@ -79,6 +79,7 @@ body::after{
 .wahl button:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.18)}
 .spielwahl{display:grid;grid-template-columns:1fr;gap:12px}
 .spielkarte{
+  position:relative;
   display:flex;align-items:center;gap:14px;text-align:left;cursor:pointer;
   background:linear-gradient(var(--pergament),var(--pergament-tief));color:var(--tinte);
   border:3px solid var(--gold-tief);border-radius:var(--r-gross);padding:14px 16px;
@@ -207,7 +208,7 @@ body::after{
 .figur--begleiter{
   position:absolute;left:6px;top:0;z-index:1;pointer-events:none;
   font-size:clamp(1.4rem,6vw,2rem);
-  filter:drop-shadow(0 3px 4px rgba(0,0,0,.5));
+  filter:drop-shadow(0 3px 4px rgba(0,0,0,.5)) hue-rotate(var(--drachen-hue,0deg));
   animation:schweben 3.2s ease-in-out infinite;
 }
 .figur--begleiter.aus{display:none}
@@ -504,7 +505,8 @@ body::after{
 }
 .hoehle-drache{
   position:relative;z-index:1;font-size:clamp(3.2rem,16vw,4.6rem);line-height:1;
-  margin-bottom:76px;filter:drop-shadow(0 8px 10px rgba(0,0,0,.55));
+  margin-bottom:76px;
+  filter:drop-shadow(0 8px 10px rgba(0,0,0,.55)) hue-rotate(var(--drachen-hue,0deg));
   animation:schweben 3.4s ease-in-out infinite;
 }
 .hoehle-drache::after{
@@ -515,6 +517,7 @@ body::after{
 .hoehle-drache img{
   display:block;width:clamp(4.5rem,20vw,6.5rem);height:auto;
 }
+.hoehle-drache.hungrig{filter:drop-shadow(0 8px 10px rgba(0,0,0,.55)) hue-rotate(var(--drachen-hue,0deg)) saturate(.45) brightness(.85)}
 .hoehle-drache.huepft{animation:huepfen .5s ease-out}
 .hoehle-drache.waechst{animation:aufpoppen .6s ease-out}
 .hoehle-name{
@@ -532,9 +535,19 @@ body::after{
 .hoehle-text{text-align:center;font-weight:600;font-size:.95rem;margin-bottom:10px;min-height:2.6em}
 .hoehle-fort{text-align:center;font-size:.82rem;opacity:.75;margin-top:8px;min-height:1.2em}
 #btn-hoehle-haupt:disabled{opacity:.5;cursor:not-allowed;filter:grayscale(.5)}
+.hoehle-namenwahl,.hoehle-farbwahl{margin-top:10px}
+/* Der Wrapper wird versteckt, nicht nur die Knoepfe – sonst bliebe die Frage
+   ohne Antwortmoeglichkeit stehen. */
+.hoehle-namenwahl[hidden],.hoehle-farbwahl[hidden]{display:none}
+.hoehle-namen-titel{
+  text-align:center;font-family:var(--schrift-display);font-size:1rem;
+  color:var(--gold);margin-bottom:2px;
+}
+.hoehle-namen-text{text-align:center;font-size:.78rem;opacity:.72;margin-bottom:8px}
 .hoehle-namen{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 /* display:grid schlaegt sonst das hidden-Attribut aus dem Browser-Stylesheet. */
 .hoehle-namen[hidden]{display:none}
+.farbtupfer{filter:drop-shadow(0 2px 2px rgba(0,0,0,.4))}
 .hoehle-namen button{
   font-family:var(--schrift-text);font-size:.78rem;font-weight:600;
   background:rgba(255,255,255,.08);color:var(--pergament);
@@ -663,6 +676,64 @@ body::after{
   60%{transform:translateX(-8px)}
 }
 @keyframes turnierFaellt{to{transform:translateY(54px) rotate(80deg);opacity:0}}
+
+/* ---------- Drachenturm ---------- */
+/* width muss explizit stehen: .screen ist ein Flex-Container, und ein
+   "margin:0 auto" liesse das Kind sonst auf Inhaltsbreite schrumpfen – die
+   Leiter ist absolut positioniert und hat damit gar keine. */
+.turm-buehne{position:relative;height:200px;width:100%;max-width:250px;margin:0 auto 10px}
+/* Alle Türme sind gleich hoch und nur unterschiedlich unterteilt: flex:1 je
+   Sprosse. Der 1er-Turm bekommt so fünf enge Sprossen, der 9er zwei weite –
+   man sieht auf einen Blick, dass die Sprünge dort größer sind. */
+.turm-leiter{
+  position:absolute;inset:0;display:flex;flex-direction:column;gap:4px;
+  background:linear-gradient(rgba(255,255,255,.06),rgba(0,0,0,.18));
+  border:3px solid var(--gold-tief);border-radius:var(--r-gross);padding:6px;
+}
+.turm-sprosse{
+  position:relative;flex:1;display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.14);
+  border-radius:var(--r-klein);min-height:22px;transition:background .18s;
+}
+.turm-zahl{
+  font-family:var(--schrift-display);font-size:1.15rem;color:var(--pergament);
+  line-height:1;
+}
+.turm-sprosse.verdeckt .turm-zahl{opacity:.4}
+.turm-sprosse.aktiv{
+  background:rgba(245,181,60,.26);border-color:var(--gold);
+  animation:mauerPuls 1.5s ease-in-out infinite;
+}
+.turm-sprosse.aktiv .turm-zahl{color:var(--gold)}
+.turm-ritter{position:absolute;left:6px;font-size:1.25rem;line-height:1;
+  filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
+.turm-schatz{position:absolute;right:6px;font-size:1.25rem;line-height:1;
+  filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
+.turm-leiter.rutscht{animation:ruettel .5s ease-out}
+.farbe-frei{font-family:var(--schrift-display);color:var(--gold);font-size:1rem}
+.farbe-frei[hidden]{display:none}
+
+/* ---------- Hunger-Hinweis ---------- */
+.hunger-banner{
+  display:flex;align-items:center;gap:12px;width:100%;margin-bottom:12px;
+  background:linear-gradient(var(--pergament),var(--pergament-tief));color:var(--tinte);
+  border:3px solid var(--feuer);border-radius:var(--r-gross);padding:10px 14px;
+  box-shadow:0 6px 0 rgba(0,0,0,.28);cursor:pointer;text-align:left;
+  font-family:var(--schrift-text);transition:transform .08s;
+}
+.hunger-banner[hidden]{display:none}
+.hunger-banner:active{transform:translateY(3px);box-shadow:0 3px 0 rgba(0,0,0,.28)}
+.hunger-banner .hb-emoji{font-size:2rem;line-height:1;animation:huepfen 1.6s ease-in-out infinite}
+.hunger-banner .hb-info{display:flex;flex-direction:column;line-height:1.2;margin-right:auto}
+.hunger-banner .hb-titel{font-family:var(--schrift-display);font-size:1.1rem;color:var(--feuer)}
+.hunger-banner .hb-text{font-size:.76rem;font-weight:600;opacity:.78}
+.hunger-banner .pfeil{font-size:1.5rem;opacity:.6}
+/* Kleiner Fleischmarker auf der Höhlenkarte, solange gefüttert werden muss. */
+.karte-punkt{
+  position:absolute;top:6px;right:8px;font-size:1.1rem;line-height:1;
+  animation:huepfen 1.6s ease-in-out infinite;
+}
+.karte-punkt[hidden]{display:none}
 
 /* ---------- Bewegung ---------- */
 @keyframes schweben{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
