@@ -52,7 +52,9 @@ unterschieden:
 - **Drachenturm** – Verdoppeln und Halbieren, ohne dass diese Wörter je fallen. Der
   Ritter steigt eine Leiter zum Schatz hinauf und wieder hinunter. Hoch geht es mit
   ganz normalen Plusaufgaben (`8 + 8 = ?`), runter mit Platzhaltern, bei denen beide
-  Lücken dieselbe Zahl sind (`? + ? = 16`). Die Leiter baut sich aus ihrer Startzahl
+  Lücken dieselbe Zahl sind (`? + ? = 16`). Runter fängt es wieder bei der ersten
+  Sprosse an statt bei der zuletzt erklommenen, und die Leiter zeigt keine Zahlen
+  mehr – so lässt sich keine Antwort ablesen. Die Leiter baut sich aus ihrer Startzahl
   von allein – verdoppeln, bis der Zahlenraum überschritten wäre –, deshalb sind die
   Türme unterschiedlich hoch: `1 · 2 · 4 · 8 · 16`, aber nur `9 · 18`. Gestartet wird
   nur auf ungeraden Zahlen; so kommt jede Verdopplung von 1 bis 10 genau einmal vor.

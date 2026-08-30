@@ -2221,9 +2221,9 @@
     for(let i=turm.leiter.length-1; i>=0; i--){
       const el = document.createElement("div");
       el.className = "turm-sprosse";
-      /* Beim Aufstieg ist alles oberhalb noch unbekannt, beim Abstieg kennt das
-         Kind die ganze Leiter schon – es war ja oben. */
-      const bekannt = turm.richtung==="runter" || i<=turm.sprosse;
+      /* Beim Aufstieg ist alles oberhalb noch unbekannt. Beim Abstieg zeigt die
+         Leiter gar keine Zahlen mehr – die Antworten wären sonst ablesbar. */
+      const bekannt = turm.richtung==="hoch" && i<=turm.sprosse;
       if(i===turm.sprosse) el.classList.add("aktiv");
       if(!bekannt) el.classList.add("verdeckt");
       const zahl = document.createElement("span");
@@ -2247,17 +2247,22 @@
   }
 
   function turmAktuell(){
-    /* Gibt die Aufgabe der aktuellen Sprosse zurück – beide Richtungen rechnen
-       mit derselben Verdopplung, nur die Anzeige unterscheidet sich. */
+    /* Gibt die Aufgabe der aktuellen Sprosse zurück: hoch wird verdoppelt,
+       runter halbiert (als zwei gleiche Summanden getarnt). */
     const i = turm.sprosse;
     if(turm.richtung==="hoch"){
       const n = turm.leiter[i];
       return { n:n, antwort:turm.leiter[i+1], hoch:true,
                loesung: n+" + "+n+" = "+turm.leiter[i+1] };
     }
-    const n = turm.leiter[i-1];
+    /* Abstieg in Vorwärts-Reihenfolge: zuerst die erste Sprosse halbieren,
+       nicht die zuletzt erklommene – sonst wäre es nur die Umkehrung der
+       letzten Aufgabe. Die Ritterposition ist davon entkoppelt. */
+    const k = turm.leiter.length-1;
+    const j = k - i + 1;
+    const n = turm.leiter[j-1];
     return { n:n, antwort:n, hoch:false,
-             loesung: turm.leiter[i]+" = "+n+" + "+n };
+             loesung: turm.leiter[j]+" = "+n+" + "+n };
   }
   function turmAufgabeZeigen(a){
     /* zeigeAufgabe() kennt die Form "? + ? = 16" nicht; die vier bestehenden
