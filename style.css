@@ -200,6 +200,8 @@ body::after{
   padding:0 6px;border-bottom:4px solid rgba(255,255,255,.08)}
 .figur{font-size:clamp(3rem,14vw,4.2rem);line-height:1;filter:drop-shadow(0 6px 6px rgba(0,0,0,.5))}
 .figur--drache{transform:scaleX(-1)}
+/* Der Ritter ist jetzt ein SVG (images/ritter.svg) statt Emoji. */
+#ritter img{display:block;height:clamp(58px,17vw,82px);width:auto}
 .figur.angriff{animation:angriff .45s ease-out}
 .figur.getroffen{animation:getroffen .45s ease-out}
 .figur.faellt{animation:faellt .9s forwards}
