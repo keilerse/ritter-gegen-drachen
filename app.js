@@ -172,6 +172,79 @@
   function sichern(){
     try{ localStorage.setItem(kontoKey(konto.aktiv,"schatz"), JSON.stringify(schatz)); }catch(e){}
   }
+
+  /* ===== Fortschritt: wo geht es beim nächsten Mal los? =====
+     Jedes Spiel fing bei jedem Start wieder ganz vorn an. Für ein Kind war
+     das die beste Strategie: ein paar leichte Aufgaben, Gold kassieren,
+     abbrechen, von vorn – die leichteste Stufe war die lohnendste, weil sie
+     am schnellsten geht. Gemerkt wird deshalb je Spiel, wie weit es gekommen
+     ist (stand) und wie oft es jede Stufe schon geschafft hat (mal). Aus mal
+     wird die Beute degressiv berechnet.
+
+     stand ist immer die Stufe, mit der das nächste Spiel BEGINNT: beim
+     Drachenkampf der Drache, beim Turnier der Gegner, bei Schatzjagd und
+     Rechenmauer der Schwierigkeitsblock, in dem die Runde 1 startet. */
+  const FORT_ANZAHL = { kampf:5, turnier:4, hort:4, mauer:4, uhr:2, waage:2, turm:1 };
+  const fort = {};
+  function fortLaden(){
+    Object.keys(FORT_ANZAHL).forEach(s =>
+      fort[s] = { stand:0, mal:new Array(FORT_ANZAHL[s]).fill(0) });
+    try{
+      const roh = localStorage.getItem(kontoKey(konto.aktiv,"fortschritt"));
+      if(!roh) return;
+      const d = JSON.parse(roh);
+      Object.keys(FORT_ANZAHL).forEach(s => {
+        const q = d[s]; if(!q) return;
+        fort[s].stand = Math.min(FORT_ANZAHL[s]-1, Math.max(0, Number(q.stand)||0));
+        if(Array.isArray(q.mal))
+          for(let i=0;i<FORT_ANZAHL[s];i++) fort[s].mal[i] = Math.max(0, Number(q.mal[i])||0);
+      });
+    }catch(e){}
+  }
+  function fortSichern(){
+    try{ localStorage.setItem(kontoKey(konto.aktiv,"fortschritt"), JSON.stringify(fort)); }catch(e){}
+  }
+  /* Stufe geschafft: Zähler hoch, und beim nächsten Mal geht es eine Stufe
+     weiter oben los. Die oberste Stufe bleibt die oberste. */
+  function fortGeschafft(spiel, stufe){
+    const f = fort[spiel];
+    f.mal[stufe] = (f.mal[stufe]||0) + 1;
+    f.stand = Math.min(FORT_ANZAHL[spiel]-1, Math.max(f.stand, stufe+1));
+    fortSichern();
+    fortZeichnen();
+  }
+  /* Besiegt: eine Stufe zurück – nie unter die erste, und der Rest des
+     Fortschritts bleibt. */
+  function fortZurueck(spiel){
+    fort[spiel].stand = Math.max(0, fort[spiel].stand - 1);
+    fortSichern();
+    fortZeichnen();
+  }
+  /* Degressive Beute: das erste Mal zählt voll, danach wird es weniger.
+     Sonst bleibt es lohnend, denselben leichten Gegner immer wieder
+     umzuwerfen – genau das, was hier abgestellt werden soll. Unter ein
+     Fünftel fällt es nie, Üben soll sich immer noch auszahlen. */
+  const WIEDER_FAKTOR = [1, .6, .45, .35, .25];
+  function beuteFuer(spiel, stufe, voll){
+    const n = Math.min(fort[spiel].mal[stufe]||0, WIEDER_FAKTOR.length-1);
+    return Math.max(5, Math.round(voll * WIEDER_FAKTOR[n] / 5) * 5);
+  }
+  /* Kleiner Hinweis auf den Karten: "Stufe 3/5". */
+  function fortZeichnen(){
+    Object.keys(FORT_ANZAHL).forEach(s => {
+      const el = $("fort-"+s);
+      if(!el) return;
+      el.textContent = tr("fort.stufe", { n: fort[s].stand+1, m: FORT_ANZAHL[s] });
+      el.hidden = fort[s].stand === 0;
+    });
+  }
+  /* Ein Satz dazu, wohin es beim nächsten Mal geht. */
+  function fortSatz(spiel, vorher, hoch){
+    const jetzt = fort[spiel].stand;
+    if(jetzt > vorher) return tr("fort.hoch");
+    if(jetzt < vorher) return tr("fort.runter");
+    return hoch ? tr("fort.max") : "";
+  }
   function optLaden(){
     opt.max = 20; opt.minus = true; opt.ton = true;
     try{
@@ -403,6 +476,12 @@
     if(schatz.neu.length){ schatz.neu = []; sichern(); }
   }
   const multiplikator = serie => serie>=6 ? 3 : serie>=3 ? 2 : 1;
+  /* Was eine richtige Antwort wert ist. Bisher gab jede dieselben zehn Gold –
+     3 + 4 genauso viel wie 8 + 7 − 9. Damit war die leichteste Aufgabe die
+     lohnendste, weil sie am schnellsten geht. Nach unten geht es nie: im
+     Zahlenraum bis 10 gibt es weiter GRUNDGOLD. Index = Stufe der Aufgabe. */
+  const STUFENGOLD = [10, 10, 12, 15, 18, 20];
+  const aufgabenGold = n => STUFENGOLD[(n && n.stufe) || 1] || GRUNDGOLD;
 
   /* ================= Aufgaben ================= */
   function fertig(a,b,op,luecke){
@@ -456,12 +535,20 @@
              loesung: a+" "+o1+" "+b+" "+o2+" "+c+" = "+e };
   }
 
+  /* Die Stufe hängt an der fertigen Aufgabe, weil davon abhängt, was sie
+     wert ist. Im Zahlenraum bis 10 werden 2 und 3 auf 1 heruntergestuft –
+     dann ist es auch eine Aufgabe der Stufe 1 und wird so bezahlt. */
   function rohAufgabe(stufe){
+    const n = rohAufgabeBauen(stufe);
+    n.stufe = (opt.max===10 && stufe!==4 && stufe!==5) ? 1 : stufe;
+    return n;
+  }
+  function rohAufgabeBauen(stufe){
     if(stufe===5) return ketteAufgabe();
     if(opt.max===10 && stufe!==4) stufe = 1;
     let a,b,op;
     if(stufe===4){
-      const basis = rohAufgabe(opt.max===10 ? 1 : waehle([2,3]));
+      const basis = rohAufgabeBauen(opt.max===10 ? 1 : waehle([2,3]));
       return fertig(basis.a,basis.b,basis.op,true);
     }
     const plus = !opt.minus || Math.random()<.5;
@@ -591,6 +678,7 @@
     alle(".screen").forEach(el=>el.classList.remove("is-active"));
     $(id).classList.add("is-active");
     schatzZeichnen();
+    fortZeichnen();
     hoehleHungerZeichnen();
     window.scrollTo(0,0);
   }
@@ -644,7 +732,7 @@
       k.richtig++; k.serie++; k.beste = Math.max(k.beste,k.serie); k.zaehne--;
       problemGeloest();
       const mult = multiplikator(k.serie);
-      const gewinn = goldDazu(GRUNDGOLD*mult);
+      const gewinn = goldDazu(aufgabenGold(k.aufgabe)*mult);
       k.beute += gewinn;
       kRichtig(); kMuenze();
       sagen("k-rueckmeldung", tr(waehle(lobWorte))+"  "+tr("gold.plus",{n:gewinn}), "gut");
@@ -685,8 +773,9 @@
       $("drache").classList.remove("faellt");
       const d = DRACHEN[k.drache];
       const sterne = k.herzen===3 ? "⭐⭐⭐" : k.herzen===2 ? "⭐⭐" : "⭐";
-      const beute = goldDazu(d.beute);
+      const beute = goldDazu(beuteFuer("kampf", k.drache, d.beute));
       k.beute += beute;
+      fortGeschafft("kampf", k.drache);
       k.drache++;
       if(k.drache>=DRACHEN.length){ kEnde(true); return; }
       $("win-titel").textContent = tr("k.win.titel", { name: tr(d.nameKey) });
@@ -704,9 +793,15 @@
       $("ende-text").textContent = tr("k.ende.sieg.text");
     } else {
       kAus();
+      /* Eine Stufe zurück – der Rest des Fortschritts bleibt erhalten. */
+      const vorher = fort.kampf.stand;
+      fortZurueck("kampf");
       $("ende-figur").textContent = "🐉";
       $("ende-titel").textContent = tr("k.ende.niederlage.titel");
-      $("ende-text").textContent = tr("k.ende.niederlage.text");
+      $("ende-text").textContent = tr("k.ende.niederlage.text") +
+        (fort.kampf.stand < vorher
+          ? " " + tr("k.ende.zurueck", { name: tr(DRACHEN[fort.kampf.stand].nameKey) })
+          : "");
     }
     $("stat-richtig").textContent = k.richtig;
     $("stat-serie").textContent = k.beste;
@@ -722,13 +817,13 @@
     kNeueAufgabe();
   }
   function kNeuesSpiel(){
-    k.drache=0; k.richtig=0; k.falsch=0; k.serie=0; k.beste=0; k.beute=0; k.letzte="";
+    k.drache=fort.kampf.stand; k.richtig=0; k.falsch=0; k.serie=0; k.beste=0; k.beute=0; k.letzte="";
     kStarteDrachen();
   }
 
   /* ================= SPIEL 2: Schatzjagd ================= */
   const ZIEL = 15;
-  const h = { runde:1, richtig:0, falsch:0, serie:0, beste:0,
+  const h = { runde:1, stufe:0, richtig:0, falsch:0, serie:0, beste:0,
               aufgabe:null, letzte:"", gesperrt:false, wiederholen:false };
 
   function hKopf(){
@@ -738,12 +833,14 @@
     $("runden-wert").textContent = Math.min(h.runde,ZIEL)+"/"+ZIEL;
     schatzZeichnen();
   }
+  /* Vier Schwierigkeitsblöcke zu je vier Runden. h.stufe sagt, in welchem
+     Block die Runde 1 beginnt: Wer die Jagd schon einmal ganz geschafft hat,
+     steigt eine Stufe höher ein, statt wieder mit 3 + 4 anzufangen. */
+  const HORT_STUFEN20 = [[1],[1,2],[2,3,5],[3,4,5]];
+  const HORT_STUFEN10 = [[1],[1],[1,4],[1,4,5]];
   function hStufen(){
-    if(opt.max===10) return h.runde>14 ? [1,4,5] : h.runde>10 ? [1,4] : [1];
-    if(h.runde<=4) return [1];
-    if(h.runde<=8) return [1,2];
-    if(h.runde<=12) return [2,3,5];
-    return [3,4,5];
+    const liste = opt.max===10 ? HORT_STUFEN10 : HORT_STUFEN20;
+    return liste[Math.min(liste.length-1, h.stufe + Math.floor((h.runde-1)/4))];
   }
   function hNeueAufgabe(){
     if(!h.wiederholen){
@@ -768,7 +865,7 @@
       h.richtig++; h.serie++; h.beste = Math.max(h.beste,h.serie);
       problemGeloest();
       const mult = multiplikator(h.serie);
-      const gewinn = goldDazu(GRUNDGOLD*mult);
+      const gewinn = goldDazu(aufgabenGold(h.aufgabe)*mult);
       kMuenze();
       sagen("h-rueckmeldung", tr(waehle(lobWorte))+"  "+tr("gold.plus",{n:gewinn}), "gut");
       bewege($("app").querySelector(".js-haufen"),"huepft",520);
@@ -802,19 +899,26 @@
   }
   function hZiel(){
     kSieg();
-    goldDazu(100);
+    goldDazu(beuteFuer("hort", h.stufe, 100));
+    /* Sauber durch heißt: nächstes Mal eine Stufe höher. Mehr als ein
+       Drittel daneben heisst: dieselbe Stufe noch einmal - wer hier landet,
+       war zu früh oben. */
+    const hoch = h.falsch*3 <= h.richtig;
+    const vorher = fort.hort.stand;
+    if(hoch) fortGeschafft("hort", h.stufe); else fortZurueck("hort");
     $("ziel-text").textContent = trp("h.ziel.basis", h.richtig, { b: h.beste }) + " " +
-      (h.falsch===0 ? tr("h.ziel.sauber") : tr("h.weiterso"));
+      (h.falsch===0 ? tr("h.ziel.sauber") : tr("h.weiterso")) + " " +
+      fortSatz("hort", vorher, hoch);
     $("ov-ziel").classList.add("is-offen");
     hKopf();
   }
   function hWeiterSammeln(){
     $("ov-ziel").classList.remove("is-offen");
-    h.runde=1; h.richtig=0; h.falsch=0;
+    h.runde=1; h.stufe=fort.hort.stand; h.richtig=0; h.falsch=0;
     hNeueAufgabe();
   }
   function hStart(){
-    h.runde=1; h.richtig=0; h.falsch=0; h.serie=0; h.beste=0; h.letzte=""; h.wiederholen=false;
+    h.runde=1; h.stufe=fort.hort.stand; h.richtig=0; h.falsch=0; h.serie=0; h.beste=0; h.letzte=""; h.wiederholen=false;
     baueZahlen("h-zahlen",hAntwort);
     zeigeScreen("screen-hort");
     hNeueAufgabe();
@@ -1744,18 +1848,26 @@
 
   /* ================= SPIEL 5: RECHENMAUER ================= */
   const MAUER_ZIEL = 15;
-  const m = { runde:1, richtig:0, falsch:0, serie:0, beste:0,
+  const m = { runde:1, stufe:0, richtig:0, falsch:0, serie:0, beste:0,
               wand:null, reihenfolge:[], aktiv:0, gesperrt:false,
               geloest:new Set(), zuletzt:null, flashNeu:false };
 
+  /* Wie bei der Schatzjagd: vier Blöcke zu je vier Runden, und m.stufe sagt,
+     wo Runde 1 einsteigt. */
+  const mBlock = () => Math.min(3, m.stufe + Math.floor((m.runde-1)/4));
   function mStufen(){
     const max20 = opt.max===20;
-    const r = m.runde;
-    if(r<=4)  return {hoehe:3, luecken:2, unten:0};
-    if(r<=8)  return {hoehe:3, luecken:3, unten: opt.minus?1:0};
-    if(r<=12) return {hoehe: max20?4:3, luecken:3, unten: opt.minus?1:0};
+    const b = mBlock();
+    if(b===0) return {hoehe:3, luecken:2, unten:0};
+    if(b===1) return {hoehe:3, luecken:3, unten: opt.minus?1:0};
+    if(b===2) return {hoehe: max20?4:3, luecken:3, unten: opt.minus?1:0};
     return     {hoehe: max20?4:3, luecken: max20?4:3, unten: opt.minus?2:0};
   }
+  /* Eine Lücke in der großen Mauer ist mehr wert als eine in der kleinen –
+     die Mauer stellt keine Aufgaben aus rohAufgabe() und hat darum ihre
+     eigene Staffel. */
+  const MAUER_GOLD = [10,12,15,18];
+  const mGold = () => MAUER_GOLD[mBlock()];
 
   function mErzeuge(hoehe){
     let maxBase = opt.max===10 ? 3 : 6;
@@ -1958,16 +2070,20 @@
 
   function mZiel(){
     kSieg();
-    goldDazu(100);
+    goldDazu(beuteFuer("mauer", m.stufe, 100));
+    const hoch = m.falsch*3 <= m.richtig;
+    const vorher = fort.mauer.stand;
+    if(hoch) fortGeschafft("mauer", m.stufe); else fortZurueck("mauer");
     $("mauer-ziel-text").textContent = trp("m.ziel.basis", m.richtig, { b: m.beste }) + " " +
-      (m.falsch===0 ? tr("h.ziel.sauber") : tr("h.weiterso"));
+      (m.falsch===0 ? tr("h.ziel.sauber") : tr("h.weiterso")) + " " +
+      fortSatz("mauer", vorher, hoch);
     $("ov-mauer").classList.add("is-offen");
     mKopf();
   }
 
   function mWeiterMauern(){
     $("ov-mauer").classList.remove("is-offen");
-    m.runde=1; m.richtig=0; m.falsch=0; m.serie=0; m.beste=0;
+    m.runde=1; m.stufe=fort.mauer.stand; m.richtig=0; m.falsch=0; m.serie=0; m.beste=0;
     mNeueWand();
   }
 
@@ -1984,7 +2100,7 @@
       m.richtig++; m.serie++; m.beste = Math.max(m.beste,m.serie);
       problemGeloest();
       const mult = multiplikator(m.serie);
-      const gewinn = goldDazu(GRUNDGOLD*mult);
+      const gewinn = goldDazu(mGold()*mult);
       kRichtig(); kMuenze();
       const key = z+"-"+s;
       m.geloest.add(key);
@@ -2023,7 +2139,7 @@
   }
 
   function mStart(){
-    m.runde=1; m.richtig=0; m.falsch=0; m.serie=0; m.beste=0;
+    m.runde=1; m.stufe=fort.mauer.stand; m.richtig=0; m.falsch=0; m.serie=0; m.beste=0;
     baueZahlen("m-zahlen",mAntwort);
     zeigeScreen("screen-mauer");
     mNeueWand();
@@ -2169,8 +2285,9 @@
     t.gewonnen = gewonnen;
     if(gewonnen){
       const g = TURNIER_GEGNER[Math.min(t.gegner,TURNIER_GEGNER.length-1)];
-      const beute = goldDazu(g.beute);
+      const beute = goldDazu(beuteFuer("turnier", t.gegner, g.beute));
       t.beute += beute;
+      fortGeschafft("turnier", t.gegner);
       kSieg();
       tRitt("gegner",true);
       setTimeout(()=> funken("t-funken","⭐",14), RITT_HIN);
@@ -2189,13 +2306,19 @@
       },RITT_HIN+680);
     } else {
       kAus();
+      /* Aus dem Sattel: eine Stufe zurück. */
+      const vorher = fort.turnier.stand;
+      fortZurueck("turnier");
       tRitt("ich",true);
       setTimeout(()=> funken("t-funken","💥",12), RITT_HIN);
       setTimeout(()=> $("t-ich").classList.add("faellt"), RITT_HIN+160);
       setTimeout(()=>{
         $("t-erg-emoji").textContent = "🛡️";
         $("t-erg-titel").textContent = tr("t.staerker", { name: tGegnerName() });
-        $("t-erg-text").textContent = tr("t.verloren", { n: t.richtig, m: t.falsch });
+        $("t-erg-text").textContent = tr("t.verloren", { n: t.richtig, m: t.falsch }) +
+          (fort.turnier.stand < vorher
+            ? " " + tr("t.zurueck", { name: tr(TURNIER_GEGNER[fort.turnier.stand].nameKey) })
+            : "");
         $("t-erg-gold").textContent = "";
         $("ov-turnier").classList.add("is-offen");
       },RITT_HIN+680);
@@ -2218,7 +2341,7 @@
       t.richtig++; t.serie++; t.beste = Math.max(t.beste,t.serie);
       problemGeloest();
       const mult = multiplikator(t.serie);
-      const gewinn = goldDazu(GRUNDGOLD*mult);
+      const gewinn = goldDazu(aufgabenGold(t.aufgabe)*mult);
       t.beute += gewinn;
       kRichtig(); kMuenze();
       sagen("t-rueckmeldung", tr(waehle(lobWorte))+"  "+tr("gold.plus",{n:gewinn}), "gut");
@@ -2261,7 +2384,7 @@
       $(id).classList.remove("reitet","reitet-finale"));
   }
   function tStart(){
-    t.gegner=0; t.richtig=0; t.falsch=0; t.serie=0; t.beste=0;
+    t.gegner=fort.turnier.stand; t.richtig=0; t.falsch=0; t.serie=0; t.beste=0;
     t.beute=0; t.letzte=""; t.wiederholen=false; t.gewonnen=false;
     tBuehneZuruecksetzen();
     baueZahlen("t-zahlen",tAntwort);
@@ -2531,7 +2654,11 @@
 
   function turmZiel(){
     kSieg();
-    goldDazu(100);
+    /* Der Drachenturm hat keine leichte und keine schwere Fassung – jede
+       Leiter ist gleich hoch. Degressiv ist deshalb nur der Abschluss:
+       das zehnte Mal Verdoppeln bringt nicht mehr so viel wie das erste. */
+    goldDazu(beuteFuer("turm", 0, 100));
+    fortGeschafft("turm", 0);
     $("turm-ziel-text").textContent =
       trp("turm.ziel.basis", turm.richtig, { b: turm.beste }) + " " +
       (turm.falsch===0 ? tr("h.ziel.sauber") : tr("h.weiterso"));
@@ -2640,7 +2767,7 @@
   const UHR_ZIEL_GOLD = 100, UHR_BONUS_GOLD = 60;
   const UHR_WAHL = 3;            /* Uhren zur Auswahl beim Zuordnen */
 
-  const uhr = { gestellt:0, richtig:0, falsch:0, serie:0, beste:0,
+  const uhr = { gestellt:0, stufe:0, richtig:0, falsch:0, serie:0, beste:0,
                 zeit:null, art:"ablesen", wahl:[], gesperrt:false,
                 bonus:false, bonusGeschafft:false, bonusRichtig:0 };
 
@@ -2696,7 +2823,10 @@
   /* Minuten, die in der laufenden Runde vorkommen dürfen. */
   function uhrMinuten(){
     if(uhr.bonus) return [15,45];
-    return uhr.gestellt < UHR_JE_RUNDE ? [0] : [0,30];
+    /* Auf Stufe 2 ist die Aufwärmrunde mit lauter vollen Stunden vorbei –
+       wer den Turm schon einmal geschafft hat, liest ab der ersten Aufgabe
+       auch halbe Stunden. */
+    return (uhr.stufe===0 && uhr.gestellt < UHR_JE_RUNDE) ? [0] : [0,30];
   }
   function uhrRunde(){ return Math.min(UHR_RUNDEN, Math.floor(uhr.gestellt/UHR_JE_RUNDE)+1); }
 
@@ -2787,7 +2917,8 @@
      Zuordnung, in der Bonusrunde die letzte. */
   function uhrArt(){
     if(uhr.bonus) return uhr.gestellt === UHR_BONUS_AUFGABEN-1 ? "zuordnen" : "ablesen";
-    return (uhr.gestellt >= UHR_JE_RUNDE && uhr.gestellt % 2 === 1) ? "zuordnen" : "ablesen";
+    const zuordnenAb = uhr.stufe>0 ? 0 : UHR_JE_RUNDE;
+    return (uhr.gestellt >= zuordnenAb && uhr.gestellt % 2 === 1) ? "zuordnen" : "ablesen";
   }
 
   function uhrNeueAufgabe(){
@@ -2814,10 +2945,19 @@
   function uhrFertig(){
     const bonusReif = !uhr.bonus && !uhr.bonusGeschafft;
     kSieg();
-    goldDazu(uhr.bonus ? UHR_BONUS_GOLD : UHR_ZIEL_GOLD);
+    /* Die Bonusrunde gibt es nur einmal je Durchgang, sie bleibt voll
+       bezahlt. Degressiv ist der Hauptteil. */
+    goldDazu(uhr.bonus ? UHR_BONUS_GOLD : beuteFuer("uhr", uhr.stufe, UHR_ZIEL_GOLD));
+    let satz = "";
+    if(!uhr.bonus){
+      const hoch = uhr.falsch*3 <= uhr.richtig;
+      const vorher = fort.uhr.stand;
+      if(hoch) fortGeschafft("uhr", uhr.stufe); else fortZurueck("uhr");
+      satz = " " + fortSatz("uhr", vorher, hoch);
+    }
     $("uhr-ziel-text").textContent =
       trp("uhr.ziel.basis", uhr.richtig, { b: uhr.beste }) + " " +
-      (uhr.falsch===0 ? tr("h.ziel.sauber") : tr("h.weiterso"));
+      (uhr.falsch===0 ? tr("h.ziel.sauber") : tr("h.weiterso")) + satz;
     $("btn-uhr-bonus").hidden = !bonusReif;
     $("ov-uhr").classList.add("is-offen");
     uhrKopf();
@@ -2887,6 +3027,7 @@
 
   function uhrStart(bonus){
     uhr.gestellt=0; uhr.richtig=0; uhr.falsch=0; uhr.serie=0; uhr.beste=0;
+    uhr.stufe = fort.uhr.stand;
     uhr.bonus = !!bonus;
     if(!bonus) uhr.bonusGeschafft = false;
     $("uhr-blatt").innerHTML = uhrBlattHTML();
@@ -2927,12 +3068,14 @@
   const WAAGE_MAX = 12;
   const WAAGE_DINGE = ["🛡️","⚔️","🐴","🐑","👑","🍞","🏹","🔔","🗝️","🪙"];
 
-  const waage = { gestellt:0, richtig:0, falsch:0, serie:0, beste:0,
+  const waage = { gestellt:0, stufe:0, richtig:0, falsch:0, serie:0, beste:0,
                   links:0, rechts:0, ding:"🛡️", art:"mengen", gesperrt:false };
 
-  /* Die dritte Runde schreibt den Vergleich mit Zeichen. */
+  /* Die dritte Runde schreibt den Vergleich mit Zeichen – auf Stufe 2 schon
+     die zweite. Ganz ohne Abzählrunde fängt es nicht an: das Zeichen soll
+     aus der Menge kommen, nicht auswendig gelernt sein. */
   function waageArt(){
-    return waage.gestellt >= (WAAGE_RUNDEN-1)*WAAGE_JE_RUNDE ? "zeichen" : "mengen";
+    return waage.gestellt >= (WAAGE_RUNDEN-1-waage.stufe)*WAAGE_JE_RUNDE ? "zeichen" : "mengen";
   }
   function waageRunde(){
     return Math.min(WAAGE_RUNDEN, Math.floor(waage.gestellt/WAAGE_JE_RUNDE)+1);
@@ -3038,10 +3181,14 @@
 
   function waageFertig(){
     kSieg();
-    goldDazu(WAAGE_ZIEL_GOLD);
+    goldDazu(beuteFuer("waage", waage.stufe, WAAGE_ZIEL_GOLD));
+    const hoch = waage.falsch*3 <= waage.richtig;
+    const vorher = fort.waage.stand;
+    if(hoch) fortGeschafft("waage", waage.stufe); else fortZurueck("waage");
     $("waage-ziel-text").textContent =
       trp("waage.ziel.basis", waage.richtig, { b: waage.beste }) + " " +
-      (waage.falsch===0 ? tr("h.ziel.sauber") : tr("h.weiterso"));
+      (waage.falsch===0 ? tr("h.ziel.sauber") : tr("h.weiterso")) + " " +
+      fortSatz("waage", vorher, hoch);
     $("ov-waage").classList.add("is-offen");
     waageKopf();
   }
@@ -3085,6 +3232,7 @@
 
   function waageStart(){
     waage.gestellt=0; waage.richtig=0; waage.falsch=0; waage.serie=0; waage.beste=0;
+    waage.stufe = fort.waage.stand;
     waage.art = "mengen";
     zeigeScreen("screen-waage");
     waageNeueAufgabe();
@@ -3138,12 +3286,12 @@
   }
   function kontoDatenLaden(){
     setLang((kontoAktuell() && kontoAktuell().sprache) || "de");
-    laden(); optLaden(); optAnwenden();
+    laden(); optLaden(); optAnwenden(); fortLaden();
     puzzleLaden(); burgLaden(); hoehleLaden();
     hoehleHungerAufholen();
     burg.auswahl = null; burg.geloest = false;
     hoehleFarbeAnwenden();
-    schatzZeichnen(); puzzleZeichnen(); galerieZeichnen(); burgZeichnen(); hoehleZeichnen();
+    schatzZeichnen(); fortZeichnen(); puzzleZeichnen(); galerieZeichnen(); burgZeichnen(); hoehleZeichnen();
     hoehleHungerZeichnen();
     kontoAnzeigen();
   }
@@ -3204,7 +3352,7 @@
   function spracheAnwenden(code){
     setLang(code);
     optAnwenden();
-    schatzZeichnen(); puzzleZeichnen(); galerieZeichnen(); burgZeichnen(); hoehleZeichnen();
+    schatzZeichnen(); fortZeichnen(); puzzleZeichnen(); galerieZeichnen(); burgZeichnen(); hoehleZeichnen();
     hoehleHungerZeichnen();
     kontoAnzeigen();
   }
@@ -3341,12 +3489,14 @@
   laden();
   optLaden();
   optAnwenden();
+  fortLaden();
   puzzleLaden();
   burgLaden();
   hoehleLaden();
   hoehleHungerAufholen();
   hoehleFarbeAnwenden();
   schatzZeichnen();
+  fortZeichnen();
   puzzleZeichnen();
   galerieZeichnen();
   burgZeichnen();

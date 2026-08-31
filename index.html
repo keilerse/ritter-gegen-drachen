@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=30">
+<link rel="stylesheet" href="style.css?v=31">
 </head>
 <body>
 <div id="app">
@@ -79,6 +79,7 @@
         <span>
           <h3 data-i18n="karte.kampf.titel">Ritter gegen Drachen</h3>
           <p data-i18n="karte.kampf.text">Schlag dem Drachen die Giftzähne aus. Jeder Treffer bringt Gold.</p>
+          <span class="karte-fort" id="fort-kampf" hidden></span>
         </span>
         <span class="badge badge--verdienen" data-i18n="badge.verdienen">Verdienen</span>
       </button>
@@ -87,6 +88,7 @@
         <span>
           <h3 data-i18n="karte.hort.titel">Schatzjagd</h3>
           <p data-i18n="karte.hort.text">Nur hier gibt es Schatztruhen fürs Album – in Ruhe, ohne Verlieren.</p>
+          <span class="karte-fort" id="fort-hort" hidden></span>
         </span>
         <span class="badge badge--verdienen" data-i18n="badge.verdienen">Verdienen</span>
       </button>
@@ -95,6 +97,7 @@
         <span>
           <h3 data-i18n="karte.mauer.titel">Rechenmauer</h3>
           <p data-i18n="karte.mauer.text">Fülle die Lücken der Zahlenmauer und verdiene Gold.</p>
+          <span class="karte-fort" id="fort-mauer" hidden></span>
         </span>
         <span class="badge badge--verdienen" data-i18n="badge.verdienen">Verdienen</span>
       </button>
@@ -103,6 +106,7 @@
         <span>
           <h3 data-i18n="karte.turnier.titel">Ritter-Turnier</h3>
           <p data-i18n="karte.turnier.text">Stich mit deiner Lanze zu – rechne dich bis zum Gegner vor.</p>
+          <span class="karte-fort" id="fort-turnier" hidden></span>
         </span>
         <span class="badge badge--verdienen" data-i18n="badge.verdienen">Verdienen</span>
       </button>
@@ -120,6 +124,7 @@
         <span>
           <h3 data-i18n="karte.uhr.titel">Uhrturm</h3>
           <p data-i18n="karte.uhr.text">Lies die Turmuhr ab, damit die Glocke wieder läutet.</p>
+          <span class="karte-fort" id="fort-uhr" hidden></span>
         </span>
         <span class="badge badge--verdienen" data-i18n="badge.verdienen">Verdienen</span>
       </button>
@@ -129,6 +134,7 @@
         <span>
           <h3 data-i18n="karte.waage.titel">Burgwaage</h3>
           <p data-i18n="karte.waage.text">Wo sind mehr? Wieg Schilde, Schafe und Pferde gegeneinander auf.</p>
+          <span class="karte-fort" id="fort-waage" hidden></span>
         </span>
         <span class="badge badge--verdienen" data-i18n="badge.verdienen">Verdienen</span>
       </button>
@@ -874,7 +880,7 @@
   </div>
 </div>
 
-<script src="strings.js?v=20"></script>
-<script src="app.js?v=31"></script>
+<script src="strings.js?v=21"></script>
+<script src="app.js?v=32"></script>
 </body>
 </html>

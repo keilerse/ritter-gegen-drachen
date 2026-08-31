@@ -21,6 +21,36 @@ wird und ob nur Plus oder Plus und Minus vorkommen.
 Auf dem Startbildschirm wird zwischen „Spielen &amp; Verdienen“ und „Gold ausgeben“
 unterschieden:
 
+### Wo es beim nächsten Mal weitergeht
+
+Jedes Spiel fing früher bei jedem Start wieder ganz vorn an. Für ein Kind war das die
+beste Strategie: ein paar leichte Aufgaben, Gold kassieren, abbrechen, von vorn – die
+leichteste Stufe war die lohnendste, weil sie am schnellsten geht. Dagegen stehen drei
+Regeln:
+
+1. **Es geht dort weiter, wo es aufgehört hat.** Gemerkt wird je Spiel eine Stufe:
+   beim Drachenkampf der Drache, beim Turnier der Gegner, bei Schatzjagd und
+   Rechenmauer der Schwierigkeitsblock, in dem Runde 1 beginnt, bei Uhrturm und
+   Burgwaage die Fassung der Aufgaben. Wer den Drachenkampf bei Schattenhorn
+   verlassen hat, startet beim nächsten Mal bei Schattenhorn.
+2. **Wer besiegt wird, fällt eine Stufe zurück** – nicht auf null. Im Drachenkampf
+   zählen die drei Herzen, im Turnier der verlorene Tjost; in den Spielen ohne
+   Niederlage übernimmt das ein Drittel Fehler diese Rolle. Damit stellt sich die
+   Schwierigkeit von selbst ein: Wer zu früh oben ist, rutscht zurück und übt weiter.
+3. **Degressive Beute.** Ein Drache, der zum vierten Mal fällt, bringt nicht mehr so
+   viel wie beim ersten Mal (`WIEDER_FAKTOR`: 100 %, 60 %, 45 %, 35 %, dann 25 %).
+   Betroffen sind nur die großen Prämien – Drachengold, Turnierbeute, das Bonusgold
+   am Ende eines Durchgangs. Das Gold je richtiger Antwort bleibt.
+
+Dazu kommt: **Gold je Antwort richtet sich nach der Schwierigkeit** (`STUFENGOLD`).
+Bisher brachte jede Antwort dieselben zehn Gold, `3 + 4` genauso viel wie `8 + 7 − 9`.
+Jetzt bringt eine Aufgabe je nach Stufe 10 bis 20. Nach unten geht es nie: Im
+Zahlenraum bis 10 gibt es weiter zehn Gold, dort wird nichts abgewertet.
+
+Auf den Spielkarten des Startbildschirms steht die erreichte Stufe („Stufe 3/5“),
+sobald sie über der ersten liegt. Gespeichert wird das pro Kind unter dem Schlüssel
+`fortschritt`; alte Spielstände starten auf Stufe 1.
+
 ### Spielen &amp; Verdienen
 
 - **Ritter gegen Drachen** – das Herzstück. Fünf Drachen warten hintereinander, jeder
@@ -83,8 +113,6 @@ unterschieden:
   Eine falsche Antwort lässt den Ritter eine Sprosse abrutschen. Drei Türme pro
   Durchgang; jeder fehlerfreie Turm schaltet eine Drachenfarbe frei.
 
-### Gold ausgeben
-
 - **Uhrturm** – die Uhr lesen, nach dem Lehrplan der 1. Klasse Volksschule: volle
   und halbe Stunden. Die Turmuhr zeigt eine Zeit, auf der Tafel steht der Satz mit
   einer Lücke (`halb ▢`), getippt wird die Zahl auf einem Feld von 1 bis 12. In der
@@ -95,7 +123,9 @@ unterschieden:
   bekommt sie nach der richtigen Antwort zurück. Alle vier Aufgaben läutet die
   Glocke und ein Fenster geht an. Nach zwölf Aufgaben bietet das Abschluss-Fenster
   eine **freiwillige Bonusrunde mit Viertelstunden** an – die gehören erst in die
-  2. Klasse, deshalb kann man sie überspringen.
+  2. Klasse, deshalb kann man sie überspringen. Auf Stufe 2 – nach einem sauber
+  geschafften Durchgang – fällt die Aufwärmrunde weg: halbe Stunden und Zuordnen
+  gibt es dann ab der ersten Aufgabe.
 
 - **Burgwaage** – Mengen vergleichen: mehr, weniger oder gleich viel. Auf zwei
   Waagschalen liegen Ritterdinge – Schilde, Schafe, Pferde, Kronen –, und die Frage
@@ -108,7 +138,11 @@ unterschieden:
   Das Zeichen ist damit nichts Neues, sondern die Schreibweise für die Entscheidung,
   die das Kind schon zwölfmal getroffen hat. Die Dinge bleiben liegen, unter jeder
   Schale steht zusätzlich die Anzahl als Ziffer. Nach der Antwort kippt die Waage
-  zur schwereren Seite.
+  zur schwereren Seite. Auf Stufe 2 beginnen die Zeichen schon in der zweiten
+  Runde; eine Abzählrunde bleibt immer davor stehen, damit das Zeichen aus der
+  Menge kommt und nicht auswendig gelernt wird.
+
+### Gold ausgeben
 
 - **Puzzle-Schatz** – jedes Puzzleteil kostet 200 Gold. Stück für Stück wird ein Bild
   enthüllt, bis das Puzzle gelöst ist. Danach geht es mit dem nächsten Motiv weiter,
@@ -220,6 +254,13 @@ drehen, dass das Pferd blau wird.
 **Wichtig fürs Ausprobieren:** `fetch` scheitert, wenn man die `index.html` direkt
 per `file://` öffnet – dann bleibt für alle Gegner der blaue Ritter aus dem Markup
 stehen. Zum Prüfen also `python3 -m http.server` im Projektordner benutzen.
+
+Den Fortschritt steuern `FORT_ANZAHL` (wie viele Stufen ein Spiel hat),
+`WIEDER_FAKTOR` (wie schnell die Beute bei Wiederholung fällt) und `STUFENGOLD`
+(was eine Aufgabe je Stufe wert ist). Die Aufgabenblöcke der Schatzjagd stehen als
+`HORT_STUFEN20` und `HORT_STUFEN10`, die der Rechenmauer in `mStufen()` samt
+`MAUER_GOLD`. Ein Spiel aus dem Fortschritt zu nehmen heißt: den Eintrag aus
+`FORT_ANZAHL` streichen und die `fort…`-Aufrufe in seinem Abschnitt entfernen.
 
 Für den Drachenturm gibt es `TURM_ANZAHL` (Türme je Durchgang), `TURM_SPROSSEN`
 (Sprossen je Turm, also eine Aufgabe weniger hinauf und ebenso viele hinunter) und

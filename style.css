@@ -92,6 +92,15 @@ body::after{
 .spielkarte .bild img{display:block;height:1.4em;width:auto}
 .spielkarte h3{font-family:var(--schrift-display);font-size:1.25rem;line-height:1.1}
 .spielkarte p{font-size:.92rem;font-weight:500;opacity:.85;margin-top:3px}
+/* Zeigt, auf welcher Stufe das Spiel beim naechsten Start beginnt. Bleibt
+   weg, solange es die erste ist - dann gibt es nichts zu erzaehlen. */
+.spielkarte .karte-fort{
+  display:inline-block;margin-top:5px;
+  font-family:var(--schrift-display);font-size:.72rem;letter-spacing:.5px;
+  background:rgba(43,32,20,.14);border:2px solid rgba(43,32,20,.28);
+  border-radius:999px;padding:2px 9px;
+}
+.spielkarte .karte-fort[hidden]{display:none}
 .spielwahl-titel{
   font-family:var(--schrift-display);font-size:1rem;letter-spacing:1px;line-height:1;
   text-align:center;margin-top:6px;color:var(--gold);
