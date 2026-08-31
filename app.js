@@ -2172,30 +2172,63 @@
      BEIDE Lücken dieselbe Zahl sind (? + ? = 16). Stünde links schon die 8,
      würde das Kind sie nur abschreiben statt zu halbieren.
 
-     Die Leiter baut sich aus der Startzahl von allein: verdoppeln, bis 20
-     überschritten wäre. Nur ungerade Startzahlen, weil eine gerade mitten in
-     einer Zweierpotenz landet – 8+8 käme dann viermal so oft wie 7+7. Mit den
-     fünf ungeraden Starts kommt jede Verdopplung von 1 bis 10 genau einmal vor. */
+     Jeder Turm ist gleich hoch. Solange die Verdopplung im Zahlenraum bleibt,
+     baut die Leiter sich selbst weiter: 3 → 6 → 12. Ist oben kein Platz mehr,
+     wird mit einer anderen zufälligen Verdopplung aufgefüllt. Ohne das Auffüllen
+     wäre ein Turm mit der 7 nach einer einzigen Stufe zu Ende (14, und 28 liegt
+     schon über 20) – kurz, langweilig und viel zu leicht. */
   const TURM_ANZAHL = 3;
-  const TURM_STARTS = [1,3,5,7,9];
+  /* Sprossen je Turm, also TURM_SPROSSEN-1 Aufgaben hinauf und ebenso viele
+     hinunter. Mehr als drei geht im Zahlenraum bis 10 nicht: von der 3 aus
+     bleiben über 6 nur noch 8 und 10 als Ergebnisse übrig. */
+  const TURM_SPROSSEN = 3;
   const TURM_GIPFEL_GOLD = 25, TURM_UNTEN_GOLD = 50, TURM_UNTEN_SILBER = 25;
   /* Nach so vielen Fehlern auf derselben Sprosse geht es ohne Abrutschen weiter –
      damit niemand zwischen zwei Sprossen hin- und herpendelt. */
   const TURM_FEHLER_HALT = 3;
 
-  const turm = { turmNr:0, starts:[], leiter:[], sprosse:0, richtung:"hoch",
+  const turm = { turmNr:0, starts:[], leiter:[], schritte:[], sprosse:0, richtung:"hoch",
                  richtig:0, falsch:0, serie:0, beste:0,
                  fehlerImTurm:false, fehlerHier:0, gesperrt:false, neueFarbe:-1 };
 
+  /* Die Leiter zerfällt in zwei Listen, weil sie nach dem Auffüllen keine reine
+     Verdopplungskette mehr ist:
+       leiter   – die Zahlen auf den Sprossen (Startzahl, dann jedes Ergebnis)
+       schritte – der Summand der Aufgabe je Stufe, schritte[i]+schritte[i]=leiter[i+1]
+     Trägt die Leiter sich selbst weiter, ist schritte[i] genau leiter[i]. */
   function turmLeiter(start){
-    const s = [start];
-    while(s[s.length-1]*2 <= opt.max) s.push(s[s.length-1]*2);
-    return s;
+    const leiter = [start], schritte = [];
+    let n = start;
+    while(schritte.length < TURM_SPROSSEN-1){
+      /* Wie viele Stufen kommen nach dieser noch? Von einer Sprosse n aus ist
+         jede gerade Zahl darüber als nächstes Ergebnis möglich, also darf ein
+         Summand k nicht so hoch greifen, dass danach zu wenig Platz bleibt. */
+      const rest = TURM_SPROSSEN-2-schritte.length;
+      const passt = k => k*2 > n && Math.floor(opt.max/2)-k >= rest;
+      let s;
+      if(n*2 <= opt.max && passt(n)){
+        s = n;                                   /* die Leiter trägt weiter */
+      }else{
+        const frei = [];
+        for(let k=1; k*2 <= opt.max; k++) if(passt(k)) frei.push(k);
+        if(!frei.length) break;                  /* ganz oben ist Schluss */
+        s = waehle(frei);
+      }
+      schritte.push(s);
+      n = s*2;
+      leiter.push(n);
+    }
+    return { leiter, schritte };
   }
-  /* Im Zahlenraum bis 10 fallen 7 und 9 raus – 14 und 18 lägen über der Grenze
-     und der Turm hätte keine einzige Sprosse. */
+  /* Mögliche Startzahlen sind die, von denen aus der Turm seine volle Höhe
+     erreicht. Von 2s aus bleiben noch floor(max/2)-s gerade Zahlen übrig; mit
+     der ersten Stufe zusammen müssen das TURM_SPROSSEN-1 sein. Bis 20 fällt
+     damit nur die 10 heraus, bis 10 die 5. */
   function turmStartsMoeglich(){
-    return TURM_STARTS.filter(s => s*2 <= opt.max);
+    const aus = [];
+    for(let s=1; s*2 <= opt.max; s++)
+      if(1 + Math.floor(opt.max/2) - s >= TURM_SPROSSEN-1) aus.push(s);
+    return aus;
   }
   function turmZiehe(arr,n){
     const rest = arr.slice(), aus = [];
@@ -2213,9 +2246,11 @@
     schatzZeichnen();
   }
 
-  /* Alle Türme sind gleich hoch gezeichnet, nur unterschiedlich unterteilt:
-     der 1er-Turm hat fünf enge Sprossen, der 9er zwei weite. So sieht man auf
-     einen Blick, dass die Sprünge dort größer sind. */
+  /* Alle Türme haben gleich viele Sprossen und sind gleich hoch gezeichnet.
+     Auf den Sprossen stehen die Zahlen, die schon erklommen sind – bei einer
+     aufgefüllten Stufe ist die Aufgabe darüber nicht die Verdopplung der
+     Sprosse, auf der der Ritter steht. Die Leiter bleibt trotzdem aufsteigend,
+     dafür sorgt die Bedingung k*2 > n in turmLeiter(). */
   function turmZeichnen(){
     const box = $("turm-leiter");
     box.innerHTML = "";
@@ -2252,7 +2287,7 @@
        runter halbiert (als zwei gleiche Summanden getarnt). */
     const i = turm.sprosse;
     if(turm.richtung==="hoch"){
-      const n = turm.leiter[i];
+      const n = turm.schritte[i];
       return { n:n, antwort:turm.leiter[i+1], hoch:true,
                loesung: n+" + "+n+" = "+turm.leiter[i+1] };
     }
@@ -2261,7 +2296,7 @@
        letzten Aufgabe. Die Ritterposition ist davon entkoppelt. */
     const k = turm.leiter.length-1;
     const j = k - i + 1;
-    const n = turm.leiter[j-1];
+    const n = turm.schritte[j-1];
     return { n:n, antwort:n, hoch:false,
              loesung: turm.leiter[j]+" = "+n+" + "+n };
   }
@@ -2285,7 +2320,9 @@
   }
 
   function turmNeuerTurm(){
-    turm.leiter = turmLeiter(turm.starts[turm.turmNr]);
+    const gebaut = turmLeiter(turm.starts[turm.turmNr]);
+    turm.leiter = gebaut.leiter;
+    turm.schritte = gebaut.schritte;
     turm.sprosse = 0;
     turm.richtung = "hoch";
     turm.fehlerImTurm = false;
@@ -2301,7 +2338,8 @@
     /* Die gerade gelöste Aufgabe ausgeschrieben stehen lassen, statt die alte
        Lücke – sonst klebt während der Gipfelpause eine Frage auf der Tafel,
        die schon beantwortet ist. */
-    const oben = turm.leiter[turm.leiter.length-1], drunter = oben/2;
+    const oben = turm.leiter[turm.leiter.length-1],
+          drunter = turm.schritte[turm.schritte.length-1];
     $("turm-aufgabe").textContent = drunter+" + "+drunter+" = "+oben;
     turmZeichnen();
     sagen("turm-rueckmeldung", tr("turm.gipfel"), "gut");

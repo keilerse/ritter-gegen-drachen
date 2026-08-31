@@ -54,10 +54,13 @@ unterschieden:
   ganz normalen Plusaufgaben (`8 + 8 = ?`), runter mit Platzhaltern, bei denen beide
   Lücken dieselbe Zahl sind (`? + ? = 16`). Runter fängt es wieder bei der ersten
   Sprosse an statt bei der zuletzt erklommenen, und die Leiter zeigt keine Zahlen
-  mehr – so lässt sich keine Antwort ablesen. Die Leiter baut sich aus ihrer Startzahl
-  von allein – verdoppeln, bis der Zahlenraum überschritten wäre –, deshalb sind die
-  Türme unterschiedlich hoch: `1 · 2 · 4 · 8 · 16`, aber nur `9 · 18`. Gestartet wird
-  nur auf ungeraden Zahlen; so kommt jede Verdopplung von 1 bis 10 genau einmal vor.
+  mehr – so lässt sich keine Antwort ablesen. **Jeder Turm ist gleich hoch.** Solange
+  die Verdopplung im Zahlenraum bleibt, baut die Leiter sich selbst weiter
+  (`3 · 6 · 12`); ist oben kein Platz mehr, wird mit einer anderen zufälligen
+  Verdopplung aufgefüllt (`8 · 16 · 18`, weil 32 über 20 läge). Ohne dieses Auffüllen
+  wäre ein Turm mit der 7 nach einer einzigen Stufe zu Ende – kurz und viel zu leicht.
+  Die Sprossen bleiben dabei immer aufsteigend; auf einer aufgefüllten Stufe ist die
+  Aufgabe aber nicht die Verdopplung der Sprosse, auf der der Ritter gerade steht.
   Oben gibt es eine silberne Truhe, unten eine goldene, wenn der Turm fehlerfrei war.
   Eine falsche Antwort lässt den Ritter eine Sprosse abrutschen. Drei Türme pro
   Durchgang; jeder fehlerfreie Turm schaltet eine Drachenfarbe frei.
@@ -146,14 +149,20 @@ Beute anpassen. Für die Drachenhöhle gilt dasselbe mit `HOEHLE_STUFEN` (Wachst
 `HOEHLE_EI` und `HOEHLE_FUTTER`. Die Turniergegner liegen als `TURNIER_GEGNER`
 (Name, Schwierigkeit, Beute), die Zahl der Ritte pro Gegner als `TURNIER_RITTE`.
 
-Für den Drachenturm gibt es `TURM_ANZAHL` (Türme je Durchgang), `TURM_STARTS` (die
-Startzahlen der Leitern – nur ungerade, sonst häufen sich die Zweierpotenzen) und
+Für den Drachenturm gibt es `TURM_ANZAHL` (Türme je Durchgang), `TURM_SPROSSEN`
+(Sprossen je Turm, also eine Aufgabe weniger hinauf und ebenso viele hinunter) und
 `TURM_FEHLER_HALT` (nach so vielen Fehlern auf derselben Sprosse rutscht der Ritter
 nicht weiter ab, damit niemand hängenbleibt). Die Drachenfarben stehen als
 `DRACHEN_FARBEN`; die Gradzahlen sind an der Drachengrafik ausgemessen und nicht
 frei wählbar – `hue-rotate` dreht ab deren Grundfarbe, und die ist grün. Deshalb ist
 Grün 0° und Rot liegt bei 240°. Den Hunger steuern `HUNGER_STUFE_MS` (Standard
 20 Stunden) und `HUNGER_MAX` (höchstens drei offene Portionen).
+
+`TURM_SPROSSEN` höher zu setzen geht nur begrenzt: Von einer Sprosse `n` aus ist
+jede gerade Zahl darüber ein mögliches nächstes Ergebnis, im Zahlenraum bis 10
+bleiben über der 6 nur noch 8 und 10. `turmStartsMoeglich()` wirft die Startzahlen
+weg, von denen aus der Turm seine Höhe gar nicht erreichen kann (bis 20 ist das die
+10, bis 10 die 5) – bei drei Sprossen bleiben 1–9 bzw. 1–4 übrig.
 
 **Ein neues Puzzlebild** kommt in zwei Schritten dazu: die Datei als `images/puzzle6.webp`
 ablegen (Seitenverhältnis 4:3) und `PUZZLE_ANZAHL` im Skript um eins erhöhen. Nimmst du
@@ -166,20 +175,41 @@ WebP bei Qualität 88 sind es 1,1 MB, ohne dass man am Bild einen Unterschied
 sieht. Wer ein Motiv austauscht, sollte es also ebenfalls als WebP speichern
 (`Image.save(..., "WEBP", quality=88, method=6)` oder `cwebp -q 88`).
 
-**Die Turnier-Ritter** (`images/ritter-nach-*.svg`) sind nachgezeichnete Grafiken:
-jede Farbfläche liegt als genau ein `<path>` vor. Umfärben geht deshalb über die
-Füllfarbe – mit zwei Fallstricken. Erstens haben die beiden Dateien für dieselbe
-Sache leicht verschiedene Werte (das Pferd ist links `#aeb7c1`, rechts `#aeb8c1`),
-ein globales Suchen-und-Ersetzen greift also daneben. Zweitens teilen sich
-Satteldecke und Rüstung eine Farbe. Die Decke wird darum über eine beschnittene
-Kopie des Rüstungspfades eingefärbt.
+**Die Ritter-Grafiken** sind nachgezeichnete SVGs: jede Farbfläche liegt als genau
+ein `<path>` vor. Umfärben geht deshalb über die Füllfarbe – aber nur, solange eine
+Farbe auch wirklich nur eine Sache meint. Sobald das nicht mehr stimmt, hilft die
+**Zerlegung in Teilpfade**: `M` beginnt jeweils eine neue Teilfigur, und über deren
+Bounding-Box lässt sich einzeln entscheiden. Wichtig dabei: Ein Loch (etwa das Auge
+eines Wappentiers) liegt immer in der Box seines Elternteils und muss mit ihm
+zusammen umziehen, sonst wird aus dem Loch eine gefüllte Fläche.
 
-Dabei ist die Decke **zweiteilig**: die große Fläche hinter dem Sattel und ein
-schmaler Lappen vor dem Reiterbein. `clipPath#cDecke` enthält deshalb zwei
-Polygone. Deren Umrisse sind nicht geschätzt, sondern aus einer Flächenanalyse
-der gerenderten Grafik gewonnen – von Hand gesetzte Rechtecke erwischten
-zuverlässig den Hüftpanzer des Reiters mit. Die Verläufe (`gRuest`, `gPferd`, `gDecke`, `gFahne`) stehen
-oben in der Datei und geben den Figuren etwas Tiefe.
+`images/ritter-nach-rechts.svg` (im Turnier der linke Ritter, Quelle in
+`assets/original/`) hat beides: ein rotes Drachenwappen auf der Satteldecke **und**
+rote Sprenkel in genau derselben Farbe, verstreut über Beine, Schweif und Hufe. Das
+Wappen ist ein einziger Teilpfad; alles, was seine Box nicht berührt, ist Sprenkel
+und liegt jetzt in einem zweiten Pfad in `#6a564f`, dem Braun des Pferdes. Gegengeprüft
+wird an der gerenderten Grafik: außerhalb des Wappens darf kein rotes Pixel
+übrig sein.
+
+`images/ritter.svg` (Drachenkampf) ist der umgekehrte Fall – dort war das
+Wappentier dieselbe helle Fläche wie die Rüstung, aber eben als eigener Teilpfad.
+Der ist jetzt rot, samt seiner beiden Löcher. Der Rest des Schildes bleibt Silber.
+
+`images/ritter-nach-links.svg` (der Gegner) hat den schwierigsten Fall: Satteldecke
+und Rüstung teilen sich eine Farbe **innerhalb** desselben Teilpfad-Geflechts. Die
+Decke wird darum über eine beschnittene Kopie des Rüstungspfades eingefärbt, und sie
+ist **zweiteilig** – die große Fläche hinter dem Sattel und ein schmaler Lappen vor
+dem Reiterbein. `clipPath#cDecke` enthält deshalb zwei Polygone. Deren Umrisse sind
+nicht geschätzt, sondern aus einer Flächenanalyse der gerenderten Grafik gewonnen –
+von Hand gesetzte Rechtecke erwischten zuverlässig den Hüftpanzer des Reiters mit.
+Die Verläufe (`gRuest`, `gPferd`, `gDecke`, `gFahne`) stehen oben in der Datei und
+geben der Figur etwas Tiefe.
+
+Die Pfadkoordinaten sind auf **eine Nachkommastelle** gerundet und knapp geschrieben
+(`c1.5-.2 3-1` statt `c 1.5,-0.2 3,-1`); zusammen spart das rund ein Viertel bis die
+Hälfte der Dateigröße, ohne dass sich am Bild etwas ändert. Beim Runden muss der
+Fehler laufend ausgeglichen werden – die Pfade sind relativ, sonst driftet die Form.
+Auf ganze Zahlen zu runden zerlegt die Grafik sichtbar, das ist die Grenze.
 
 **Die beiden Drachen** (`jungdrache.svg`, `schluepfling.svg`) benutzen dieselbe
 grüne Palette, damit sie wie dasselbe Tier aussehen und die freigeschalteten
