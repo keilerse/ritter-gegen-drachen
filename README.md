@@ -60,7 +60,9 @@ unterschieden:
   Verdopplung aufgefüllt (`8 · 16 · 18`, weil 32 über 20 läge). Ohne dieses Auffüllen
   wäre ein Turm mit der 7 nach einer einzigen Stufe zu Ende – kurz und viel zu leicht.
   Die Sprossen bleiben dabei immer aufsteigend; auf einer aufgefüllten Stufe ist die
-  Aufgabe aber nicht die Verdopplung der Sprosse, auf der der Ritter gerade steht.
+  Aufgabe aber nicht die Verdopplung der Sprosse, auf der der Ritter gerade steht –
+  die Antwort ist dafür immer die Sprosse, auf der er landet. Vier Sprossen, also
+  drei Aufgaben hinauf und drei hinunter.
   Oben gibt es eine silberne Truhe, unten eine goldene, wenn der Turm fehlerfrei war.
   Eine falsche Antwort lässt den Ritter eine Sprosse abrutschen. Drei Türme pro
   Durchgang; jeder fehlerfreie Turm schaltet eine Drachenfarbe frei.
@@ -158,11 +160,22 @@ frei wählbar – `hue-rotate` dreht ab deren Grundfarbe, und die ist grün. Des
 Grün 0° und Rot liegt bei 240°. Den Hunger steuern `HUNGER_STUFE_MS` (Standard
 20 Stunden) und `HUNGER_MAX` (höchstens drei offene Portionen).
 
-`TURM_SPROSSEN` höher zu setzen geht nur begrenzt: Von einer Sprosse `n` aus ist
-jede gerade Zahl darüber ein mögliches nächstes Ergebnis, im Zahlenraum bis 10
-bleiben über der 6 nur noch 8 und 10. `turmStartsMoeglich()` wirft die Startzahlen
-weg, von denen aus der Turm seine Höhe gar nicht erreichen kann (bis 20 ist das die
-10, bis 10 die 5) – bei drei Sprossen bleiben 1–9 bzw. 1–4 übrig.
+`TURM_SPROSSEN` lässt sich hochsetzen – die Höhe ist nicht das Problem. Selbst bis
+10 trägt die Leiter `1 · 2 · 4 · 6 · 8 · 10`, also alle fünf Verdopplungen des
+Zahlenraums in einem Turm. Es kostet nur Startzahlen: `turmStartsMoeglich()` wirft
+alle weg, von denen aus die Höhe nicht mehr erreichbar ist, und das sind mit jeder
+Sprosse mehr.
+
+| Sprossen | Startzahlen bis 10 | bis 20 | Aufgaben je Durchgang |
+|---|---|---|---|
+| 3 | 1–4 | 1–9 | 12 |
+| **4** | **1–3** | **1–8** | **18** |
+| 5 | 1–2 | 1–7 | 24 |
+| 6 | nur 1 | 1–6 | 30 |
+
+Vier ist eingestellt: der letzte Wert, bei dem auch bis 10 noch für jeden der drei
+Türme eine eigene Startzahl da ist. Die 18 Aufgaben liegen nahe an Schatzjagd und
+Rechenmauer (je `ZIEL`/`MAUER_ZIEL` = 15).
 
 **Ein neues Puzzlebild** kommt in zwei Schritten dazu: die Datei als `images/puzzle6.webp`
 ablegen (Seitenverhältnis 4:3) und `PUZZLE_ANZAHL` im Skript um eins erhöhen. Nimmst du

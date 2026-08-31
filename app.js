@@ -2179,9 +2179,12 @@
      schon über 20) – kurz, langweilig und viel zu leicht. */
   const TURM_ANZAHL = 3;
   /* Sprossen je Turm, also TURM_SPROSSEN-1 Aufgaben hinauf und ebenso viele
-     hinunter. Mehr als drei geht im Zahlenraum bis 10 nicht: von der 3 aus
-     bleiben über 6 nur noch 8 und 10 als Ergebnisse übrig. */
-  const TURM_SPROSSEN = 3;
+     hinunter. Höher zu bauen geht durchaus – bis 10 trägt die Leiter
+     1·2·4·6·8·10 –, aber mit jeder Sprosse fällt eine Startzahl weg: bis 10
+     bleiben bei vier Sprossen noch 1, 2 und 3, bei fünf nur noch 1 und 2.
+     Vier ist der Punkt, an dem für jeden der drei Türme noch eine eigene
+     Startzahl da ist. */
+  const TURM_SPROSSEN = 4;
   const TURM_GIPFEL_GOLD = 25, TURM_UNTEN_GOLD = 50, TURM_UNTEN_SILBER = 25;
   /* Nach so vielen Fehlern auf derselben Sprosse geht es ohne Abrutschen weiter –
      damit niemand zwischen zwei Sprossen hin- und herpendelt. */
