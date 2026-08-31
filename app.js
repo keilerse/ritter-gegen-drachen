@@ -2269,13 +2269,13 @@
       zahl.className = "turm-zahl";
       zahl.textContent = bekannt ? turm.leiter[i] : "?";
       el.appendChild(zahl);
-      if(i===turm.sprosse){
-        const ritter = document.createElement("img");
-        ritter.className = "turm-ritter";
-        ritter.src = "images/ritter-leiter.svg?v=1";
-        ritter.alt = "";
-        el.appendChild(ritter);
-      }
+      /* Der Ritter steht auf jeder Sprosse; die aktuelle hebt ihn hervor,
+         die übrigen bleiben gedämpft, damit man die Position noch sieht. */
+      const ritter = document.createElement("img");
+      ritter.className = "turm-ritter";
+      ritter.src = "images/ritter-leiter.svg?v=1";
+      ritter.alt = "";
+      el.appendChild(ritter);
       if(i===turm.leiter.length-1){
         const schatz = document.createElement("span");
         schatz.className = "turm-schatz";

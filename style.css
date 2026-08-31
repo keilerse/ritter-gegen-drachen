@@ -784,12 +784,16 @@ body::after{
   animation:mauerPuls 1.5s ease-in-out infinite;
 }
 .turm-sprosse.aktiv .turm-zahl{color:var(--gold)}
-/* Der Ritter ist ein SVG (images/ritter-leiter.svg). Die Höhe hängt an der
-   Sprosse, nicht an der Schriftgröße, damit er bei jeder Turmhöhe passt; die
-   Sprosse ist niedriger als die Grafik hoch ist, deshalb ragt er oben heraus. */
-.turm-ritter{position:absolute;left:4px;bottom:2px;height:150%;max-height:70px;
-  width:auto;pointer-events:none;
+/* Der Ritter ist ein SVG (images/ritter-leiter.svg) und steht auf jeder
+   Sprosse. Die Höhe hängt an der Sprosse, nicht an der Schriftgröße, damit er
+   bei jeder Turmhöhe passt; etwas über 100% lässt die mitgezeichneten Leitern
+   ineinander übergehen, ohne dass der oberste Ritter aus dem Rahmen ragt.
+   Gedämpft sind alle außer dem auf der aktuellen Sprosse – sonst sieht man
+   nicht mehr, wo man steht. */
+.turm-ritter{position:absolute;left:4px;bottom:2px;height:112%;max-height:52px;
+  width:auto;pointer-events:none;transition:opacity .18s;
   filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
+.turm-sprosse:not(.aktiv) .turm-ritter{opacity:.4}
 .turm-schatz{position:absolute;right:6px;font-size:1.25rem;line-height:1;
   filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
 .turm-leiter.rutscht{animation:ruettel .5s ease-out}
