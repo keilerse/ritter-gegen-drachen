@@ -88,9 +88,10 @@ unterschieden:
 - **Uhrturm** – die Uhr lesen, nach dem Lehrplan der 1. Klasse Volksschule: volle
   und halbe Stunden. Die Turmuhr zeigt eine Zeit, auf der Tafel steht der Satz mit
   einer Lücke (`halb ▢`), getippt wird die Zahl auf einem Feld von 1 bis 12. In der
-  letzten Runde kommt die Gegenrichtung dazu: Auf der Tafel steht die Zeit, darunter
-  drei Uhren zur Wahl – das ist das „Einstellen" des Lehrplans, ohne dass ein
-  Sechsjähriger Zeiger ziehen muss. Dabei verliert die Turmuhr ihre Zeiger und
+  ersten Runde geht es nur ums Ablesen; danach ist **jede zweite Aufgabe** die
+  Gegenrichtung: Auf der Tafel steht die Zeit, darunter drei Uhren zur Wahl – das ist
+  das „Einstellen" des Lehrplans, ohne dass ein Sechsjähriger Zeiger ziehen muss.
+  Macht vier von zwölf Aufgaben, dazu die letzte der Bonusrunde. Dabei verliert die Turmuhr ihre Zeiger und
   bekommt sie nach der richtigen Antwort zurück. Alle vier Aufgaben läutet die
   Glocke und ein Fenster geht an. Nach zwölf Aufgaben bietet das Abschluss-Fenster
   eine **freiwillige Bonusrunde mit Viertelstunden** an – die gehören erst in die

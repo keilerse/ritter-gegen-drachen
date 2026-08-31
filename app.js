@@ -2704,11 +2704,17 @@
     });
   }
 
+  /* Die erste Runde ist reines Ablesen – erst muss das sitzen, und dort kommen
+     ohnehin nur volle Stunden vor. Danach ist jede zweite Aufgabe eine
+     Zuordnung, in der Bonusrunde die letzte. */
+  function uhrArt(){
+    if(uhr.bonus) return uhr.gestellt === UHR_BONUS_AUFGABEN-1 ? "zuordnen" : "ablesen";
+    return (uhr.gestellt >= UHR_JE_RUNDE && uhr.gestellt % 2 === 1) ? "zuordnen" : "ablesen";
+  }
+
   function uhrNeueAufgabe(){
     uhr.zeit = uhrZiehen();
-    /* Zuordnen erst ab der letzten Runde – vorher soll das Ablesen sitzen. */
-    const zuordnenErlaubt = !uhr.bonus && uhr.gestellt >= (UHR_RUNDEN-1)*UHR_JE_RUNDE;
-    uhr.art = (zuordnenErlaubt && uhr.gestellt % 2 === 1) ? "zuordnen" : "ablesen";
+    uhr.art = uhrArt();
     if(uhr.art==="zuordnen"){
       uhr.wahl = uhrAblenker(uhr.zeit, UHR_WAHL-1).concat([uhr.zeit]);
       for(let i=uhr.wahl.length-1;i>0;i--){
