@@ -2201,36 +2201,58 @@
      Trägt die Leiter sich selbst weiter, ist schritte[i] genau leiter[i]. */
   function turmLeiter(start){
     const leiter = [start], schritte = [];
-    let n = start;
-    while(schritte.length < TURM_SPROSSEN-1){
-      /* Wie viele Stufen kommen nach dieser noch? Von einer Sprosse n aus ist
-         jede gerade Zahl darüber als nächstes Ergebnis möglich, also darf ein
-         Summand k nicht so hoch greifen, dass danach zu wenig Platz bleibt. */
-      const rest = TURM_SPROSSEN-2-schritte.length;
-      const passt = k => k*2 > n && Math.floor(opt.max/2)-k >= rest;
-      let s;
-      if(n*2 <= opt.max && passt(n)){
-        s = n;                                   /* die Leiter trägt weiter */
-      }else{
-        const frei = [];
-        for(let k=1; k*2 <= opt.max; k++) if(passt(k)) frei.push(k);
-        if(!frei.length) break;                  /* ganz oben ist Schluss */
-        s = waehle(frei);
+
+    /* Summanden, mit denen es von der Sprosse n aus weitergehen kann: Das
+       Ergebnis muss über n liegen (die Leiter soll steigen) und im Zahlenraum
+       bleiben. Ein aufgefüllter Summand darf außerdem nicht schon als
+       Sprossenzahl dastehen – beim Abstieg wäre die gesuchte Zahl sonst von
+       der Leiter abzulesen (Leiter 5·10·18·20 fragt "? + ? = 20", und die 10
+       stünde zwei Sprossen tiefer). Trägt die Leiter selbst weiter, hat das
+       Vorrang, der Rest kommt in zufälliger Reihenfolge. */
+    function moeglich(n){
+      const rest = [];
+      let kette = false;
+      for(let k=1; k*2 <= opt.max; k++){
+        if(k*2 <= n) continue;
+        if(k === n) kette = true;
+        else if(leiter.indexOf(k) < 0) rest.push(k);
       }
-      schritte.push(s);
-      n = s*2;
-      leiter.push(n);
+      for(let i=rest.length-1; i>0; i--){
+        const j = zufall(0,i); const h = rest[i]; rest[i] = rest[j]; rest[j] = h;
+      }
+      return kette ? [n].concat(rest) : rest;
     }
+
+    /* Mit Rücknahme, weil ein zu gieriger Schritt den Turm zu kurz enden ließe:
+       von der 20 aus geht es nicht weiter, und wer dort zu früh landet, käme
+       nie auf die volle Höhe. */
+    function bauen(n){
+      if(schritte.length === TURM_SPROSSEN-1) return true;
+      /* Die erste Stufe ist immer die Startzahl selbst. Ohne das findet die
+         Suche auch Leitern wie 9·12·14·16 – der Ritter stünde dann auf einer
+         9, die in keiner einzigen Aufgabe des Turms vorkommt. */
+      const kandidaten = schritte.length === 0
+        ? (start*2 <= opt.max ? [start] : [])
+        : moeglich(n);
+      for(let i=0; i<kandidaten.length; i++){
+        const k = kandidaten[i];
+        schritte.push(k); leiter.push(k*2);
+        if(bauen(k*2)) return true;
+        schritte.pop(); leiter.pop();
+      }
+      return false;
+    }
+    bauen(start);
     return { leiter, schritte };
   }
   /* Mögliche Startzahlen sind die, von denen aus der Turm seine volle Höhe
-     erreicht. Von 2s aus bleiben noch floor(max/2)-s gerade Zahlen übrig; mit
-     der ersten Stufe zusammen müssen das TURM_SPROSSEN-1 sein. Bis 20 fällt
-     damit nur die 10 heraus, bis 10 die 5. */
+     erreicht. Das wird ausprobiert statt ausgerechnet: turmLeiter() sucht mit
+     Rücknahme, findet also jede Leiter, die es gibt – eine Formel müsste die
+     Sperre für schon vergebene Zahlen mitrechnen. */
   function turmStartsMoeglich(){
     const aus = [];
     for(let s=1; s*2 <= opt.max; s++)
-      if(1 + Math.floor(opt.max/2) - s >= TURM_SPROSSEN-1) aus.push(s);
+      if(turmLeiter(s).schritte.length === TURM_SPROSSEN-1) aus.push(s);
     return aus;
   }
   function turmZiehe(arr,n){
@@ -2254,16 +2276,31 @@
      aufgefüllten Stufe ist die Aufgabe darüber nicht die Verdopplung der
      Sprosse, auf der der Ritter steht. Die Leiter bleibt trotzdem aufsteigend,
      dafür sorgt die Bedingung k*2 > n in turmLeiter(). */
+  /* Die Sprosse, in die die Antwort gehört – die, auf der das ? golden pulst.
+     Hinauf ist das die Sprosse über dem Ritter. Hinunter füllen sich die
+     Sprossen von unten auf, weil der Abstieg vorne anfängt (siehe turmAktuell);
+     die unterste noch offene ist das Ziel. Am Gipfel und ganz unten liegt das
+     Ziel außerhalb der Leiter: dann steht alles offen da und nichts pulst.
+
+     Alles unterhalb des Ziels ist ausgerechnet und wird angezeigt, alles ab dem
+     Ziel bleibt ?. Damit ist die Antwort der laufenden Aufgabe nie auf der
+     Leiter abzulesen – beim Abstieg wäre sie das sonst, denn dort ist die
+     gesuchte Zahl genau die Sprosse unter der aus der Aufgabe. */
+  function turmZielSprosse(){
+    if(turm.richtung==="hoch") return turm.sprosse+1;
+    return turm.sprosse===0 ? turm.leiter.length
+                            : turm.leiter.length-1-turm.sprosse;
+  }
+
   function turmZeichnen(){
     const box = $("turm-leiter");
+    const ziel = turmZielSprosse();
     box.innerHTML = "";
     for(let i=turm.leiter.length-1; i>=0; i--){
       const el = document.createElement("div");
       el.className = "turm-sprosse";
-      /* Beim Aufstieg ist alles oberhalb noch unbekannt. Beim Abstieg zeigt die
-         Leiter gar keine Zahlen mehr – die Antworten wären sonst ablesbar. */
-      const bekannt = turm.richtung==="hoch" && i<=turm.sprosse;
-      if(i===turm.sprosse) el.classList.add("aktiv");
+      const bekannt = i < ziel;
+      if(i===ziel) el.classList.add("aktiv");
       if(!bekannt) el.classList.add("verdeckt");
       const zahl = document.createElement("span");
       zahl.className = "turm-zahl";

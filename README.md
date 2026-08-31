@@ -53,8 +53,11 @@ unterschieden:
   Ritter steigt eine Leiter zum Schatz hinauf und wieder hinunter. Hoch geht es mit
   ganz normalen Plusaufgaben (`8 + 8 = ?`), runter mit Platzhaltern, bei denen beide
   Lücken dieselbe Zahl sind (`? + ? = 16`). Runter fängt es wieder bei der ersten
-  Sprosse an statt bei der zuletzt erklommenen, und die Leiter zeigt keine Zahlen
-  mehr – so lässt sich keine Antwort ablesen. **Jeder Turm ist gleich hoch.** Solange
+  Sprosse an statt bei der zuletzt erklommenen. Golden pulst immer die Sprosse, in
+  die die Antwort gehört – hinauf die über dem Ritter, hinunter füllt sich die
+  Leiter von unten wieder auf. Was darunter steht, ist ausgerechnet und sichtbar;
+  ab der goldenen Sprosse bleibt alles `?`, damit die gesuchte Zahl nie auf der
+  Leiter abzulesen ist. **Jeder Turm ist gleich hoch.** Solange
   die Verdopplung im Zahlenraum bleibt, baut die Leiter sich selbst weiter
   (`3 · 6 · 12`); ist oben kein Platz mehr, wird mit einer anderen zufälligen
   Verdopplung aufgefüllt (`8 · 16 · 18`, weil 32 über 20 läge). Ohne dieses Auffüllen
@@ -63,6 +66,12 @@ unterschieden:
   Aufgabe aber nicht die Verdopplung der Sprosse, auf der der Ritter gerade steht –
   die Antwort ist dafür immer die Sprosse, auf der er landet. Vier Sprossen, also
   drei Aufgaben hinauf und drei hinunter.
+
+  Beim Auffüllen darf ein Summand keine Zahl treffen, die schon auf einer Sprosse
+  steht: Die Leiter `5 · 10 · 18 · 20` fragt beim Abstieg `? + ? = 20`, und die
+  gesuchte 10 stünde zwei Sprossen tiefer offen da. `turmLeiter()` sucht deshalb
+  mit Rücknahme statt geradeaus – ein zu gieriger Schritt (etwa früh auf die 20)
+  ließe den Turm sonst zu kurz enden.
   Oben gibt es eine silberne Truhe, unten eine goldene, wenn der Turm fehlerfrei war.
   Eine falsche Antwort lässt den Ritter eine Sprosse abrutschen. Drei Türme pro
   Durchgang; jeder fehlerfreie Turm schaltet eine Drachenfarbe frei.
@@ -166,16 +175,12 @@ Zahlenraums in einem Turm. Es kostet nur Startzahlen: `turmStartsMoeglich()` wir
 alle weg, von denen aus die Höhe nicht mehr erreichbar ist, und das sind mit jeder
 Sprosse mehr.
 
-| Sprossen | Startzahlen bis 10 | bis 20 | Aufgaben je Durchgang |
-|---|---|---|---|
-| 3 | 1–4 | 1–9 | 12 |
-| **4** | **1–3** | **1–8** | **18** |
-| 5 | 1–2 | 1–7 | 24 |
-| 6 | nur 1 | 1–6 | 30 |
-
-Vier ist eingestellt: der letzte Wert, bei dem auch bis 10 noch für jeden der drei
-Türme eine eigene Startzahl da ist. Die 18 Aufgaben liegen nahe an Schatzjagd und
-Rechenmauer (je `ZIEL`/`MAUER_ZIEL` = 15).
+Bei vier Sprossen bleiben bis 10 die Startzahlen 1–3 und bis 20 die Startzahlen
+1–8 übrig, also je genug für die drei Türme eines Durchgangs; bei fünf müsste sich
+bis 10 schon einer wiederholen. Die 18 Aufgaben je Durchgang liegen nahe an
+Schatzjagd und Rechenmauer (je `ZIEL`/`MAUER_ZIEL` = 15). Welche Startzahlen
+durchkommen, rechnet `turmStartsMoeglich()` nicht aus, sondern probiert es –
+die Sperre für schon vergebene Zahlen ließe sich sonst kaum mitrechnen.
 
 **Ein neues Puzzlebild** kommt in zwei Schritten dazu: die Datei als `images/puzzle6.webp`
 ablegen (Seitenverhältnis 4:3) und `PUZZLE_ANZAHL` im Skript um eins erhöhen. Nimmst du

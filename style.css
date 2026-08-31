@@ -778,7 +778,9 @@ body::after{
   font-family:var(--schrift-display);font-size:1.15rem;color:var(--pergament);
   line-height:1;
 }
-.turm-sprosse.verdeckt .turm-zahl{opacity:.4}
+/* Die Zielsprosse ist verdeckt und trotzdem die wichtigste – sie behält
+   volle Deckkraft, damit das goldene ? wirklich heraussticht. */
+.turm-sprosse.verdeckt:not(.aktiv) .turm-zahl{opacity:.4}
 .turm-sprosse.aktiv{
   background:rgba(245,181,60,.26);border-color:var(--gold);
   animation:mauerPuls 1.5s ease-in-out infinite;
@@ -788,12 +790,10 @@ body::after{
    Sprosse. Die Höhe hängt an der Sprosse, nicht an der Schriftgröße, damit er
    bei jeder Turmhöhe passt; etwas über 100% lässt die mitgezeichneten Leitern
    ineinander übergehen, ohne dass der oberste Ritter aus dem Rahmen ragt.
-   Gedämpft sind alle außer dem auf der aktuellen Sprosse – sonst sieht man
-   nicht mehr, wo man steht. */
+   Wo der Ritter gerade steht, sagt die golden pulsende Sprosse. */
 .turm-ritter{position:absolute;left:4px;bottom:2px;height:112%;max-height:52px;
-  width:auto;pointer-events:none;transition:opacity .18s;
+  width:auto;pointer-events:none;
   filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
-.turm-sprosse:not(.aktiv) .turm-ritter{opacity:.4}
 .turm-schatz{position:absolute;right:6px;font-size:1.25rem;line-height:1;
   filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
 .turm-leiter.rutscht{animation:ruettel .5s ease-out}
