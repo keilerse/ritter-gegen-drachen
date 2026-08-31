@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Rechen-Ritter">
+  <title>Rechen-Ritter</title>
+  <defs>
+    <linearGradient id="fNacht" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#26314f"/>
+      <stop offset="1" stop-color="#0b1122"/>
+    </linearGradient>
+    <linearGradient id="fGold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffd873"/>
+      <stop offset=".55" stop-color="#f5b53c"/>
+      <stop offset="1" stop-color="#b97d1c"/>
+    </linearGradient>
+  </defs>
+  <!-- Grund wie der Spielhintergrund. Das rx faellt fuer die Startbildschirm-
+       Symbole weg, iOS und Android runden selbst (siehe README). -->
+  <rect width="64" height="64" rx="14" fill="url(#fNacht)"/>
+  <!-- Ritterschild mit Pluszeichen: Ritter und Rechnen in einer Form, und beides
+       bleibt bei 16 Pixeln noch erkennbar. -->
+  <path d="M14 16q0-4 4-4h28q4 0 4 4v14q0 14-18 22-18-8-18-22z"
+        fill="url(#fGold)" stroke="#2a1c0e" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M18 12h28q4 0 4 4v3H14v-3q0-4 4-4z" fill="#fff" opacity=".16"/>
+  <path d="M19 26h26v8H19zM28 17h8v26h-8z" fill="#2a1c0e"/>
+</svg>

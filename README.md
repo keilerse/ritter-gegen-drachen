@@ -221,6 +221,46 @@ horizontales Scrollen) und funktioniert am Tablet und Desktop genauso. Querforma
 Handy und Geräte mit Notch werden über eigene CSS-Regeln berücksichtigt. Am Handy
 lässt sich die Seite über „Zum Home-Bildschirm hinzufügen“ wie eine App ablegen.
 
+### Symbol und Startbildschirm
+
+Das Symbol ist ein goldenes Ritterschild mit einem Pluszeichen – Ritter und Rechnen in
+einer Form, und beides bleibt bei 16 Pixeln noch erkennbar. Gezeichnet ist es als
+`favicon.svg` in den Farben des Spiels; alles andere entsteht daraus:
+
+| Datei | wofür |
+|---|---|
+| `favicon.svg` | die Quelle, und was moderne Browser im Tab zeigen |
+| `favicon.ico` | 16/32/48 Pixel für ältere Browser und den automatischen Abruf von `/favicon.ico` |
+| `apple-touch-icon.png` | 180 Pixel, iPhone und iPad |
+| `icon-192.png`, `icon-512.png` | Android |
+| `icon-512-maskable.png` | Android schneidet bis zu 20 % ringsum weg, deshalb sitzt das Motiv hier auf 60 % |
+| `manifest.json` | Name, Farben und Symbole für den Startbildschirm |
+
+GitHub Pages liefert alle diese Dateien ohne Zutun aus; `.svg`, `.ico`, `.png` und
+`.json` bekommen den richtigen MIME-Typ. Es braucht keine Einstellung im Repository.
+Das Manifest heißt bewusst `manifest.json` und nicht `site.webmanifest` – die Endung
+`.json` wird überall sauber ausgeliefert.
+
+Die abgerundeten Ecken stecken nur im `favicon.svg`. Für die Startbildschirm-Symbole
+fallen sie weg, weil iOS und Android selbst runden und sonst dunkle Ecken stehen
+blieben. Neu erzeugt werden die Dateien mit `rsvg-convert` und Pillow:
+
+```sh
+sed 's/ rx="14"//' favicon.svg > /tmp/eckig.svg
+rsvg-convert -w 180 -h 180 /tmp/eckig.svg -o apple-touch-icon.png
+rsvg-convert -w 192 -h 192 /tmp/eckig.svg -o icon-192.png
+rsvg-convert -w 512 -h 512 /tmp/eckig.svg -o icon-512.png
+rsvg-convert -w 64  -h 64  favicon.svg   -o /tmp/f64.png
+python3 -c "from PIL import Image; Image.open('/tmp/f64.png').save('favicon.ico', sizes=[(16,16),(32,32),(48,48)])"
+```
+
+Das maskable Symbol entsteht aus derselben Zeichnung, nur mit dem Hintergrund über die
+volle Fläche und dem Schild in `<g transform="translate(12.8 12.8) scale(0.6)">`.
+
+Das `manifest.json` stellt das Spiel auf `display: standalone`: Vom Startbildschirm aus
+öffnet es ohne Adressleiste und Browser-Knöpfe. Wer die Leiste behalten will, setzt dort
+`"display": "browser"`.
+
 Die Schriften Luckiest Guy und Fredoka werden von Google Fonts geladen. Ohne
 Internetverbindung greift eine Systemschrift, das Spiel bleibt spielbar.
 
