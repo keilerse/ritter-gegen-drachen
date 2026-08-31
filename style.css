@@ -537,13 +537,23 @@ body::after{
   position:absolute;font-size:1.7rem;line-height:1;
   filter:drop-shadow(0 3px 4px rgba(0,0,0,.55));animation:aufpoppen .5s ease-out;
 }
-/* Höhlen-Deko lebt: Fackel flackert und wirft Licht, Stern funkelt,
-   Kristall blinkt, Gold glitzert. Jeder Lichtschein ist ein ::before-Ring,
-   der hinter dem Emoji liegt und dessen Farbe zur Ware passt. */
+/* Höhlen-Deko lebt, jedes Stück auf seine Art: Fackel flackert und wirft Licht,
+   Stern funkelt, Kristall blinkt, Gold glitzert, das Nest wiegt sich in seiner
+   eigenen Wärme und der Knochen kippelt ab und zu. Die Lichtscheine sind
+   ::before-Ringe hinter dem Emoji, deren Farbe zur Ware passt – der Knochen
+   bekommt keinen, Knochen leuchten nicht.
+
+   Nest und Knochen behalten das Aufpoppen aus .hoehle-schmuck span und hängen
+   ihre Dauerbewegung mit .5s Verzögerung dahinter. Die vier leuchtenden
+   überschreiben es weiterhin, sonst wären sie bei jedem Öffnen der Höhle eine
+   halbe Sekunde lang unsichtbar. */
 .hoehle-schmuck .schmuck-fackel{animation:fackelFlacker .38s ease-in-out infinite}
+.hoehle-schmuck .schmuck-nest{animation:aufpoppen .5s ease-out,nestWiegen 4.6s ease-in-out .5s infinite}
+.hoehle-schmuck .schmuck-knochen{animation:aufpoppen .5s ease-out,knochenKippeln 5.2s ease-in-out .5s infinite}
 .hoehle-schmuck .schmuck-fackel::before,
 .hoehle-schmuck .schmuck-stern::before,
 .hoehle-schmuck .schmuck-kristall::before,
+.hoehle-schmuck .schmuck-nest::before,
 .hoehle-schmuck .schmuck-gold::before{
   content:"";position:absolute;left:50%;bottom:50%;border-radius:50%;pointer-events:none;
 }
@@ -569,6 +579,12 @@ body::after{
   width:4.4rem;height:4.4rem;margin-left:-2.2rem;margin-bottom:-2.2rem;
   background:radial-gradient(circle,rgba(255,205,90,.5),transparent 68%);
   animation:goldSchein 3.4s ease-in-out infinite;
+}
+/* Das Nest glimmt warm statt zu leuchten – hier hat das Ei gelegen. */
+.hoehle-schmuck .schmuck-nest::before{
+  width:4rem;height:4rem;margin-left:-2rem;margin-bottom:-2rem;
+  background:radial-gradient(circle,rgba(255,170,90,.32),transparent 70%);
+  animation:nestSchein 4.6s ease-in-out infinite;
 }
 @keyframes fackelFlacker{
   0%,100%{transform:scale(1) rotate(-2deg);filter:brightness(1) drop-shadow(0 3px 4px rgba(0,0,0,.55))}
@@ -609,6 +625,25 @@ body::after{
 @keyframes goldSchein{
   0%,100%{opacity:.4;transform:scale(1)}
   50%{opacity:.95;transform:scale(1.25)}
+}
+/* Ruhiges Atmen, kein Blitzen: Das Nest soll neben Stern und Kristall nicht
+   um Aufmerksamkeit kämpfen. */
+@keyframes nestWiegen{
+  0%,100%{transform:rotate(-2.5deg) translateY(0);filter:brightness(1) drop-shadow(0 3px 4px rgba(0,0,0,.55))}
+  50%{transform:rotate(2.5deg) translateY(-2px);filter:brightness(1.12) drop-shadow(0 3px 6px rgba(255,170,90,.45))}
+}
+@keyframes nestSchein{
+  0%,100%{opacity:.35;transform:scale(1)}
+  50%{opacity:.8;transform:scale(1.12)}
+}
+/* Der Knochen liegt fast die ganze Zeit still und kippelt dann kurz – als
+   hätte der Drache ihn im Vorbeigehen angestoßen. */
+@keyframes knochenKippeln{
+  0%,62%,100%{transform:rotate(0deg) translateY(0)}
+  68%{transform:rotate(-9deg) translateY(-3px)}
+  74%{transform:rotate(7deg) translateY(-1px)}
+  80%{transform:rotate(-4deg) translateY(0)}
+  86%{transform:rotate(2deg)}
 }
 .hoehle-tafel{padding:14px}
 .hoehle-text{text-align:center;font-weight:600;font-size:.95rem;margin-bottom:10px;min-height:2.6em}

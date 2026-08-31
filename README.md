@@ -92,6 +92,13 @@ unterschieden:
   zum Hausdrachen. Ab dem Jungdrachen fliegt er im Drachenkampf als Begleiter mit und
   jubelt bei jedem Treffer. Sein Name wird aus einer Liste angetippt, und die Höhle
   lässt sich mit Nest, Fackel, Goldhaufen, Kristall, Knochen und Sternenlicht schmücken.
+  Jedes Stück bewegt sich, und zwar unterschiedlich: Die Fackel flackert und wirft
+  Licht, der Stern funkelt, der Kristall blinkt, das Gold glitzert, das Nest wiegt
+  sich in seiner eigenen Wärme, und der Knochen liegt meist still und kippelt dann
+  kurz. Nest und Knochen bekommen ihre Bewegung hinter dem Aufpoppen (`animation`
+  mit zwei Einträgen und `.5s` Verzögerung); die vier leuchtenden überschreiben das
+  Aufpoppen weiterhin, sonst wären sie bei jedem Öffnen der Höhle eine halbe Sekunde
+  lang unsichtbar.
 
   Der Drache **bekommt Hunger**: Nach 20 Stunden meldet ein Banner auf dem
   Startbildschirm, dass gefüttert werden will, und mit jedem weiteren Tag kommt eine
@@ -239,6 +246,24 @@ Sprenkel unter 2×2 Einheiten – bei einer Anzeigehöhe von 40 bis 95 Pixeln is
 weniger als ein Fünftel Pixel, macht aber ein Drittel der Datei aus. Sie fliegen
 raus (415 KB → 273 KB); die mittlere Pixelabweichung liegt selbst in voller Größe
 bei 0,35 von 255.
+
+**Plastizität** kommt bei allen Figuren aus linearen Verläufen statt flacher
+Füllfarben: je Fläche einer, aber alle mit denselben Endpunkten quer über die Figur,
+damit sie einer Lichtquelle links oben folgen. Die Endpunkte liegen bei 10 % und 95 %
+der Figurenbreite, nicht in den Ecken – sonst läge der hellste Punkt außerhalb der
+Zeichnung und der Verlauf wirkte flach. Metall bekommt die größte Spreizung und einen
+leicht kühlen Schatten, Stoff und Holz weniger. Mehr geht nicht: Bei anderthalbfacher
+Spreizung werden die Beine matschig und das rote Wappen wäscht aus.
+
+`gradientUnits="userSpaceOnUse"` heißt, dass die Koordinaten im Nutzerraum des
+Pfades gelten, also **nach** einem `<g transform>` – bei den Dateien mit
+Gruppenverschiebung (Leiter-Ritter, Jungdrache, Hausdrache) muss die Box darum um die
+Verschiebung bereinigt sein.
+
+Bei den drei Drachen war zu prüfen, ob die Verläufe die Drachenfarben stören: Sie
+ändern nur die Helligkeit, nicht den Farbton, und nachgemessen bleibt der Farbton
+nach `hue-rotate` derselbe (Feuerrot 3° vorher, 4° nachher). Die Gradzahlen in
+`DRACHEN_FARBEN` stimmen also weiter.
 
 Die Pfadkoordinaten sind auf **eine Nachkommastelle** gerundet und knapp geschrieben
 (`c1.5-.2 3-1` statt `c 1.5,-0.2 3,-1`); zusammen spart das rund ein Viertel bis die

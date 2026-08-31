@@ -2310,7 +2310,7 @@
          die übrigen bleiben gedämpft, damit man die Position noch sieht. */
       const ritter = document.createElement("img");
       ritter.className = "turm-ritter";
-      ritter.src = "images/ritter-leiter.svg?v=1";
+      ritter.src = "images/ritter-leiter.svg?v=2";
       ritter.alt = "";
       el.appendChild(ritter);
       if(i===turm.leiter.length-1){
