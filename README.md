@@ -97,6 +97,19 @@ unterschieden:
   eine **freiwillige Bonusrunde mit Viertelstunden** an – die gehören erst in die
   2. Klasse, deshalb kann man sie überspringen.
 
+- **Burgwaage** – Mengen vergleichen: mehr, weniger oder gleich viel. Auf zwei
+  Waagschalen liegen Ritterdinge – Schilde, Schafe, Pferde, Kronen –, und die Frage
+  ist immer dieselbe Entscheidung: linke Seite, gleich viel oder rechte Seite. Die
+  Dinge liegen zu fünft in einer Reihe, damit sich die Schalen Reihe für Reihe
+  vergleichen lassen; das ist die Methode der ersten Klasse, das Zuordnen. Bei jeder
+  vierten Aufgabe sind es gleich viele – der Fall, den Kinder am häufigsten falsch
+  beantworten, und deshalb mit fester Quote statt dem Zufall überlassen. In der
+  letzten Runde wechselt nur die Aufschrift der drei Knöpfe auf `>`, `=` und `<`:
+  Das Zeichen ist damit nichts Neues, sondern die Schreibweise für die Entscheidung,
+  die das Kind schon zwölfmal getroffen hat. Die Dinge bleiben liegen, unter jeder
+  Schale steht zusätzlich die Anzahl als Ziffer. Nach der Antwort kippt die Waage
+  zur schwereren Seite.
+
 - **Puzzle-Schatz** – jedes Puzzleteil kostet 200 Gold. Stück für Stück wird ein Bild
   enthüllt, bis das Puzzle gelöst ist. Danach geht es mit dem nächsten Motiv weiter,
   und das fertige Bild bleibt.
@@ -229,6 +242,12 @@ bis 10 schon einer wiederholen. Die 18 Aufgaben je Durchgang liegen nahe an
 Schatzjagd und Rechenmauer (je `ZIEL`/`MAUER_ZIEL` = 15). Welche Startzahlen
 durchkommen, rechnet `turmStartsMoeglich()` nicht aus, sondern probiert es –
 die Sperre für schon vergebene Zahlen ließe sich sonst kaum mitrechnen.
+
+Die Burgwaage hat `WAAGE_RUNDEN` × `WAAGE_JE_RUNDE` Aufgaben, die Dinge stehen in
+`WAAGE_DINGE`. `WAAGE_MAX` begrenzt die Menge je Schale auf zwölf – mehr Bilder kann
+ein Kind auf einem Handy nicht mehr abzählen, und abzählen ist ja die Aufgabe. Die
+Unterschiede sind absichtlich klein (eins bis drei): 3 gegen 11 sieht man ohne
+Zählen, 6 gegen 7 nicht.
 
 Der Uhrturm hat `UHR_RUNDEN` × `UHR_JE_RUNDE` Aufgaben im Hauptteil und
 `UHR_BONUS_AUFGABEN` in der Bonusrunde, dazu `UHR_WAHL` Uhren beim Zuordnen.

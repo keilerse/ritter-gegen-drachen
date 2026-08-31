@@ -2827,6 +2827,195 @@
     uhrStart(true);
   }
 
+  /* ================= SPIEL 10: BURGWAAGE =================
+     Mengen vergleichen – mehr, weniger, gleich viel. Kernstoff der 1. Klasse,
+     und der einzige Bereich, in dem hier nicht gerechnet, sondern gezählt und
+     verglichen wird.
+
+     Die Antwort ist immer dieselbe Entscheidung: linke Seite, gleich viel oder
+     rechte Seite. Nur die Beschriftung der drei Knöpfe wechselt – in den ersten
+     beiden Runden Wörter, in der dritten die Zeichen > = <. Damit ist das
+     Zeichen nichts Neues, sondern die Schreibweise für das, was das Kind schon
+     entschieden hat; links steht > , weil links die größere Seite ist.
+
+     Die Dinge auf den Schalen bleiben in allen Runden liegen. "Immer mit
+     Ritter-Objekten" heißt auch in der Zeichenrunde: Unter jeder Schale steht
+     zusätzlich die Anzahl als Ziffer, das ist die Brücke von der Menge zur
+     Zahl. */
+  const WAAGE_RUNDEN = 3, WAAGE_JE_RUNDE = 4;
+  const WAAGE_ZIEL_GOLD = 100;
+  /* Mehr als zwölf Bilder kann ein Kind auf einem Handy nicht mehr abzählen –
+     und abzählen ist ja die Aufgabe. */
+  const WAAGE_MAX = 12;
+  const WAAGE_DINGE = ["🛡️","⚔️","🐴","🐑","👑","🍞","🏹","🔔","🗝️","🪙"];
+
+  const waage = { gestellt:0, richtig:0, falsch:0, serie:0, beste:0,
+                  links:0, rechts:0, ding:"🛡️", art:"mengen", gesperrt:false };
+
+  /* Die dritte Runde schreibt den Vergleich mit Zeichen. */
+  function waageArt(){
+    return waage.gestellt >= (WAAGE_RUNDEN-1)*WAAGE_JE_RUNDE ? "zeichen" : "mengen";
+  }
+  function waageRunde(){
+    return Math.min(WAAGE_RUNDEN, Math.floor(waage.gestellt/WAAGE_JE_RUNDE)+1);
+  }
+  const waageGrenze = () => Math.min(opt.max, WAAGE_MAX);
+  const waageLoesung = () => waage.links > waage.rechts ? -1
+                           : waage.links < waage.rechts ?  1 : 0;
+
+  function waageZiehen(){
+    const g = waageGrenze();
+    waage.ding = waehle(WAAGE_DINGE);
+    /* Jede vierte Aufgabe ist ein Gleichstand. Ohne feste Quote käme er bei
+       kleinen Unterschieden fast nie vor – dabei ist er der Fall, den Kinder
+       am häufigsten falsch beantworten. */
+    if(zufall(1,4)===1){
+      waage.links = waage.rechts = zufall(1,g);
+      return;
+    }
+    /* Kleine Unterschiede sind die eigentliche Aufgabe: 3 gegen 11 sieht man
+       ohne Zählen, 6 gegen 7 nicht. */
+    const a = zufall(1,g);
+    let b = a + zufall(1,3) * (zufall(0,1) ? 1 : -1);
+    if(b < 1) b = a + zufall(1,3);
+    if(b > g) b = a - zufall(1,3);
+    if(b < 1 || b === a) b = a === g ? a-1 : a+1;
+    waage.links = a; waage.rechts = b;
+  }
+
+  function waageSchaleFuellen(id, anzahl, ariaKey){
+    const box = $(id);
+    box.innerHTML = "";
+    for(let i=0;i<anzahl;i++){
+      const e = document.createElement("i");
+      e.className = "waage-ding";
+      e.textContent = waage.ding;
+      box.appendChild(e);
+    }
+    box.setAttribute("aria-label", tr(ariaKey, { n: anzahl }));
+  }
+
+  function waageZeichnen(){
+    const bild = $("waage-bild");
+    bild.className = "waage";                       /* wieder waagrecht */
+    waageSchaleFuellen("waage-links",  waage.links,  "aria.waage.links");
+    waageSchaleFuellen("waage-rechts", waage.rechts, "aria.waage.rechts");
+    const zeichen = waage.art==="zeichen";
+    $("waage-zahl-links").hidden  = !zeichen;
+    $("waage-zahl-rechts").hidden = !zeichen;
+    $("waage-zahl-links").textContent  = waage.links;
+    $("waage-zahl-rechts").textContent = waage.rechts;
+    /* In der Zeichenrunde steht der Vergleich auch in der gewohnten
+       Schreibweise auf der Tafel – die Ziffern unter den Schalen sind die
+       Brücke von der Menge zur Zahl, die Tafel zeigt, wo das Zeichen hinkommt. */
+    $("waage-aufgabe").hidden = !zeichen;
+    if(zeichen)
+      $("waage-aufgabe").innerHTML =
+        waage.links + ' <span class="luecke">?</span> ' + waage.rechts;
+  }
+
+  function waageKopf(){
+    const mult = multiplikator(waage.serie);
+    $("waage-serie-wert").textContent = "×"+mult;
+    $("waage-serie").classList.toggle("aus", mult===1);
+    $("waage-runden").textContent = waageRunde()+"/"+WAAGE_RUNDEN;
+    schatzZeichnen();
+  }
+
+  /* Dieselben drei Knöpfe für beide Aufgabenarten – nur die Aufschrift wechselt. */
+  function waageAntwortfeld(){
+    const box = $("waage-antwort");
+    const zeichen = waage.art==="zeichen";
+    box.innerHTML = "";
+    box.classList.toggle("waage-antwort--zeichen", zeichen);
+    [[-1,">","waage.links"],[0,"=","waage.gleich"],[1,"<","waage.rechts"]].forEach(([wert,sym,key])=>{
+      const b = document.createElement("button");
+      b.className = "zahl waage-knopf"; b.type = "button";
+      b.dataset.wert = wert;
+      b.innerHTML = zeichen
+        ? '<span class="waage-sym">'+sym+'</span><span class="waage-wort">'+tr(key)+'</span>'
+        : '<span class="waage-wort waage-wort--gross">'+tr(key)+'</span>';
+      b.setAttribute("aria-label", tr(key));
+      b.addEventListener("click", ()=>waageAntwort(wert,b));
+      box.appendChild(b);
+    });
+  }
+
+  function waageNeueAufgabe(){
+    const vorher = waage.art;
+    waage.art = waageArt();
+    waageZiehen();
+    waageZeichnen();
+    waageAntwortfeld();
+    waageKopf();
+    sagen("waage-rueckmeldung",
+          (waage.art==="zeichen" && vorher!=="zeichen")
+            ? tr("waage.zeichen.start")
+            : tr(waage.art==="zeichen" ? "waage.frage.zeichen" : "waage.frage.mengen"), "");
+    $("waage-tipptext").textContent = tr(waage.art==="zeichen" ? "waage.tipp.zeichen" : "waage.tipp.mengen");
+    $("waage-tipp").classList.remove("is-offen");
+    waage.gesperrt = false;
+    freigeben("waage-antwort");
+  }
+
+  function waageFertig(){
+    kSieg();
+    goldDazu(WAAGE_ZIEL_GOLD);
+    $("waage-ziel-text").textContent =
+      trp("waage.ziel.basis", waage.richtig, { b: waage.beste }) + " " +
+      (waage.falsch===0 ? tr("h.ziel.sauber") : tr("h.weiterso"));
+    $("ov-waage").classList.add("is-offen");
+    waageKopf();
+  }
+
+  function waageAntwort(wert,knopf){
+    if(waage.gesperrt) return;
+    waage.gesperrt = true; sperren("waage-antwort");
+    const richtig = waageLoesung();
+    waage.gestellt++;
+
+    /* Die Waage kippt erst nach der Antwort – vorher stünde die Lösung da. */
+    $("waage-bild").classList.add(richtig===0 ? "waage--gleich"
+                                : richtig<0  ? "waage--links" : "waage--rechts");
+
+    if(wert===richtig){
+      knopf.classList.add("richtig");
+      waage.richtig++; waage.serie++; waage.beste = Math.max(waage.beste,waage.serie);
+      problemGeloest();
+      const gewinn = goldDazu(GRUNDGOLD*multiplikator(waage.serie));
+      kRichtig(); kMuenze();
+      sagen("waage-rueckmeldung", tr(waehle(lobWorte))+"  "+tr("gold.plus",{n:gewinn}), "gut");
+      funken("waage-funken","🪙",multiplikator(waage.serie)*4);
+    }else{
+      knopf.classList.add("falsch");
+      zeigeLoesung("waage-antwort", richtig);
+      waage.falsch++; waage.serie = 0;
+      const weg = goldWeg();
+      kFalsch();
+      $("waage-tipp").classList.add("is-offen");
+      sagen("waage-rueckmeldung",
+            weg ? tr("waage.falsch.gold", { a:waage.links, b:waage.rechts, n:weg })
+                : tr("waage.falsch",      { a:waage.links, b:waage.rechts }),
+            "schlecht");
+    }
+    waageKopf();
+
+    const ende = waage.gestellt >= WAAGE_RUNDEN*WAAGE_JE_RUNDE;
+    setTimeout(()=>{ ende ? waageFertig() : waageNeueAufgabe(); },
+               wert===richtig ? 1500 : 2800);
+  }
+
+  function waageStart(){
+    waage.gestellt=0; waage.richtig=0; waage.falsch=0; waage.serie=0; waage.beste=0;
+    waage.art = "mengen";
+    zeigeScreen("screen-waage");
+    waageNeueAufgabe();
+  }
+  function waageWeiter(){
+    $("ov-waage").classList.remove("is-offen");
+    waageStart();
+  }
+
   /* ================= Auswahl & Bedienung ================= */
   function wahlSetzen(gruppeId,wert){
     alle("#"+gruppeId+" button").forEach(b =>
@@ -3061,6 +3250,8 @@
 
   $("karte-turm").addEventListener("click", turmStart);
   $("karte-uhr").addEventListener("click", ()=>uhrStart(false));
+  $("karte-waage").addEventListener("click", waageStart);
+  $("btn-waage-weiter").addEventListener("click", waageWeiter);
   $("btn-uhr-weiter").addEventListener("click", uhrWeiter);
   $("btn-uhr-bonus").addEventListener("click", uhrBonusStarten);
   $("btn-turm-weiter").addEventListener("click", turmWeiter);
