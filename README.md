@@ -359,6 +359,25 @@ einem blassen Grün liefert `hue-rotate` nur matte Farben. Die Eierschale beim
 Schlüpfling bleibt cremefarben – sie ist kein Drache.
 
 Die Aufgaben selbst entstehen in `rohAufgabe()`, jede Stufe hat dort ein paar Zeilen.
+Die Stufen 1 bis 3 sind Zahlenräume (bis 10, bis 20 ohne und mit Zehnerübergang),
+die Stufen 4 und 5 sind **Formen**, die darauf aufsetzen: 4 ist die Lückenaufgabe
+(`7 + ? = 12`), 5 die **Rechenkette** mit drei Zahlen (`1 + 3 - 2`).
+
+Ketten stehen überall am Ende, weil man dabei ein Zwischenergebnis behalten muss:
+in der Schatzjagd ab Runde 9, beim Drachenkampf beim Schattenhorn und beim
+Königsdrachen, im Turnier bei König Goldhelm. Rechenmauer, Drachenturm, Uhrturm und
+Burgwaage haben eigene Erzeuger und sind davon nicht berührt.
+
+Beide Zwischenschritte müssen im Zahlenraum bleiben und dürfen nicht unter null
+gehen. Deshalb rechnet `ketteAufgabe()` die Summanden aus dem, was gerade da ist,
+statt zu würfeln und zu verwerfen. Der Fall, der dabei leicht durchrutscht: Steht
+„nur Plus" und ist die erste Rechnung schon beim Höchstwert angekommen, bliebe für
+den zweiten Schritt nur noch Abziehen – darum ist die Decke des ersten Schritts in
+diesem Fall um eins niedriger.
+
+Der Tipp zeigt bei einer Kette **zwei Punktereihen**, eine je Schritt, mit dem
+Schritt darübergeschrieben. Genau das Behalten des Zwischenergebnisses ist ja die
+Schwierigkeit – der Tipp nimmt es ab.
 Die Farben liegen als CSS-Variablen ganz oben in der Datei.
 
 ## Lizenz

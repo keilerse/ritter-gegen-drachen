@@ -412,7 +412,52 @@
              text: luecke ? a+op+"?"+ergebnis : a+op+b,
              loesung: a+" "+op+" "+b+" = "+ergebnis };
   }
+  /* Rechenkette mit drei Zahlen: 1 + 3 - 2. Wie die Lückenaufgabe (Stufe 4)
+     keine eigene Zahlenraum-Stufe, sondern eine Form, die auf den vorhandenen
+     aufsetzt. Das Kind muss ein Zwischenergebnis behalten – deshalb steht sie
+     überall am Ende, beim letzten Drachen, beim letzten Gegner, in den letzten
+     Runden der Schatzjagd.
+
+     Beide Zwischenschritte müssen im Zahlenraum bleiben und dürfen nicht unter
+     null gehen; darum werden die Summanden aus dem gerechnet, was gerade da
+     ist, statt zu würfeln und zu verwerfen. Ohne Minus wird daraus eine
+     Pluskette (2 + 3 + 4), auch das ist eine Rechenkette. */
+  function ketteAufgabe(){
+    const max = opt.max;
+    const o1 = (!opt.minus || Math.random()<.5) ? "+" : "-";
+    let a, b;
+    if(o1==="+"){
+      /* Ist Minus abgeschaltet, muss nach dem ersten Schritt noch Platz für
+         den zweiten bleiben – sonst bliebe nur Abziehen, und das wäre gegen
+         die Einstellung. */
+      const decke = opt.minus ? max : max-1;
+      a = zufall(1, decke-1);
+      b = zufall(1, decke-a);
+    }else{
+      a = zufall(3, max);
+      b = zufall(1, a-1);
+    }
+    const z = o1==="+" ? a+b : a-b;
+    let o2 = (!opt.minus || Math.random()<.5) ? "+" : "-";
+    /* Für den zweiten Schritt muss oben bzw. unten noch Luft sein. */
+    if(opt.minus){
+      if(o2==="+" && z>=max) o2 = "-";
+      if(o2==="-" && z<=1)   o2 = "+";
+    }
+    const c = o2==="+" ? zufall(1, max-z) : zufall(1, z);
+    return fertigKette(a,o1,b,o2,c);
+  }
+  function fertigKette(a,o1,b,o2,c){
+    const z = o1==="+" ? a+b : a-b;
+    const e = o2==="+" ? z+c : z-c;
+    return { a:a, b:b, c:c, op:o1, op2:o2, zwischen:z, ergebnis:e,
+             kette:true, luecke:false, antwort:e,
+             text: a+o1+b+o2+c,
+             loesung: a+" "+o1+" "+b+" "+o2+" "+c+" = "+e };
+  }
+
   function rohAufgabe(stufe){
+    if(stufe===5) return ketteAufgabe();
     if(opt.max===10 && stufe!==4) stufe = 1;
     let a,b,op;
     if(stufe===4){
@@ -438,7 +483,13 @@
     return n;
   }
   function zeigeAufgabe(elId,n){
-    $(elId).innerHTML = n.luecke
+    const el = $(elId);
+    /* Eine Kette ist vier Zeichen länger als "7 + 5 = ?" und liefe bei der
+       vollen Schriftgröße über den Rand. */
+    el.classList.toggle("aufgabe--kette", !!n.kette);
+    el.innerHTML = n.kette
+      ? n.a+" "+n.op+" "+n.b+" "+n.op2+" "+n.c+' = <span class="luecke">?</span>'
+      : n.luecke
       ? n.a+" "+n.op+' <span class="luecke">?</span> = '+n.ergebnis
       : n.a+" "+n.op+" "+n.b+' = <span class="luecke">?</span>';
   }
@@ -447,19 +498,46 @@
     el.textContent = text;
     el.className = "rueckmeldung" + (art ? " "+art : "");
   }
-  function bauePunkte(elId,n){
-    const feld = $(elId), gross = opt.max===10 ? 10 : 20;
+  /* Punktebild eines einzelnen Rechenschritts. */
+  function punkteMuster(a,op,b,ergebnis,luecke,gross){
     const k = new Array(gross).fill("");
     const setze = (v,bis,cls) => { for(let i=v;i<bis && i<gross;i++) k[i]=cls; };
-    if(n.op==="+" && !n.luecke){ setze(0,n.a,"a"); setze(n.a,n.a+n.b,"b"); }
-    else if(n.op==="+" && n.luecke){ setze(0,n.a,"a"); setze(n.a,n.ergebnis,"dazu"); }
-    else if(n.op==="-" && !n.luecke){ setze(0,n.a-n.b,"a"); setze(n.a-n.b,n.a,"weg"); }
-    else { setze(0,n.ergebnis,"a"); setze(n.ergebnis,n.a,"weg"); }
+    if(op==="+" && !luecke){ setze(0,a,"a"); setze(a,a+b,"b"); }
+    else if(op==="+" && luecke){ setze(0,a,"a"); setze(a,ergebnis,"dazu"); }
+    else if(op==="-" && !luecke){ setze(0,a-b,"a"); setze(a-b,a,"weg"); }
+    else { setze(0,ergebnis,"a"); setze(ergebnis,a,"weg"); }
+    return k;
+  }
+  /* Eine Rechenkette bekommt zwei Reihen – eine je Schritt, mit dem Schritt
+     darüber geschrieben. Genau das ist ja die Schwierigkeit: dass man das
+     Zwischenergebnis behalten muss. Der Tipp nimmt es einem ab. */
+  function bauePunkte(elId,n){
+    const feld = $(elId), gross = opt.max===10 ? 10 : 20;
     feld.innerHTML = "";
-    for(let i=0;i<gross;i++){
-      const p = document.createElement("i");
-      if(k[i]) p.className = k[i];
-      feld.appendChild(p);
+    feld.classList.remove("zahlenfeldpunkte");
+    feld.classList.add("punktefeld");
+    const reihe = (muster,text) => {
+      if(text){
+        const t = document.createElement("div");
+        t.className = "punkte-schritt"; t.textContent = text;
+        feld.appendChild(t);
+      }
+      const box = document.createElement("div");
+      box.className = "zahlenfeldpunkte";
+      muster.forEach(cls => {
+        const p = document.createElement("i");
+        if(cls) p.className = cls;
+        box.appendChild(p);
+      });
+      feld.appendChild(box);
+    };
+    if(n.kette){
+      reihe(punkteMuster(n.a,n.op,n.b,n.zwischen,false,gross),
+            n.a+" "+n.op+" "+n.b+" = "+n.zwischen);
+      reihe(punkteMuster(n.zwischen,n.op2,n.c,n.ergebnis,false,gross),
+            n.zwischen+" "+n.op2+" "+n.c);
+    }else{
+      reihe(punkteMuster(n.a,n.op,n.b,n.ergebnis,n.luecke,gross));
     }
   }
 
@@ -523,8 +601,8 @@
     { nameKey:"drache.glutzahn",      emoji:"🐲", zaehne:4, stufen:[1],   hue:0,   beute:50 },
     { nameKey:"drache.nebelschwinge", emoji:"🐉", zaehne:5, stufen:[1,2], hue:160, beute:75 },
     { nameKey:"drache.frostkralle",   emoji:"🐲", zaehne:5, stufen:[2,3], hue:200, beute:100 },
-    { nameKey:"drache.schattenhorn",  emoji:"🐉", zaehne:6, stufen:[3],   hue:270, beute:125 },
-    { nameKey:"drache.koenigsdrache", emoji:"🐲", zaehne:6, stufen:[3,4], hue:330, beute:200 }
+    { nameKey:"drache.schattenhorn",  emoji:"🐉", zaehne:6, stufen:[3,5], hue:270, beute:125 },
+    { nameKey:"drache.koenigsdrache", emoji:"🐲", zaehne:6, stufen:[3,4,5], hue:330, beute:200 }
   ];
   const MAX_HERZEN = 3;
   const k = { drache:0, herzen:3, zaehne:0, maxZaehne:0, aufgabe:null, letzte:"",
@@ -661,11 +739,11 @@
     schatzZeichnen();
   }
   function hStufen(){
-    if(opt.max===10) return h.runde>10 ? [1,4] : [1];
+    if(opt.max===10) return h.runde>14 ? [1,4,5] : h.runde>10 ? [1,4] : [1];
     if(h.runde<=4) return [1];
     if(h.runde<=8) return [1,2];
-    if(h.runde<=12) return [2,3];
-    return [3,4];
+    if(h.runde<=12) return [2,3,5];
+    return [3,4,5];
   }
   function hNeueAufgabe(){
     if(!h.wiederholen){
@@ -1969,7 +2047,7 @@
     { nameKey:"t.gegner.blauhelm",  stufen:[1],     beute:50,  hell:"#6ea0f2", dunkel:"#22499b" },
     { nameKey:"t.gegner.grauguss",  stufen:[1,2],   beute:75,  hell:"#95a1ab", dunkel:"#333c45" },
     { nameKey:"t.gegner.silberzahn",stufen:[2,3],   beute:100, hell:"#ffffff", dunkel:"#93a3b4" },
-    { nameKey:"t.gegner.goldhelm",  stufen:[3,4],   beute:150, hell:"#ffd873", dunkel:"#9a6a10" }
+    { nameKey:"t.gegner.goldhelm",  stufen:[3,4,5], beute:150, hell:"#ffd873", dunkel:"#9a6a10" }
   ];
   const GEGNER_BILD = "images/ritter-nach-links.svg";
   const t = { gegner:0, richtig:0, falsch:0, serie:0, beste:0,
