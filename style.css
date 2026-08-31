@@ -87,6 +87,8 @@ body::after{
 }
 .spielkarte:active{transform:translateY(5px);box-shadow:0 3px 0 rgba(0,0,0,.35)}
 .spielkarte .bild{font-size:2.6rem;line-height:1;flex-shrink:0}
+/* Karten mit gezeichnetem Symbol statt Emoji: gleiche Höhe wie ein Emoji. */
+.spielkarte .bild img{display:block;height:1.4em;width:auto}
 .spielkarte h3{font-family:var(--schrift-display);font-size:1.25rem;line-height:1.1}
 .spielkarte p{font-size:.92rem;font-weight:500;opacity:.85;margin-top:3px}
 .spielwahl-titel{
@@ -324,6 +326,8 @@ body::after{
 .overlay-karte{width:100%;max-width:440px;text-align:center;display:flex;flex-direction:column;gap:14px;align-items:center}
 .truhe{font-size:clamp(5rem,26vw,7.5rem);line-height:1;cursor:pointer;animation:wackeln 1s ease-in-out infinite}
 .belohnung{font-size:clamp(4rem,22vw,6rem);line-height:1;animation:aufpoppen .6s ease-out}
+/* Gezeichnetes Symbol statt Emoji – 1em, damit dieselbe clamp-Größe greift. */
+.belohnung img{display:block;height:1em;width:auto;margin:0 auto}
 .overlay h2{font-family:var(--schrift-display);font-size:clamp(1.6rem,7vw,2.2rem);color:var(--gold);line-height:1.15}
 .overlay p{font-weight:500;font-size:1.05rem;max-width:28ch}
 .gold-plus{font-family:var(--schrift-display);font-size:1.6rem;color:var(--gold)}
@@ -780,7 +784,11 @@ body::after{
   animation:mauerPuls 1.5s ease-in-out infinite;
 }
 .turm-sprosse.aktiv .turm-zahl{color:var(--gold)}
-.turm-ritter{position:absolute;left:6px;font-size:1.25rem;line-height:1;
+/* Der Ritter ist ein SVG (images/ritter-leiter.svg). Die Höhe hängt an der
+   Sprosse, nicht an der Schriftgröße, damit er bei jeder Turmhöhe passt; die
+   Sprosse ist niedriger als die Grafik hoch ist, deshalb ragt er oben heraus. */
+.turm-ritter{position:absolute;left:4px;bottom:2px;height:150%;max-height:70px;
+  width:auto;pointer-events:none;
   filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
 .turm-schatz{position:absolute;right:6px;font-size:1.25rem;line-height:1;
   filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}

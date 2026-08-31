@@ -2270,9 +2270,10 @@
       zahl.textContent = bekannt ? turm.leiter[i] : "?";
       el.appendChild(zahl);
       if(i===turm.sprosse){
-        const ritter = document.createElement("span");
+        const ritter = document.createElement("img");
         ritter.className = "turm-ritter";
-        ritter.textContent = "🧗";
+        ritter.src = "images/ritter-leiter.svg?v=1";
+        ritter.alt = "";
         el.appendChild(ritter);
       }
       if(i===turm.leiter.length-1){

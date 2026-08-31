@@ -208,6 +208,17 @@ wird an der gerenderten Grafik: außerhalb des Wappens darf kein rotes Pixel
 Wappentier dieselbe helle Fläche wie die Rüstung, aber eben als eigener Teilpfad.
 Der ist jetzt rot, samt seiner beiden Löcher. Der Rest des Schildes bleibt Silber.
 
+`images/ritter-leiter.svg` (Symbol des Drachenturms, Ritter auf der Sprosse und
+Bild im Abschluss-Fenster) ist der dritte Fall: Der Drache steckt dort gar nicht
+als Fläche in der Zeichnung, sondern nur als **Loch im Konturpfad** – das Wappen
+war reine Strichzeichnung auf zweifarbigem Feld. Das Loch lässt sich aber als
+eigene Fläche wiederverwenden: Es wird mit `fill-rule="evenodd"` zusammen mit der
+Schwanzschlaufe (die Feldfarbe behalten soll) als roter Pfad direkt unter dem
+Konturpfad eingehängt, damit die schwarzen Linien darüber liegen bleiben. Die
+Grüntöne sind gegen die Grautöne des Kampfritters getauscht (`#c9c9c9`, `#9a9a9a`),
+das Gewand gegen ein helleres `#d8d8d8`. Der weiße Hintergrundpfad musste weg,
+sonst klebte ein weißer Kasten hinter der Figur.
+
 `images/ritter-nach-links.svg` (der Gegner) hat den schwierigsten Fall: Satteldecke
 und Rüstung teilen sich eine Farbe **innerhalb** desselben Teilpfad-Geflechts. Die
 Decke wird darum über eine beschnittene Kopie des Rüstungspfades eingefärbt, und sie
@@ -217,6 +228,12 @@ nicht geschätzt, sondern aus einer Flächenanalyse der gerenderten Grafik gewon
 von Hand gesetzte Rechtecke erwischten zuverlässig den Hüftpanzer des Reiters mit.
 Die Verläufe (`gRuest`, `gPferd`, `gDecke`, `gFahne`) stehen oben in der Datei und
 geben der Figur etwas Tiefe.
+
+Beim Leiter-Ritter kommt noch ein Schritt dazu: Drei Viertel seiner Teilpfade sind
+Sprenkel unter 2×2 Einheiten – bei einer Anzeigehöhe von 40 bis 95 Pixeln ist das
+weniger als ein Fünftel Pixel, macht aber ein Drittel der Datei aus. Sie fliegen
+raus (415 KB → 273 KB); die mittlere Pixelabweichung liegt selbst in voller Größe
+bei 0,35 von 255.
 
 Die Pfadkoordinaten sind auf **eine Nachkommastelle** gerundet und knapp geschrieben
 (`c1.5-.2 3-1` statt `c 1.5,-0.2 3,-1`); zusammen spart das rund ein Viertel bis die
