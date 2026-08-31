@@ -53,7 +53,9 @@ unterschieden:
   Ritter steigt eine Leiter zum Schatz hinauf und wieder hinunter. Hoch geht es mit
   ganz normalen Plusaufgaben (`8 + 8 = ?`), runter mit Platzhaltern, bei denen beide
   Lücken dieselbe Zahl sind (`? + ? = 16`). Runter fängt es wieder bei der ersten
-  Sprosse an statt bei der zuletzt erklommenen. Golden pulst immer die Sprosse, in
+  Sprosse an statt bei der zuletzt erklommenen; der Ritter steht dabei auf genau
+  einer Sprosse und läuft von oben herunter, während sich die Leiter von unten
+  auffüllt. Golden pulst immer die Sprosse, in
   die die Antwort gehört – hinauf die über dem Ritter, hinunter füllt sich die
   Leiter von unten wieder auf. Was darunter steht, ist ausgerechnet und sichtbar;
   ab der goldenen Sprosse bleibt alles `?`, damit die gesuchte Zahl nie auf der

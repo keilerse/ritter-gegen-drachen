@@ -2306,13 +2306,18 @@
       zahl.className = "turm-zahl";
       zahl.textContent = bekannt ? turm.leiter[i] : "?";
       el.appendChild(zahl);
-      /* Der Ritter steht auf jeder Sprosse; die aktuelle hebt ihn hervor,
-         die übrigen bleiben gedämpft, damit man die Position noch sieht. */
-      const ritter = document.createElement("img");
-      ritter.className = "turm-ritter";
-      ritter.src = "images/ritter-leiter.svg?v=2";
-      ritter.alt = "";
-      el.appendChild(ritter);
+      /* Der Ritter steht auf der Sprosse, die gerade dran ist. Beim Aufstieg
+         ist das die unter dem goldenen ? – er greift von dort nach oben. Beim
+         Abstieg läuft er von oben herunter, während sich die Leiter von unten
+         auffüllt: Die Halbierungsaufgaben fangen vorne an, nicht bei der
+         zuletzt erklommenen Sprosse (siehe turmAktuell). */
+      if(i===turm.sprosse){
+        const ritter = document.createElement("img");
+        ritter.className = "turm-ritter";
+        ritter.src = "images/ritter-leiter.svg?v=2";
+        ritter.alt = "";
+        el.appendChild(ritter);
+      }
       if(i===turm.leiter.length-1){
         const schatz = document.createElement("span");
         schatz.className = "turm-schatz";

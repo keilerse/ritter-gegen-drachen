@@ -821,12 +821,11 @@ body::after{
   animation:mauerPuls 1.5s ease-in-out infinite;
 }
 .turm-sprosse.aktiv .turm-zahl{color:var(--gold)}
-/* Der Ritter ist ein SVG (images/ritter-leiter.svg) und steht auf jeder
+/* Der Ritter ist ein SVG (images/ritter-leiter.svg) und steht auf genau einer
    Sprosse. Die Höhe hängt an der Sprosse, nicht an der Schriftgröße, damit er
-   bei jeder Turmhöhe passt; etwas über 100% lässt die mitgezeichneten Leitern
-   ineinander übergehen, ohne dass der oberste Ritter aus dem Rahmen ragt.
-   Wo der Ritter gerade steht, sagt die golden pulsende Sprosse. */
-.turm-ritter{position:absolute;left:4px;bottom:2px;height:112%;max-height:52px;
+   bei jeder Turmhöhe passt; die halbe Sprosse Überstand lässt ihn beim Aufstieg
+   in die goldene Sprosse darüber hineingreifen. */
+.turm-ritter{position:absolute;left:4px;bottom:2px;height:150%;max-height:70px;
   width:auto;pointer-events:none;
   filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
 .turm-schatz{position:absolute;right:6px;font-size:1.25rem;line-height:1;
