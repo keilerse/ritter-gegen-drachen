@@ -1967,12 +1967,17 @@
   /* Takt eines Ritts: hin, Lanzen krachen, zurück. */
   const RITT_HIN = 380, RITT_HALT = 240, RITT_ZURUECK = 420;
   const RITT_GESAMT = RITT_HIN + RITT_HALT + RITT_ZURUECK;
+  /* Jeder Gegner hat seine eigenen Wappenfarben – Fahne und Satteldecke. Die
+     Namen geben sie in allen fünf Sprachen vor (Blauhelm, Grauguss,
+     Silberzahn, Goldhelm), und von blau über Eisen und Silber zu Gold läuft
+     die Reihe nebenbei mit der Schwierigkeit mit. */
   const TURNIER_GEGNER = [
-    { nameKey:"t.gegner.blauhelm",  stufen:[1],     beute:50 },
-    { nameKey:"t.gegner.grauguss",  stufen:[1,2],   beute:75 },
-    { nameKey:"t.gegner.silberzahn",stufen:[2,3],   beute:100 },
-    { nameKey:"t.gegner.goldhelm",  stufen:[3,4],   beute:150 }
+    { nameKey:"t.gegner.blauhelm",  stufen:[1],     beute:50,  hell:"#6ea0f2", dunkel:"#22499b" },
+    { nameKey:"t.gegner.grauguss",  stufen:[1,2],   beute:75,  hell:"#95a1ab", dunkel:"#333c45" },
+    { nameKey:"t.gegner.silberzahn",stufen:[2,3],   beute:100, hell:"#ffffff", dunkel:"#93a3b4" },
+    { nameKey:"t.gegner.goldhelm",  stufen:[3,4],   beute:150, hell:"#ffd873", dunkel:"#9a6a10" }
   ];
+  const GEGNER_BILD = "images/ritter-nach-links.svg";
   const t = { gegner:0, richtig:0, falsch:0, serie:0, beste:0,
               aufgabe:null, letzte:"", gesperrt:false, wiederholen:false, beute:0, gewonnen:false };
 
@@ -1990,10 +1995,53 @@
   function tGegnerName(){
     return tr(TURNIER_GEGNER[Math.min(t.gegner,TURNIER_GEGNER.length-1)].nameKey);
   }
+  /* Ein <img> lässt sich von außen nicht umfärben – die Verläufe stecken in der
+     SVG-Datei. Also wird die Datei einmal geholt, für den jeweiligen Gegner
+     werden die vier Farbwerte von gDecke und gFahne im Text ersetzt, und das
+     Ergebnis hängt als Blob-URL am selben <img>. So bleiben alle CSS-Klassen
+     (angriff, getroffen, faellt) unangetastet.
+
+     Klappt das Holen nicht – etwa wenn jemand die index.html direkt per
+     file:// öffnet –, bleibt einfach der blaue Ritter aus dem Markup stehen. */
+  let gegnerSvg = null, gegnerLaeuft = false, gegnerBlob = "", gegnerGezeigt = -1;
+
+  function gegnerEinfaerben(txt, hell, dunkel){
+    return txt.replace(/<linearGradient id="g(?:Decke|Fahne)"[\s\S]*?<\/linearGradient>/g, block => {
+      let n = 0;
+      return block.replace(/stop-color="#[0-9a-fA-F]{3,8}"/g,
+                           () => 'stop-color="' + (n++ ? dunkel : hell) + '"');
+    });
+  }
+  function gegnerBildSetzen(){
+    const i = Math.min(t.gegner, TURNIER_GEGNER.length-1);
+    if(!gegnerSvg || gegnerGezeigt === i) return;
+    const g = TURNIER_GEGNER[i];
+    const url = URL.createObjectURL(
+      new Blob([gegnerEinfaerben(gegnerSvg, g.hell, g.dunkel)], {type:"image/svg+xml"}));
+    $("t-gegner-ritter").src = url;
+    /* Immer nur eine Fassung im Speicher: die Datei ist mehrere hundert KB. */
+    if(gegnerBlob) URL.revokeObjectURL(gegnerBlob);
+    gegnerBlob = url;
+    gegnerGezeigt = i;
+  }
+  function gegnerBildLaden(){
+    if(gegnerSvg || gegnerLaeuft) return;
+    gegnerLaeuft = true;
+    fetch(GEGNER_BILD)
+      .then(r => r.ok ? r.text() : Promise.reject(new Error(r.status)))
+      .then(txt => { gegnerSvg = txt; gegnerBildSetzen(); })
+      .catch(() => { gegnerLaeuft = false; });
+  }
+
   function tZeichnen(){
     const k = kontoAktuell();
+    const g = TURNIER_GEGNER[Math.min(t.gegner,TURNIER_GEGNER.length-1)];
     $("t-name-ich").textContent    = (k && k.name) || tr("t.dein.ritter");
     $("t-name-gegner").textContent = tGegnerName();
+    /* Das Namensschild trägt dieselbe Farbe – bei 60 Pixel Rittergröße ist das
+       der schnellere Hinweis als die Fahne selbst. */
+    $("t-name-gegner").style.color = g.hell;
+    gegnerBildSetzen();
     $("t-treffer-ich").textContent    = "⚔".repeat(t.richtig);
     $("t-treffer-gegner").textContent = "⚔".repeat(t.falsch);
     $("t-ritt").textContent = tr("t.ritt", { n: t.richtig+t.falsch, m: TURNIER_RITTE });
@@ -2150,6 +2198,7 @@
     tBuehneZuruecksetzen();
     baueZahlen("t-zahlen",tAntwort);
     zeigeScreen("screen-turnier");
+    gegnerBildLaden();
     tZeichnen();
     tNeueAufgabe();
   }

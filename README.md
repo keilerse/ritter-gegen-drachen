@@ -167,7 +167,29 @@ Die Drachen stehen als Liste `DRACHEN`, die Schätze als `SCHAETZE` und die Rän
 Beute anpassen. Für die Drachenhöhle gilt dasselbe mit `HOEHLE_STUFEN` (Wachstum),
 `HOEHLE_SCHMUCK` (Deko samt Position in der Höhle), `HOEHLE_NAMEN` sowie den Preisen
 `HOEHLE_EI` und `HOEHLE_FUTTER`. Die Turniergegner liegen als `TURNIER_GEGNER`
-(Name, Schwierigkeit, Beute), die Zahl der Ritte pro Gegner als `TURNIER_RITTE`.
+(Name, Schwierigkeit, Beute, Wappenfarben), die Zahl der Ritte pro Gegner als
+`TURNIER_RITTE`.
+
+**Jeder Gegner hat eigene Farben** an Fahne und Satteldecke – die Namen geben sie
+in allen fünf Sprachen vor (Blauhelm, Grauguss, Silberzahn, Goldhelm), und von Blau
+über Eisen und Silber zu Gold läuft die Reihe nebenbei mit der Schwierigkeit mit.
+Sein Namensschild trägt dieselbe Farbe; bei 60 Pixel Rittergröße ist das der
+schnellere Hinweis als die Fahne.
+
+Umgesetzt ist das ohne vier Kopien der Grafik: Ein `<img>` lässt sich von außen
+nicht umfärben, die Verläufe stecken in der Datei. Also wird `ritter-nach-links.svg`
+einmal geholt, im Text werden die vier Farbwerte von `gDecke` und `gFahne` ersetzt,
+und das Ergebnis hängt als Blob-URL am selben `<img>` – alle CSS-Klassen
+(`angriff`, `getroffen`, `faellt`) bleiben unangetastet. Es liegt immer nur eine
+Fassung im Speicher, die vorige wird freigegeben.
+
+Ein `filter: hue-rotate()` auf das ganze Bild wäre einfacher gewesen, geht aber
+nicht: Es würde das braune Pferd mitdrehen, und für Gold müsste man so weit
+drehen, dass das Pferd blau wird.
+
+**Wichtig fürs Ausprobieren:** `fetch` scheitert, wenn man die `index.html` direkt
+per `file://` öffnet – dann bleibt für alle Gegner der blaue Ritter aus dem Markup
+stehen. Zum Prüfen also `python3 -m http.server` im Projektordner benutzen.
 
 Für den Drachenturm gibt es `TURM_ANZAHL` (Türme je Durchgang), `TURM_SPROSSEN`
 (Sprossen je Turm, also eine Aufgabe weniger hinauf und ebenso viele hinunter) und
