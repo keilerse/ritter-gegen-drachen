@@ -115,6 +115,15 @@
         <span class="badge badge--verdienen" data-i18n="badge.verdienen">Verdienen</span>
       </button>
 
+      <button class="spielkarte" id="karte-uhr" type="button">
+        <span class="bild">🕰️</span>
+        <span>
+          <h3 data-i18n="karte.uhr.titel">Uhrturm</h3>
+          <p data-i18n="karte.uhr.text">Lies die Turmuhr ab, damit die Glocke wieder läutet.</p>
+        </span>
+        <span class="badge badge--verdienen" data-i18n="badge.verdienen">Verdienen</span>
+      </button>
+
       <div class="spielwahl-titel spielwahl-titel--ausgeben" data-i18n="gold.ausgeben">🪙 Gold ausgeben</div>
       <button class="spielkarte spielkarte--ausgeben" id="karte-puzzle" type="button">
         <span class="bild">🧩</span>
@@ -549,6 +558,57 @@
     </div>
   </section>
 
+  <!-- ============ SPIEL 9: UHRTURM ============ -->
+  <section class="screen" id="screen-uhr">
+    <div class="hort-kopf">
+      <div class="anzeige">
+        <div class="kopf" data-i18n="gold">Gold</div>
+        <div class="wert"><span class="goldbox js-goldbox"><span class="js-gold">0</span></span></div>
+      </div>
+      <div class="anzeige anzeige--serie aus" id="uhr-serie">
+        <div class="kopf" data-i18n="serie">Serie</div>
+        <div class="wert" id="uhr-serie-wert">×1</div>
+      </div>
+      <div class="anzeige">
+        <div class="kopf" data-i18n="uhr">Runde</div>
+        <div class="wert" id="uhr-runden">1/3</div>
+      </div>
+    </div>
+
+    <div class="schatzleiste">
+      <span class="schild">🎁</span>
+      <span class="balken"><i class="js-truhe-balken"></i></span>
+      <span class="zaehler js-truhe-zaehler">0/5</span>
+    </div>
+
+    <div class="rang-chip"><span class="js-rang-emoji">🪙</span><span class="js-rang">Knappe</span></div>
+
+    <div class="uhr-buehne">
+      <div class="uhr-turm">
+        <div class="uhr-dach"><span class="uhr-glocke" id="uhr-glocke">🔔</span></div>
+        <div class="uhr-blatt" id="uhr-blatt" data-i18n-aria="aria.uhr" aria-label="Turmuhr"></div>
+        <div class="uhr-fenster" id="uhr-fenster"></div>
+      </div>
+      <div class="funken" id="uhr-funken"></div>
+    </div>
+
+    <div class="tafel aufgabe-tafel">
+      <div class="aufgabe" id="uhr-aufgabe">? Uhr</div>
+      <div class="rueckmeldung" id="uhr-rueckmeldung">Wie spät ist es?</div>
+      <div class="tipp-feld" id="uhr-tipp"><div class="uhr-tipptext" id="uhr-tipptext"></div></div>
+    </div>
+
+    <div class="zahlenfeld zahlenfeld--uhr" id="uhr-zahlen"></div>
+    <div class="uhr-wahl" id="uhr-wahl" hidden></div>
+
+    <div class="fusszeile">
+      <button class="mini" data-tipp="uhr" data-i18n="tipp">💡 Tipp</button>
+      <button class="mini" data-kammer data-i18n="kammer">🗝️ Schatzkammer</button>
+      <button class="mini" data-ton>🔊 Ton</button>
+      <button class="mini" data-heim data-i18n="heim">🏠 Auswahl</button>
+    </div>
+  </section>
+
   <!-- ============ SPIEL 7: RITTER-TURNIER ============ -->
   <section class="screen" id="screen-turnier">
     <div class="hort-kopf">
@@ -714,6 +774,19 @@
   </div>
 </div>
 
+<!-- ============ UHRTURM ERGEBNIS ============ -->
+<div class="overlay" id="ov-uhr">
+  <div class="overlay-karte">
+    <div class="belohnung">🔔</div>
+    <h2 data-i18n="uhr.titel">Die Turmuhr geht wieder!</h2>
+    <p id="uhr-ziel-text"></p>
+    <p class="gold-plus" data-i18n="ziel.bonus">+100 Bonus-Gold</p>
+    <button class="knopf" id="btn-uhr-bonus" data-i18n="uhr.bonus.knopf" hidden>🔔 Bonus: Viertelstunden</button>
+    <button class="knopf" id="btn-uhr-weiter" data-i18n="uhr.weiter">Noch einmal</button>
+    <button class="mini" data-heim data-i18n="heim">🏠 Auswahl</button>
+  </div>
+</div>
+
 <!-- ============ TURNIER ERGEBNIS ============ -->
 <div class="overlay" id="ov-turnier">
   <div class="overlay-karte">
@@ -756,7 +829,7 @@
   </div>
 </div>
 
-<script src="strings.js?v=17"></script>
-<script src="app.js?v=26"></script>
+<script src="strings.js?v=18"></script>
+<script src="app.js?v=27"></script>
 </body>
 </html>

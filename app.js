@@ -2552,6 +2552,292 @@
     turmStart();
   }
 
+  /* ================= SPIEL 9: UHRTURM =================
+     Uhrzeit lesen nach dem Lehrplan der 1. Klasse Volksschule: volle und
+     halbe Stunden. Viertelstunden gibt es nur als freiwillige Bonusrunde,
+     sie gehören erst in die 2. Klasse.
+
+     Die Sprachfalle: "halb 4" ist 3:30 – aber nur im Deutschen wird dabei die
+     NÄCHSTE Stunde genannt. Englisch ("half past three"), Spanisch ("3 y
+     media"), Französisch und Türkisch nennen die aktuelle. Dieselbe Uhr hat
+     also je nach Sprache eine andere richtige Antwort; welche gilt, steht in
+     uhr.halb.bezug. Bei "viertel vor" ist es in allen fünf Sprachen die
+     nächste Stunde, da braucht es keine Fallunterscheidung.
+
+     Zwei Aufgabenarten, beide antippbar – ein Sechsjähriger soll keine Zeiger
+     ziehen müssen:
+       ablesen   – die Turmuhr zeigt eine Zeit, auf der Tafel steht der Rahmen
+                   mit einer Lücke ("halb ▢"), getippt wird die Zahl.
+       zuordnen  – auf der Tafel steht die Zeit in Worten, darunter stehen drei
+                   Uhren zur Wahl. Das ist das "Einstellen" des Lehrplans. */
+  const UHR_RUNDEN = 3;          /* Runden im Hauptteil */
+  const UHR_JE_RUNDE = 4;        /* Aufgaben je Runde */
+  const UHR_BONUS_AUFGABEN = 4;
+  const UHR_ZIEL_GOLD = 100, UHR_BONUS_GOLD = 60;
+  const UHR_WAHL = 3;            /* Uhren zur Auswahl beim Zuordnen */
+
+  const uhr = { gestellt:0, richtig:0, falsch:0, serie:0, beste:0,
+                zeit:null, art:"ablesen", wahl:[], gesperrt:false,
+                bonus:false, bonusGeschafft:false, bonusRichtig:0 };
+
+  const uhrNaechste = h => h===12 ? 1 : h+1;
+  const uhrVorige   = h => h===1  ? 12 : h-1;
+
+  /* Welcher Satz gehört zu welcher Minutenstellung. */
+  function uhrForm(z){
+    return z.m===0  ? "uhr.form.voll"
+         : z.m===30 ? "uhr.form.halb"
+         : z.m===15 ? "uhr.form.viertelnach"
+                    : "uhr.form.viertelvor";
+  }
+  /* Die Zahl, die im Satz genannt wird – und damit die richtige Antwort. */
+  function uhrZahl(z){
+    if(z.m===0 || z.m===15) return z.h;
+    if(z.m===45) return uhrNaechste(z.h);
+    return tr("uhr.halb.bezug")==="naechste" ? uhrNaechste(z.h) : z.h;
+  }
+  const uhrSatz = z => tr(uhrForm(z), { n: uhrZahl(z) });
+
+  /* Zeigerwinkel. Der kleine Zeiger steht bei 3:30 NICHT auf der 3, sondern
+     auf halbem Weg zur 4 – genau daran liest ein Kind ab, dass es fast vier
+     ist. Ohne den halben Grad je Minute wäre die Uhr didaktisch falsch. */
+  const uhrStdWinkel = z => (z.h % 12) * 30 + z.m * 0.5;
+  const uhrMinWinkel = z => z.m * 6;
+
+  /* Zifferblatt als SVG. Wird auch für die drei Wahluhren benutzt. */
+  function uhrBlattHTML(){
+    let t = '<svg class="uhr-svg" viewBox="0 0 100 100" aria-hidden="true" focusable="false">';
+    t += '<circle class="uhr-rand" cx="50" cy="50" r="46"/>';
+    for(let i=0;i<12;i++){
+      const w = i*30, r = Math.PI*w/180;
+      const x = 50+Math.sin(r), y = 50-Math.cos(r);
+      t += '<line class="uhr-strich" x1="'+(50+42*Math.sin(r)).toFixed(1)+'" y1="'+(50-42*Math.cos(r)).toFixed(1)+
+           '" x2="'+(50+37*Math.sin(r)).toFixed(1)+'" y2="'+(50-37*Math.cos(r)).toFixed(1)+'"/>';
+    }
+    for(let i=1;i<=12;i++){
+      const r = Math.PI*i*30/180;
+      t += '<text class="uhr-zahl-svg" x="'+(50+30*Math.sin(r)).toFixed(1)+
+           '" y="'+(50-30*Math.cos(r)+4).toFixed(1)+'">'+i+'</text>';
+    }
+    t += '<line class="uhr-zeiger uhr-zeiger--std" x1="50" y1="54" x2="50" y2="28"/>';
+    t += '<line class="uhr-zeiger uhr-zeiger--min" x1="50" y1="56" x2="50" y2="15"/>';
+    t += '<circle class="uhr-mitte" cx="50" cy="50" r="3.4"/></svg>';
+    return t;
+  }
+  function uhrZeigerSetzen(el,z){
+    el.style.setProperty("--std", uhrStdWinkel(z)+"deg");
+    el.style.setProperty("--min", uhrMinWinkel(z)+"deg");
+  }
+
+  /* Minuten, die in der laufenden Runde vorkommen dürfen. */
+  function uhrMinuten(){
+    if(uhr.bonus) return [15,45];
+    return uhr.gestellt < UHR_JE_RUNDE ? [0] : [0,30];
+  }
+  function uhrRunde(){ return Math.min(UHR_RUNDEN, Math.floor(uhr.gestellt/UHR_JE_RUNDE)+1); }
+
+  function uhrZiehen(){
+    return { h: zufall(1,12), m: waehle(uhrMinuten()) };
+  }
+  /* Ablenker für das Zuordnen: die echten Verwechslungen – dieselbe Stunde mit
+     anderer Zeigerstellung und die Nachbarstunden. */
+  function uhrAblenker(z,n){
+    const kand = [];
+    for(const h of [z.h, uhrNaechste(z.h), uhrVorige(z.h)])
+      for(const m of (uhr.bonus ? [0,15,30,45] : [0,30]))
+        if(!(h===z.h && m===z.m)) kand.push({h:h,m:m});
+    const aus = [];
+    while(aus.length<n && kand.length){
+      const k = kand.splice(zufall(0,kand.length-1),1)[0];
+      if(!aus.some(a => a.h===k.h && a.m===k.m)) aus.push(k);
+    }
+    return aus;
+  }
+
+  function uhrKopf(){
+    const mult = multiplikator(uhr.serie);
+    $("uhr-serie-wert").textContent = "×"+mult;
+    $("uhr-serie").classList.toggle("aus", mult===1);
+    $("uhr-runden").textContent = uhr.bonus ? "★" : uhrRunde()+"/"+UHR_RUNDEN;
+    schatzZeichnen();
+  }
+  function uhrFensterZeichnen(){
+    const box = $("uhr-fenster");
+    box.innerHTML = "";
+    for(let i=0;i<UHR_RUNDEN;i++){
+      const f = document.createElement("i");
+      f.className = "uhr-licht" + ((uhr.bonus || i < Math.floor(uhr.gestellt/UHR_JE_RUNDE)) ? " an" : "");
+      box.appendChild(f);
+    }
+  }
+
+  function uhrTipptext(){
+    const z = uhr.zeit;
+    return tr(z.m===0 ? "uhr.tipp.voll" : z.m===30 ? "uhr.tipp.halb" : "uhr.tipp.viertel");
+  }
+
+  function uhrAufgabeZeigen(){
+    const z = uhr.zeit;
+    const blatt = $("uhr-blatt");
+    const luecke = '<span class="luecke">?</span>';
+    if(uhr.art==="ablesen"){
+      blatt.classList.remove("ohne-zeiger");
+      uhrZeigerSetzen(blatt.firstChild, z);
+      $("uhr-aufgabe").innerHTML = tr(uhrForm(z), { n: luecke });
+      $("uhr-zahlen").hidden = false;
+      $("uhr-wahl").hidden = true;
+    }else{
+      /* Beim Zuordnen verliert die Turmuhr ihre Zeiger – die Antwort stünde
+         sonst oben schon da. Das Zifferblatt bleibt stehen, sonst klaffte im
+         Turm ein leerer Kasten, und es passt zur Geschichte: Die Uhr ist
+         kaputt, das Kind sagt ihr, wie spät es ist. Nach der richtigen Antwort
+         bekommt sie die Zeiger zurück. */
+      blatt.classList.add("ohne-zeiger");
+      $("uhr-aufgabe").textContent = uhrSatz(z);
+      $("uhr-zahlen").hidden = true;
+      $("uhr-wahl").hidden = false;
+      uhrWahlZeichnen();
+    }
+    $("uhr-tipptext").textContent = uhrTipptext();
+    sagen("uhr-rueckmeldung", tr(uhr.art==="ablesen" ? "uhr.frage.ablesen" : "uhr.frage.zuordnen"), "");
+    $("uhr-tipp").classList.remove("is-offen");
+  }
+
+  function uhrWahlZeichnen(){
+    const box = $("uhr-wahl");
+    box.innerHTML = "";
+    uhr.wahl.forEach((z,i) => {
+      const b = document.createElement("button");
+      b.className = "zahl uhr-karte"; b.type = "button";
+      b.dataset.wert = i;
+      b.setAttribute("aria-label", tr("aria.uhr.wahl", { n:i+1 }));
+      b.innerHTML = uhrBlattHTML();
+      uhrZeigerSetzen(b.firstChild, z);
+      b.addEventListener("click", ()=>uhrAntwort(i,b));
+      box.appendChild(b);
+    });
+  }
+
+  function uhrNeueAufgabe(){
+    uhr.zeit = uhrZiehen();
+    /* Zuordnen erst ab der letzten Runde – vorher soll das Ablesen sitzen. */
+    const zuordnenErlaubt = !uhr.bonus && uhr.gestellt >= (UHR_RUNDEN-1)*UHR_JE_RUNDE;
+    uhr.art = (zuordnenErlaubt && uhr.gestellt % 2 === 1) ? "zuordnen" : "ablesen";
+    if(uhr.art==="zuordnen"){
+      uhr.wahl = uhrAblenker(uhr.zeit, UHR_WAHL-1).concat([uhr.zeit]);
+      for(let i=uhr.wahl.length-1;i>0;i--){
+        const j = zufall(0,i), h = uhr.wahl[i]; uhr.wahl[i] = uhr.wahl[j]; uhr.wahl[j] = h;
+      }
+    }
+    uhrAufgabeZeigen();
+    uhrFensterZeichnen();
+    uhrKopf();
+    uhr.gesperrt = false;
+    freigeben("uhr-zahlen"); freigeben("uhr-wahl");
+  }
+
+  function uhrRichtigeAntwort(){
+    if(uhr.art==="ablesen") return uhrZahl(uhr.zeit);
+    return uhr.wahl.findIndex(z => z.h===uhr.zeit.h && z.m===uhr.zeit.m);
+  }
+
+  function uhrFertig(){
+    const bonusReif = !uhr.bonus && !uhr.bonusGeschafft;
+    kSieg();
+    goldDazu(uhr.bonus ? UHR_BONUS_GOLD : UHR_ZIEL_GOLD);
+    $("uhr-ziel-text").textContent =
+      trp("uhr.ziel.basis", uhr.richtig, { b: uhr.beste }) + " " +
+      (uhr.falsch===0 ? tr("h.ziel.sauber") : tr("h.weiterso"));
+    $("btn-uhr-bonus").hidden = !bonusReif;
+    $("ov-uhr").classList.add("is-offen");
+    uhrKopf();
+  }
+
+  function uhrAntwort(wert,knopf){
+    if(uhr.gesperrt) return;
+    uhr.gesperrt = true;
+    const feld = uhr.art==="ablesen" ? "uhr-zahlen" : "uhr-wahl";
+    sperren(feld);
+    const richtig = uhrRichtigeAntwort();
+    uhr.gestellt++;
+
+    if(wert===richtig){
+      knopf.classList.add("richtig");
+      uhr.richtig++; uhr.serie++; uhr.beste = Math.max(uhr.beste,uhr.serie);
+      problemGeloest();
+      const gewinn = goldDazu(GRUNDGOLD*multiplikator(uhr.serie));
+      kRichtig(); kMuenze();
+      sagen("uhr-rueckmeldung", tr(waehle(lobWorte))+"  "+tr("gold.plus",{n:gewinn}), "gut");
+      funken("uhr-funken","🪙",multiplikator(uhr.serie)*4);
+      if(uhr.art==="zuordnen"){
+        uhrZeigerSetzen($("uhr-blatt").firstChild, uhr.zeit);
+        $("uhr-blatt").classList.remove("ohne-zeiger");
+      }
+    }else{
+      knopf.classList.add("falsch");
+      zeigeLoesung(feld, richtig);
+      uhr.falsch++; uhr.serie = 0;
+      const weg = goldWeg();
+      kFalsch();
+      $("uhr-tipp").classList.add("is-offen");
+      sagen("uhr-rueckmeldung",
+            weg ? tr("uhr.falsch.gold", { zeit: uhrSatz(uhr.zeit), n: weg })
+                : tr("uhr.falsch",      { zeit: uhrSatz(uhr.zeit) }),
+            "schlecht");
+    }
+
+    /* Rundenwechsel: die Glocke läutet und ein Fenster geht an. */
+    const rundeVoll = !uhr.bonus && uhr.gestellt % UHR_JE_RUNDE === 0
+                                 && uhr.gestellt < UHR_RUNDEN*UHR_JE_RUNDE;
+    if(rundeVoll){
+      uhrFensterZeichnen();
+      bewege($("uhr-glocke"),"laeutet",900);
+      setTimeout(()=> sagen("uhr-rueckmeldung", tr("uhr.glocke"), "gut"), 700);
+      kSieg();
+    }
+    uhrKopf();
+
+    const ende = uhr.gestellt >= (uhr.bonus ? UHR_BONUS_AUFGABEN : UHR_RUNDEN*UHR_JE_RUNDE);
+    const truheFaellig = truheZaehlen();
+    setTimeout(()=>{
+      const weiter = () => { ende ? uhrFertig() : uhrNeueAufgabe(); };
+      truheFaellig ? truheZeigen(weiter) : weiter();
+    }, wert===richtig ? (rundeVoll ? 1700 : 1050) : 2400);
+  }
+
+  function uhrZahlenfeld(){
+    const feld = $("uhr-zahlen");
+    feld.innerHTML = "";
+    for(let i=1;i<=12;i++){
+      const b = document.createElement("button");
+      b.className = "zahl"; b.type = "button";
+      b.textContent = i; b.dataset.wert = i;
+      b.setAttribute("aria-label", tr("aria.antwort", { n:i }));
+      b.addEventListener("click", ()=>uhrAntwort(i,b));
+      feld.appendChild(b);
+    }
+  }
+
+  function uhrStart(bonus){
+    uhr.gestellt=0; uhr.richtig=0; uhr.falsch=0; uhr.serie=0; uhr.beste=0;
+    uhr.bonus = !!bonus;
+    if(!bonus) uhr.bonusGeschafft = false;
+    $("uhr-blatt").innerHTML = uhrBlattHTML();
+    uhrZahlenfeld();
+    zeigeScreen("screen-uhr");
+    if(bonus) sagen("uhr-rueckmeldung", tr("uhr.bonus.start"), "gut");
+    uhrNeueAufgabe();
+  }
+  function uhrWeiter(){
+    $("ov-uhr").classList.remove("is-offen");
+    uhrStart(false);
+  }
+  function uhrBonusStarten(){
+    $("ov-uhr").classList.remove("is-offen");
+    uhr.bonusGeschafft = true;
+    uhrStart(true);
+  }
+
   /* ================= Auswahl & Bedienung ================= */
   function wahlSetzen(gruppeId,wert){
     alle("#"+gruppeId+" button").forEach(b =>
@@ -2785,6 +3071,9 @@
   $("btn-turnier-weiter").addEventListener("click", tWeiter);
 
   $("karte-turm").addEventListener("click", turmStart);
+  $("karte-uhr").addEventListener("click", ()=>uhrStart(false));
+  $("btn-uhr-weiter").addEventListener("click", uhrWeiter);
+  $("btn-uhr-bonus").addEventListener("click", uhrBonusStarten);
   $("btn-turm-weiter").addEventListener("click", turmWeiter);
 
   $("hunger-banner").addEventListener("click", ()=>{ hoehleZeichnen(); zeigeScreen("screen-hoehle"); });

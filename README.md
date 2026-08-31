@@ -80,6 +80,17 @@ unterschieden:
 
 ### Gold ausgeben
 
+- **Uhrturm** – die Uhr lesen, nach dem Lehrplan der 1. Klasse Volksschule: volle
+  und halbe Stunden. Die Turmuhr zeigt eine Zeit, auf der Tafel steht der Satz mit
+  einer Lücke (`halb ▢`), getippt wird die Zahl auf einem Feld von 1 bis 12. In der
+  letzten Runde kommt die Gegenrichtung dazu: Auf der Tafel steht die Zeit, darunter
+  drei Uhren zur Wahl – das ist das „Einstellen" des Lehrplans, ohne dass ein
+  Sechsjähriger Zeiger ziehen muss. Dabei verliert die Turmuhr ihre Zeiger und
+  bekommt sie nach der richtigen Antwort zurück. Alle vier Aufgaben läutet die
+  Glocke und ein Fenster geht an. Nach zwölf Aufgaben bietet das Abschluss-Fenster
+  eine **freiwillige Bonusrunde mit Viertelstunden** an – die gehören erst in die
+  2. Klasse, deshalb kann man sie überspringen.
+
 - **Puzzle-Schatz** – jedes Puzzleteil kostet 200 Gold. Stück für Stück wird ein Bild
   enthüllt, bis das Puzzle gelöst ist. Danach geht es mit dem nächsten Motiv weiter,
   und das fertige Bild bleibt.
@@ -212,6 +223,27 @@ bis 10 schon einer wiederholen. Die 18 Aufgaben je Durchgang liegen nahe an
 Schatzjagd und Rechenmauer (je `ZIEL`/`MAUER_ZIEL` = 15). Welche Startzahlen
 durchkommen, rechnet `turmStartsMoeglich()` nicht aus, sondern probiert es –
 die Sperre für schon vergebene Zahlen ließe sich sonst kaum mitrechnen.
+
+Der Uhrturm hat `UHR_RUNDEN` × `UHR_JE_RUNDE` Aufgaben im Hauptteil und
+`UHR_BONUS_AUFGABEN` in der Bonusrunde, dazu `UHR_WAHL` Uhren beim Zuordnen.
+
+**Die Sprachfalle des Uhrturms.** „halb 4" ist 3:30 – aber nur im Deutschen wird
+dabei die *nächste* Stunde genannt. Englisch („half past three"), Spanisch („3 y
+media"), Französisch und Türkisch nennen die *aktuelle*. Dieselbe Uhr hat also je
+nach Sprache eine andere richtige Antwort. Welche gilt, steht als
+`uhr.halb.bezug` in `strings.js` (`naechste` nur bei `de`); `uhrZahl()` liest es
+aus. Bei „viertel vor" nennen alle fünf Sprachen die nächste Stunde, da braucht es
+keine Fallunterscheidung. Wer eine Sprache ergänzt, muss diesen Schlüssel setzen.
+
+Die Zeitangaben in Spanisch, Französisch und Türkisch sind für Ziffern
+vereinfacht („1 heures" statt „une heure"); wer es genauer will, muss die Formen
+in `uhr.form.*` sprachspezifisch aufteilen.
+
+**Der Stundenzeiger** steht bei 3:30 nicht auf der 3, sondern auf halbem Weg zur 4
+(`(h % 12) * 30 + m * 0.5`). Genau daran liest ein Kind ab, dass es schon fast vier
+ist – ohne den halben Grad je Minute wäre die Uhr didaktisch falsch. Der Test
+rechnet die Zeit aus den tatsächlich gesetzten Zeigerwinkeln zurück und prüft das
+nach, statt dem Spielzustand zu glauben.
 
 **Ein neues Puzzlebild** kommt in zwei Schritten dazu: die Datei als `images/puzzle6.webp`
 ablegen (Seitenverhältnis 4:3) und `PUZZLE_ANZAHL` im Skript um eins erhöhen. Nimmst du
