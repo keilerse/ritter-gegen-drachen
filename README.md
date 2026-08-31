@@ -38,6 +38,11 @@ unterschieden:
 
 - **Schatzjagd** – Rechnen in Ruhe, ohne Herzen und ohne Verlieren. Eine Serie richtiger
   Antworten bringt den zwei- und dreifachen Goldbetrag, nach 15 Aufgaben winkt Bonus-Gold.
+  **Nur hier gibt es Schatztruhen**: Alle fünf Aufgaben springt eine auf und legt ein
+  Stück ins Album. Das ist ihr Alleinstellungsmerkmal – zählte jedes Spiel mit, wäre
+  die Schatzjagd bloß eines von sechs Rechenspielen und die Truhe eine Belohnung, die
+  überall vom Himmel fällt. Die Truhenleiste steht deshalb nur in der Schatzjagd und
+  auf dem Startbildschirm, wo sie als Einladung dient.
 
 - **Rechenmauer** – Lücken in der Zahlenmauer füllen. Jede Mauer ist so aufgebaut, dass
   sich die Lücken Schritt für Schritt lösen lassen; ein Knopf zeigt den nächsten

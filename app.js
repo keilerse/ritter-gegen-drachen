@@ -265,7 +265,9 @@
     schatzZeichnen(); sichern();
     return true;
   }
-  /* Truhenfortschritt zählt in beiden Spielen mit */
+  /* Truhen gibt es nur in der Schatzjagd – das ist ihr Spiel. Zählte jedes
+     Spiel mit, wäre die Schatzjagd nur eines von sechs Rechenspielen und die
+     Schatztruhe eine Belohnung, die überall vom Himmel fällt. */
   function truheZaehlen(){
     schatz.bisTruhe++;
     if(schatz.bisTruhe>=TRUHE_ALLE){ schatz.bisTruhe = 0; schatzZeichnen(); sichern(); return true; }
@@ -579,11 +581,7 @@
         funken("k-gold-funken","🪙",mult*4);
         kLeben(); kVerlustAnzeigen("zaehne",k.zaehne);
       },220);
-      const truheFaellig = truheZaehlen();
-      setTimeout(()=>{
-        const weiter = () => { k.zaehne<=0 ? kDracheBesiegt() : kNeueAufgabe(); };
-        truheFaellig ? truheZeigen(weiter) : weiter();
-      },1050);
+      setTimeout(()=>{ k.zaehne<=0 ? kDracheBesiegt() : kNeueAufgabe(); },1050);
 
     } else {
       knopf.classList.add("falsch");
@@ -1917,11 +1915,7 @@
       sagen("m-rueckmeldung", tr(waehle(lobWorte))+"  "+tr("gold.plus",{n:gewinn}), "gut");
       mZeichnen(); m.flashNeu = false;
       mKopf();
-      const truheFaellig = truheZaehlen();
-      setTimeout(()=>{
-        const weiter = () => { m.aktiv>=m.reihenfolge.length ? mWandFertig() : mNaechsteLuecke(); };
-        truheFaellig ? truheZeigen(weiter) : weiter();
-      },1050);
+      setTimeout(()=>{ m.aktiv>=m.reihenfolge.length ? mWandFertig() : mNaechsteLuecke(); },1050);
     }else{
       m.gesperrt = true; sperren("m-zahlen");
       knopf.classList.add("falsch");
@@ -2161,11 +2155,7 @@
       }
       tZeichnen();
       tKopf();
-      const truheFaellig = truheZaehlen();
-      setTimeout(()=>{
-        const weiter = () => { letzter ? tKampf() : tNeueAufgabe(); };
-        truheFaellig ? truheZeigen(weiter) : weiter();
-      }, letzter ? 400 : RITT_GESAMT+160);
+      setTimeout(()=>{ letzter ? tKampf() : tNeueAufgabe(); }, letzter ? 400 : RITT_GESAMT+160);
     } else {
       knopf.classList.add("falsch");
       zeigeLoesung("t-zahlen",t.aufgabe.antwort);
@@ -2500,11 +2490,7 @@
 
       const oben   = turm.richtung==="hoch"   && turm.sprosse===turm.leiter.length-1;
       const unten  = turm.richtung==="runter" && turm.sprosse===0;
-      const truheFaellig = truheZaehlen();
-      setTimeout(()=>{
-        const weiter = () => { oben ? turmGipfel() : unten ? turmFertig() : turmNeueAufgabe(); };
-        truheFaellig ? truheZeigen(weiter) : weiter();
-      }, 1050);
+      setTimeout(()=>{ oben ? turmGipfel() : unten ? turmFertig() : turmNeueAufgabe(); }, 1050);
 
     }else{
       knopf.classList.add("falsch");
@@ -2798,11 +2784,8 @@
     uhrKopf();
 
     const ende = uhr.gestellt >= (uhr.bonus ? UHR_BONUS_AUFGABEN : UHR_RUNDEN*UHR_JE_RUNDE);
-    const truheFaellig = truheZaehlen();
-    setTimeout(()=>{
-      const weiter = () => { ende ? uhrFertig() : uhrNeueAufgabe(); };
-      truheFaellig ? truheZeigen(weiter) : weiter();
-    }, wert===richtig ? (rundeVoll ? 1700 : 1050) : 2400);
+    setTimeout(()=>{ ende ? uhrFertig() : uhrNeueAufgabe(); },
+               wert===richtig ? (rundeVoll ? 1700 : 1050) : 2400);
   }
 
   function uhrZahlenfeld(){
