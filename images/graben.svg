@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 48" width="52" height="48" role="img" aria-label="Burggraben">
+  <title>Burggraben</title>
+  <defs>
+    <linearGradient id="gGrabenStein" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9a8c72"/><stop offset="1" stop-color="#4a4234"/>
+    </linearGradient>
+    <linearGradient id="gGrabenWasser" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2d5b96"/><stop offset="1" stop-color="#12305a"/>
+    </linearGradient>
+  </defs>
+  <!-- Wasser und Steg -->
+  <rect x="1" y="41" width="50" height="5" rx="2.5" fill="url(#gGrabenWasser)"/>
+  <rect x="1" y="37" width="50" height="5" rx="2" fill="#2a1c0e"/>
+  <!-- Die zwei Rechenboegen: hin zum Zehnerstein, dann weiter -->
+  <path d="M6 37Q12.5 11 19 37" fill="none" stroke="#ef5a35" stroke-width="4.4" stroke-linecap="round"/>
+  <path d="M33 37Q39.5 11 46 37" fill="none" stroke="#ef5a35" stroke-width="4.4" stroke-linecap="round"/>
+  <!-- Der Zehnerstein -->
+  <rect x="19" y="17" width="14" height="20" rx="3" fill="url(#gGrabenStein)" stroke="#2a1c0e" stroke-width="2.5"/>
+  <text x="26" y="32" text-anchor="middle" font-family="Verdana,DejaVu Sans,sans-serif"
+        font-size="12" font-weight="bold" fill="#fff8e6">10</text>
+</svg>

@@ -149,6 +149,10 @@ sobald sie über der ersten liegt. Gespeichert wird das pro Kind unter dem Schl�
   Einschränkung, sondern die Tauschaufgabe: Von `4 + 9` steht die 9 vorne, weil man
   vom größeren Teil aus weiterrechnet.
 
+  Das Symbol auf der Spielkarte ist `images/graben.svg`: zwei Bögen, die auf dem
+  Zehnerstein zusammentreffen. Ein Emoji gab das nicht her – 🌉 ist auf jedem
+  Gerät die Golden Gate Bridge und hat im Mittelalter nichts verloren.
+
   Der **Tipp** zeigt das Zwanzigerfeld – die andere Darstellung aus der Schule. Der
   Zeilenumbruch nach zehn Punkten ist derselbe Zehnerübergang, nur anders gezeichnet.
 
