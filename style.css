@@ -1076,15 +1076,31 @@ body::after{
 .graben-weg .offen{opacity:.4}
 
 /* ---------- Das Wirtshaus ---------- */
+/* Der Wirtstisch: Holz, ein warmer Schein von der Kerze, links das Kind mit
+   seinem eigenen Bild, rechts der Wirt. */
 .wirt-buehne{
-  position:relative;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;
-  margin:6px 0 10px;padding:12px 10px;
-  background:linear-gradient(#2a1f14,#180f08);border:3px solid var(--gold-tief);
-  border-radius:var(--r-gross);
+  position:relative;display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:8px;
+  margin:6px 0 10px;padding:14px 10px 12px;overflow:hidden;
+  background:
+    radial-gradient(120% 80% at 50% 0%,rgba(255,196,96,.20),transparent 60%),
+    repeating-linear-gradient(90deg,rgba(0,0,0,.14) 0 2px,transparent 2px 26px),
+    linear-gradient(#3a2a19,#1d120a);
+  border:3px solid var(--gold-tief);border-radius:var(--r-gross);
 }
-.wirt-seite{text-align:center;min-width:0}
+.wirt-kerze{position:absolute;top:6px;left:10px;font-size:1.25rem;line-height:1;font-style:normal;
+  animation:fackelFlacker .38s ease-in-out infinite}
+.wirt-seite{
+  text-align:center;min-width:0;border-radius:var(--r-klein);padding:6px 4px;
+  border:2px solid transparent;transition:border-color .2s,background .2s;
+}
+/* Wer dran ist, sitzt im Licht. */
+.wirt-seite.dran{border-color:var(--gold);background:rgba(245,181,60,.16);
+  box-shadow:0 0 14px rgba(245,181,60,.25)}
+.wirt-figur{font-size:1.9rem;line-height:1;filter:drop-shadow(0 3px 4px rgba(0,0,0,.6))}
+.wirt-seite.dran .wirt-figur{animation:huepfen 1.6s ease-in-out infinite}
 .wirt-name{font-family:var(--schrift-display);font-size:.82rem;letter-spacing:1px;
-  color:var(--pergament);opacity:.7;line-height:1}
+  color:var(--pergament);opacity:.75;line-height:1;margin-top:3px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .wirt-punkte{font-family:var(--schrift-display);font-size:clamp(1.9rem,9vw,2.6rem);line-height:1.1;
   color:var(--gold);transition:color .2s}
 /* Ueberworfen: die Zahl wird rot und bleibt stehen, damit man sieht, warum. */
@@ -1093,8 +1109,12 @@ body::after{
 .wirt-seite.dran .wirt-name{opacity:1;color:var(--gold)}
 
 /* Der Becher in der Mitte: hier liegen die Wuerfel. */
-.wirt-becher{display:flex;gap:6px;justify-content:center;min-height:46px;align-items:center}
-.wirt-wuerfel{display:flex;gap:6px}
+/* Der Platz fuer die Wuerfel bleibt frei, damit die Bühne nicht springt - der
+   dunkle Fleck Tisch kommt erst, wenn auch Wuerfel darauf liegen. */
+.wirt-becher{display:flex;justify-content:center;align-items:center;
+  min-height:58px;min-width:72px;margin-bottom:6px}
+.wirt-wuerfel{display:flex;gap:6px;padding:7px 9px;border-radius:12px}
+.wirt-wuerfel:not(:empty){background:radial-gradient(70% 70% at 50% 45%,rgba(0,0,0,.5),transparent 78%)}
 .wuerfel{
   display:grid;grid-template-columns:repeat(3,9px);grid-template-rows:repeat(3,9px);
   gap:2px;padding:6px;flex-shrink:0;

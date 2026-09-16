@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=35">
+<link rel="stylesheet" href="style.css?v=36">
 </head>
 <body>
 <div id="app">
@@ -763,14 +763,17 @@
     <div class="rang-chip" id="wirt-ziel-chip">Ziel 21</div>
 
     <div class="wirt-buehne">
+      <i class="wirt-kerze">🕯️</i>
       <div class="wirt-seite" id="wirt-seite-du">
-        <div class="wirt-name" data-i18n="wirt.du">Du</div>
+        <div class="wirt-figur" id="wirt-avatar">🦁</div>
+        <div class="wirt-name" id="wirt-name-du">Du</div>
         <div class="wirt-punkte" id="wirt-summe">0</div>
       </div>
       <div class="wirt-becher">
         <div class="wirt-wuerfel" id="wirt-wuerfel"></div>
       </div>
       <div class="wirt-seite" id="wirt-seite-gegner">
+        <div class="wirt-figur">🍺</div>
         <div class="wirt-name" data-i18n="wirt.gegner">Wirt</div>
         <div class="wirt-punkte" id="wirt-gegner-summe">0</div>
       </div>
@@ -1051,6 +1054,6 @@
 </div>
 
 <script src="strings.js?v=23"></script>
-<script src="app.js?v=36"></script>
+<script src="app.js?v=37"></script>
 </body>
 </html>

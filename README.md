@@ -238,6 +238,13 @@ sobald sie über der ersten liegt. Gespeichert wird das pro Kind unter dem Schl�
   ohne darüber zu gehen, gewinnt. Der Wirt spielt nach einer festen, im Tipp
   nachlesbaren Regel – er würfelt, bis er 17 hat.
 
+  **Gewürfelt wird abwechselnd.** Beide Zahlen wachsen nebeneinander, und das Kind
+  entscheidet, während es den Stand des Wirts vor Augen hat – aus dem Blindflug des
+  Originals wird damit eine echte Abwägung („er hat 16, ich habe 14"). Erst wenn das
+  Kind stehen bleibt, würfelt der Wirt seine Runde allein zu Ende. Überwirft er sich
+  vorher, ist die Runde sofort gewonnen. Am Tisch sitzt das Kind mit **seinem eigenen
+  Namen und Avatar**, gegenüber der Wirt; wer dran ist, sitzt im Licht.
+
   Gerechnet wird fortlaufend: Nach jedem Wurf tippt das Kind seinen neuen Stand. Das
   ist die Aufgabenart, die den anderen Spielen fehlt – eine offene Kette statt einer
   fertigen Aufgabe.
