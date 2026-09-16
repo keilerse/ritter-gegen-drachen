@@ -154,8 +154,14 @@ sobald sie über der ersten liegt. Gespeichert wird das pro Kind unter dem Schl�
   | Stufe | gefragt wird |
   |---|---|
   | 1 | alle drei Schritte: bis zum Stein, der Rest, das Ergebnis |
-  | 2 | nur bis zum Stein – der Rest deckt sich auf – und das Ergebnis |
+  | 2 | bis zum Stein und das Ergebnis – der Rest bleibt ein Kästchen |
   | 3 | nur `8 + 5 = ?`; der Weg kommt danach als Probe |
+
+  Auf Stufe 2 wird die mittlere Zahl **nicht** nebenbei eingesetzt: Auf der Tafel
+  steht `9 + 1 + ▢ = ?`, und wer das Ergebnis nennen will, muss die 4 selbst
+  finden. Setzte man sie ein, wäre die Zerlegung verschenkt – und die ist der
+  Schritt, an dem Kinder scheitern. Aufgedeckt wird alles erst mit dem Ergebnis,
+  als Probe.
 
   Auf Stufe 3 ist es genau die Aufgabe, die auch die anderen Spiele stellen: Der
   Übergang ins normale Spiel ist eingebaut. Minus geht rückwärts über denselben

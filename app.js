@@ -3442,12 +3442,16 @@
     freigeben("graben-zahlen");
   }
 
-  /* Was nach einer beantworteten Frage sichtbar wird. Auf Stufe 2 ergibt sich
-     der Rest von selbst, sobald der Weg bis zum Stein bekannt ist; auf Stufe 3
-     wird nach der Antwort der ganze Weg aufgedeckt. */
+  /* Was nach einer beantworteten Frage sichtbar wird.
+
+     Der Rest wird NICHT nebenbei aufgedeckt, auch wenn niemand danach fragt.
+     Bei 9 + 5 stand auf Stufe 2 nach der 1 sofort "9 + 1 + 4 = ?" auf der
+     Tafel - die Zerlegung der 5 in 1 und 4 war damit verschenkt, und genau
+     die ist der Schritt, an dem Kinder scheitern. Jetzt steht dort
+     "9 + 1 + ▢ = ?": Wer das Ergebnis nennen will, muss die 4 selbst finden.
+     Aufgedeckt wird alles erst mit dem Ergebnis, als Probe. */
   function grabenAufdecken(feld){
     graben.bekannt[feld] = true;
-    if(feld==="e1" && grabenSchritte().indexOf(1) < 0) graben.bekannt.e2 = true;
     if(feld==="ergebnis"){ graben.bekannt.e1 = true; graben.bekannt.e2 = true; }
   }
 
