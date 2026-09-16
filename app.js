@@ -678,6 +678,8 @@
   }
   function funken(boxId,zeichen,anzahl){ funkenEl($(boxId),zeichen,anzahl); }
   function zeigeScreen(id){
+    /* Wer das Wirtshaus verlaesst, laesst keine laufenden Wuerfel zurueck. */
+    if(id !== "screen-wirt") wirt.lauf++;
     alle(".screen").forEach(el=>el.classList.remove("is-active"));
     $(id).classList.add("is-active");
     schatzZeichnen();
@@ -3594,6 +3596,276 @@
     grabenStart();
   }
 
+  /* ================= SPIEL 12: DAS WIRTSHAUS =================
+     Siebzehn und Vier mit Wuerfeln: Wer naeher an 21 herankommt als der Wirt,
+     ohne darueber zu gehen, gewinnt. Das ist das einzige Spiel, in dem Gold
+     nicht verdient, sondern gesetzt wird - es steht deshalb unter "Gold
+     ausgeben".
+
+     Die Rechenarbeit ist das fortlaufende Addieren: Nach jedem Wurf tippt das
+     Kind seinen neuen Stand. Der Zahlenraum haelt dabei, obwohl das Ziel 21
+     ist - denn gewuerfelt wird nur unterhalb von 21, und **der Wurf, der die
+     Runde beendet, wird nicht gerechnet, sondern vorgerechnet**. Jede getippte
+     Zahl liegt damit zwischen 0 und 20. Das Kind begegnet der 21, ohne sie
+     schon rechnen zu muessen - erst begegnen, dann rechnen, wie im Unterricht
+     auch.
+
+     Vor dem vorgerechneten Schlusswurf steht eine Denkpause: Die Wuerfel
+     liegen schon da, das Ergebnis kommt erst nach WIRT_DENKZEIT. In der
+     Sekunde rechnet das Kind mit, ohne dass es muss.
+
+     Schwierigkeit ueber die Wuerfelzahl, nicht ueber die Zielzahl: Die 21
+     muesste man erklaeren, den zweiten Wuerfel nicht. Mit einem Wuerfel kann
+     man sich bis 15 nie ueberwerfen, mit zweien schon ab 10. */
+  const WIRT_ZIEL = 21;
+  const WIRT_RUNDEN_LEICHT = 3;                 /* Runden mit einem Wuerfel */
+  const WIRT_RUNDEN_SCHWER = 4;                 /* danach mit zweien */
+  const WIRT_RUNDEN = WIRT_RUNDEN_LEICHT + WIRT_RUNDEN_SCHWER;
+  const WIRT_EINSAETZE = [20, 40, 80];
+  const WIRT_STEHT = 17;        /* so weit wuerfelt der Wirt, dann bleibt er stehen */
+  const WIRT_GEWINN = 2;        /* Sieg zahlt den Einsatz doppelt zurueck */
+  const WIRT_DENKZEIT = 1600;   /* Pause vor dem vorgerechneten Schlusswurf */
+  const WIRT_WURFPAUSE = 850;   /* Takt, in dem der Wirt wuerfelt */
+
+  /* Augenstellung der Wuerfelbilder als [Zeile, Spalte]. */
+  const WUERFEL_AUGEN = {
+    1:[[2,2]],
+    2:[[1,1],[3,3]],
+    3:[[1,1],[2,2],[3,3]],
+    4:[[1,1],[1,3],[3,1],[3,3]],
+    5:[[1,1],[1,3],[2,2],[3,1],[3,3]],
+    6:[[1,1],[2,1],[3,1],[1,3],[2,3],[3,3]]
+  };
+
+  const wirt = { runde:0, einsatz:0, summe:0, gegner:0, wurf:0,
+                 gewonnen:0, bilanz:0, gesperrt:false, lauf:0 };
+
+  /* Verlaesst das Kind das Wirtshaus mitten in einer Runde, liefen die
+     Zeitgeber bisher weiter: Der Wirt wuerfelte auf dem Startbildschirm
+     weiter, schrieb Gold gut und ueberschrieb die naechste Runde. Jeder
+     Zeitgeber merkt sich deshalb, zu welchem Besuch er gehoert - passt der
+     nicht mehr, tut er nichts. */
+  function wirtSpaeter(fn, ms){
+    const lauf = wirt.lauf;
+    setTimeout(()=>{ if(lauf === wirt.lauf) fn(); }, ms);
+  }
+
+  const wirtWuerfelZahl = () => wirt.runde < WIRT_RUNDEN_LEICHT ? 1 : 2;
+
+  function wirtKopf(){
+    $("wirt-einsatz-wert").textContent = wirt.einsatz ? wirt.einsatz : "–";
+    $("wirt-runden").textContent = Math.min(wirt.runde+1, WIRT_RUNDEN)+"/"+WIRT_RUNDEN;
+    $("wirt-ziel-chip").textContent = tr("wirt.zielzahl", { n: WIRT_ZIEL });
+    $("wirt-summe").textContent = wirt.summe;
+    $("wirt-gegner-summe").textContent = wirt.gegner;
+    schatzZeichnen();
+  }
+
+  /* Genau eine der drei Bedienflaechen ist sichtbar. */
+  function wirtPhase(phase){
+    $("wirt-einsaetze").hidden    = phase !== "einsatz";
+    $("wirt-zahlen").hidden       = phase !== "rechnen";
+    $("wirt-entscheidung").hidden = phase !== "entscheiden";
+    $("wirt-aufgabe").hidden      = phase !== "rechnen";
+  }
+
+  function wirtWuerfelZeichnen(augen){
+    const box = $("wirt-wuerfel");
+    box.innerHTML = "";
+    augen.forEach(n => {
+      const w = document.createElement("div");
+      w.className = "wuerfel rollt";
+      (WUERFEL_AUGEN[n]||[]).forEach(pos => {
+        const auge = document.createElement("i");
+        auge.style.gridRow = pos[0];
+        auge.style.gridColumn = pos[1];
+        w.appendChild(auge);
+      });
+      box.appendChild(w);
+    });
+  }
+
+  function wirtEinsaetzeZeichnen(){
+    const box = $("wirt-einsaetze");
+    box.innerHTML = "";
+    WIRT_EINSAETZE.forEach(betrag => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "wirt-einsatz";
+      b.dataset.wert = betrag;
+      b.textContent = betrag;
+      b.disabled = schatz.gold < betrag;
+      b.addEventListener("click", ()=>wirtSetzen(betrag));
+      box.appendChild(b);
+    });
+  }
+
+  function wirtNeueRunde(){
+    if(wirt.runde >= WIRT_RUNDEN){ wirtFertig(); return; }
+    wirt.einsatz = 0; wirt.summe = 0; wirt.gegner = 0; wirt.wurf = 0;
+    wirt.gesperrt = false;
+    $("wirt-seite-du").className = "wirt-seite";
+    $("wirt-seite-gegner").className = "wirt-seite";
+    $("wirt-wuerfel").innerHTML = "";
+    wirtEinsaetzeZeichnen();
+    wirtPhase("einsatz");
+    sagen("wirt-rueckmeldung",
+      schatz.gold < WIRT_EINSAETZE[0] ? tr("wirt.kein.gold") : tr("wirt.einsatz.frage"),
+      schatz.gold < WIRT_EINSAETZE[0] ? "schlecht" : "");
+    $("wirt-tipp").classList.remove("is-offen");
+    wirtKopf();
+  }
+
+  function wirtSetzen(betrag){
+    if(wirt.einsatz) return;
+    if(!goldAusgeben(betrag)){
+      sagen("wirt-rueckmeldung", tr("wirt.kein.gold"), "schlecht");
+      return;
+    }
+    wirt.einsatz = betrag;
+    wirt.bilanz -= betrag;
+    $("wirt-seite-du").classList.add("dran");
+    wirtKopf();
+    wirtWerfen();
+  }
+
+  /* Ein Wurf. Bleibt der neue Stand unter 21, rechnet das Kind ihn aus.
+     Sonst ist die Runde vorbei und der Wurf wird vorgerechnet. */
+  function wirtWerfen(){
+    const augen = [];
+    for(let i=0;i<wirtWuerfelZahl();i++) augen.push(zufall(1,6));
+    wirt.wurf = augen.reduce((a,b)=>a+b, 0);
+    wirtWuerfelZeichnen(augen);
+    kMuenze();
+    const neu = wirt.summe + wirt.wurf;
+    if(neu >= WIRT_ZIEL){
+      wirtPhase("aus");
+      sagen("wirt-rueckmeldung", wirt.summe+" + "+wirt.wurf+" = ?", "");
+      /* Denkpause: Die Wuerfel liegen, das Ergebnis kommt gleich. */
+      wirtSpaeter(()=>{
+        wirt.summe = neu;
+        wirtKopf();
+        const genau = neu === WIRT_ZIEL;
+        $("wirt-seite-du").classList.add(genau ? "trifft" : "drueber");
+        sagen("wirt-rueckmeldung",
+          wirt.summe+" = "+(genau ? tr("wirt.getroffen") : tr("wirt.ueberworfen")),
+          genau ? "gut" : "schlecht");
+        if(genau){ kSieg(); funken("wirt-funken","⭐",12); } else { kFalsch(); }
+        wirtSpaeter(()=> genau ? wirtWirtIstDran() : wirtEnde(false), 1500);
+      }, WIRT_DENKZEIT);
+      return;
+    }
+    wirtPhase("rechnen");
+    $("wirt-aufgabe").innerHTML = wirt.summe+" + "+wirt.wurf+' = <span class="luecke">?</span>';
+    sagen("wirt-rueckmeldung", tr("wirt.frage.summe"), "");
+    wirt.gesperrt = false;
+    freigeben("wirt-zahlen");
+  }
+
+  function wirtAntwort(wert,knopf){
+    if(wirt.gesperrt) return;
+    wirt.gesperrt = true; sperren("wirt-zahlen");
+    const loesung = wirt.summe + wirt.wurf;
+    if(wert===loesung){
+      knopf.classList.add("richtig");
+      problemGeloest();
+      kRichtig();
+      sagen("wirt-rueckmeldung", tr(waehle(lobWorte)), "gut");
+    }else{
+      knopf.classList.add("falsch");
+      zeigeLoesung("wirt-zahlen", loesung);
+      goldWeg();
+      kFalsch();
+      sagen("wirt-rueckmeldung", tr("wirt.falsch", { n: loesung }), "schlecht");
+    }
+    wirt.summe = loesung;
+    wirtKopf();
+    wirtSpaeter(()=>{
+      wirtPhase("entscheiden");
+      sagen("wirt-rueckmeldung", tr("wirt.frage.weiter"), "");
+    }, wert===loesung ? 900 : 2200);
+  }
+
+  /* Der Wirt spielt nach einer festen, im Tipp nachlesbaren Regel. */
+  function wirtWirtIstDran(){
+    wirtPhase("aus");
+    $("wirt-seite-du").classList.remove("dran");
+    $("wirt-seite-gegner").classList.add("dran");
+    sagen("wirt-rueckmeldung", tr("wirt.gegner.dran"), "");
+    const wurf = () => {
+      if(wirt.gegner >= WIRT_STEHT){ wirtVergleich(); return; }
+      const augen = [];
+      for(let i=0;i<wirtWuerfelZahl();i++) augen.push(zufall(1,6));
+      wirtWuerfelZeichnen(augen);
+      wirt.gegner += augen.reduce((a,b)=>a+b, 0);
+      wirtKopf();
+      if(wirt.gegner > WIRT_ZIEL){
+        $("wirt-seite-gegner").classList.add("drueber");
+        sagen("wirt-rueckmeldung", tr("wirt.gegner.ueber"), "gut");
+        wirtSpaeter(()=>wirtEnde(true), 1200);
+        return;
+      }
+      wirtSpaeter(wurf, WIRT_WURFPAUSE);
+    };
+    wirtSpaeter(wurf, WIRT_WURFPAUSE);
+  }
+
+  function wirtVergleich(){
+    if(wirt.gegner === WIRT_ZIEL) $("wirt-seite-gegner").classList.add("trifft");
+    if(wirt.summe === wirt.gegner){ wirtEnde(null); return; }
+    wirtEnde(wirt.summe > wirt.gegner);
+  }
+
+  /* gewonnen: true Sieg, false Niederlage, null Gleichstand. */
+  function wirtEnde(gewonnen){
+    wirtPhase("aus");
+    $("wirt-seite-gegner").classList.remove("dran");
+    if(gewonnen === null){
+      goldDazu(wirt.einsatz);
+      wirt.bilanz += wirt.einsatz;
+      sagen("wirt-rueckmeldung", tr("wirt.gleich"), "");
+    }else if(gewonnen){
+      const aus = goldDazu(wirt.einsatz * WIRT_GEWINN);
+      wirt.bilanz += aus;
+      wirt.gewonnen++;
+      kSieg();
+      funken("wirt-funken","🪙",12);
+      sagen("wirt-rueckmeldung", tr("wirt.gewonnen", { n: wirt.einsatz }), "gut");
+    }else{
+      kAus();
+      sagen("wirt-rueckmeldung", tr("wirt.verloren", { n: wirt.einsatz }), "schlecht");
+    }
+    wirt.runde++;
+    wirtKopf();
+    wirtSpaeter(wirtNeueRunde, 2300);
+  }
+
+  function wirtFertig(){
+    kSieg();
+    $("wirt-ziel-text").textContent =
+      trp("wirt.ziel.basis", wirt.gewonnen, {}) +
+      (wirt.gewonnen === 0 ? " " + tr("h.weiterso") : "");
+    $("wirt-bilanz-text").textContent =
+      wirt.bilanz > 0 ? tr("wirt.bilanz.plus",  { n: wirt.bilanz })
+    : wirt.bilanz < 0 ? tr("wirt.bilanz.minus", { n: -wirt.bilanz })
+                      : tr("wirt.bilanz.null");
+    $("ov-wirt").classList.add("is-offen");
+    wirtKopf();
+  }
+
+  function wirtStart(){
+    wirt.lauf++;
+    wirt.runde = 0; wirt.gewonnen = 0; wirt.bilanz = 0;
+    wirt.einsatz = 0; wirt.summe = 0; wirt.gegner = 0;
+    baueZahlen("wirt-zahlen", wirtAntwort, WIRT_ZIEL-1);
+    zeigeScreen("screen-wirt");
+    wirtNeueRunde();
+  }
+  function wirtWeiter(){
+    $("ov-wirt").classList.remove("is-offen");
+    wirtStart();
+  }
+
   /* ================= Auswahl & Bedienung ================= */
   function wahlSetzen(gruppeId,wert){
     alle("#"+gruppeId+" button").forEach(b =>
@@ -3828,6 +4100,10 @@
 
   $("karte-turm").addEventListener("click", turmStart);
   $("karte-uhr").addEventListener("click", ()=>uhrStart(false));
+  $("karte-wirt").addEventListener("click", wirtStart);
+  $("btn-wirt-weiter").addEventListener("click", wirtWeiter);
+  $("btn-wirt-nochmal").addEventListener("click", ()=>{ if($("wirt-entscheidung").hidden) return; wirtPhase("aus"); wirtWerfen(); });
+  $("btn-wirt-genug").addEventListener("click", ()=>{ if($("wirt-entscheidung").hidden) return; wirtWirtIstDran(); });
   $("karte-graben").addEventListener("click", grabenStart);
   $("btn-graben-weiter").addEventListener("click", grabenWeiter);
   $("karte-waage").addEventListener("click", waageStart);

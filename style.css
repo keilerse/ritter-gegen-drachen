@@ -1075,6 +1075,57 @@ body::after{
 .graben-weg .luecke{color:var(--feuer)}
 .graben-weg .offen{opacity:.4}
 
+/* ---------- Das Wirtshaus ---------- */
+.wirt-buehne{
+  position:relative;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;
+  margin:6px 0 10px;padding:12px 10px;
+  background:linear-gradient(#2a1f14,#180f08);border:3px solid var(--gold-tief);
+  border-radius:var(--r-gross);
+}
+.wirt-seite{text-align:center;min-width:0}
+.wirt-name{font-family:var(--schrift-display);font-size:.82rem;letter-spacing:1px;
+  color:var(--pergament);opacity:.7;line-height:1}
+.wirt-punkte{font-family:var(--schrift-display);font-size:clamp(1.9rem,9vw,2.6rem);line-height:1.1;
+  color:var(--gold);transition:color .2s}
+/* Ueberworfen: die Zahl wird rot und bleibt stehen, damit man sieht, warum. */
+.wirt-seite.drueber .wirt-punkte{color:var(--feuer)}
+.wirt-seite.trifft .wirt-punkte{color:var(--drache)}
+.wirt-seite.dran .wirt-name{opacity:1;color:var(--gold)}
+
+/* Der Becher in der Mitte: hier liegen die Wuerfel. */
+.wirt-becher{display:flex;gap:6px;justify-content:center;min-height:46px;align-items:center}
+.wirt-wuerfel{display:flex;gap:6px}
+.wuerfel{
+  display:grid;grid-template-columns:repeat(3,9px);grid-template-rows:repeat(3,9px);
+  gap:2px;padding:6px;flex-shrink:0;
+  background:linear-gradient(#fffdf5,#e4d8bc);border:3px solid var(--tinte);
+  border-radius:8px;box-shadow:0 3px 0 rgba(0,0,0,.45);
+}
+.wuerfel i{width:9px;height:9px;border-radius:50%;background:var(--tinte);display:block}
+.wuerfel.rollt{animation:wuerfelRollt .5s ease-in-out}
+@keyframes wuerfelRollt{
+  0%{transform:rotate(0) scale(1)} 30%{transform:rotate(-18deg) scale(1.15)}
+  60%{transform:rotate(14deg) scale(1.08)} 100%{transform:rotate(0) scale(1)}
+}
+
+/* Die drei Einsaetze vor der Runde. */
+.wirt-einsaetze{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.wirt-einsaetze[hidden]{display:none}
+.wirt-einsatz{
+  font-family:var(--schrift-display);font-size:1.5rem;padding:14px 4px;
+  color:var(--tinte);background:linear-gradient(var(--pergament),var(--pergament-tief));
+  border:3px solid var(--gold-tief);border-radius:var(--r-klein);
+  box-shadow:0 5px 0 rgba(0,0,0,.4);cursor:pointer;transition:transform .07s,box-shadow .07s;
+}
+.wirt-einsatz:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.4)}
+.wirt-einsatz[disabled]{opacity:.42;cursor:default;box-shadow:0 5px 0 rgba(0,0,0,.25)}
+
+/* Weiterwuerfeln oder aufhoeren. */
+.wirt-entscheidung{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.wirt-entscheidung[hidden]{display:none}
+.knopf--ruhig{background:linear-gradient(#cfc4a6,#a89a75);border-color:#7d7050}
+#wirt-zahlen[hidden]{display:none}
+
 /* ---------- Hunger-Hinweis ---------- */
 .hunger-banner{
   display:flex;align-items:center;gap:12px;width:100%;margin-bottom:12px;

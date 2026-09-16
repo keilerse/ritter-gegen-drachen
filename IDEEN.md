@@ -22,6 +22,9 @@ Gold ausgeben lässt. Stand: 30. August 2026.
   verstanden – die Frage war „warum hüpft der so wenig weit?". Erst die
   beschrifteten Bögen (`+2`, `+3`) machen aus der Wanderung eine Rechnung.
 
+- ✅ **Fortlaufendes Addieren mit Zielzahl**: das **Wirtshaus** (siehe README) –
+  Siebzehn und Vier mit Würfeln, Einsatz in drei Höhen, Ziel 21.
+
 ---
 
 ## Als Nächstes zu prüfen: Zahlzerlegung als eigenes Spiel

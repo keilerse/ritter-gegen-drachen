@@ -232,6 +232,34 @@ sobald sie über der ersten liegt. Gespeichert wird das pro Kind unter dem Schl�
   eines gross, ein zweiter vergrössert es noch einmal zum Verschieben. Noch nicht
   gelöste Motive sind als Schloss zu sehen. Sind alle Bilder fertig, bleibt das letzte
   vollständig stehen und es beginnt kein neues Puzzle mehr.
+- **Das Wirtshaus** – „Siebzehn und Vier" mit Würfeln, und das einzige Spiel, in dem
+  Gold nicht verdient, sondern **gesetzt** wird. Vor jeder Runde wählt das Kind seinen
+  Einsatz (20, 40 oder 80), dann würfelt es gegen den Wirt: Wer näher an **21** kommt,
+  ohne darüber zu gehen, gewinnt. Der Wirt spielt nach einer festen, im Tipp
+  nachlesbaren Regel – er würfelt, bis er 17 hat.
+
+  Gerechnet wird fortlaufend: Nach jedem Wurf tippt das Kind seinen neuen Stand. Das
+  ist die Aufgabenart, die den anderen Spielen fehlt – eine offene Kette statt einer
+  fertigen Aufgabe.
+
+  **Der Zahlenraum hält trotzdem.** Gewürfelt wird nur unterhalb von 21, und der Wurf,
+  der die Runde beendet, wird **nicht gefragt, sondern vorgerechnet**. Jede getippte
+  Zahl liegt damit zwischen 0 und 20; die 21 begegnet dem Kind, ohne dass es sie schon
+  rechnen muss – erst begegnen, dann rechnen, wie im Unterricht auch. Vor dem
+  vorgerechneten Schlusswurf liegen die Würfel eine gute Sekunde still
+  (`WIRT_DENKZEIT`), damit das Kind mitrechnen kann, ohne zu müssen.
+
+  **Schwerer wird es über die Würfelzahl, nicht über die Zielzahl:** drei Runden mit
+  einem Würfel, dann vier mit zweien. Die 21 müsste man erklären, den zweiten Würfel
+  nicht. Und die Zahlen dahinter stimmen: Mit einem Würfel kann man sich bis 15 nie
+  überwerfen, mit zweien schon ab 10.
+
+  Ein Sieg zahlt den Einsatz doppelt zurück, Gleichstand gibt ihn zurück. Unterm
+  Strich zieht das Wirtshaus im Schnitt etwas Gold aus der Kasse – deshalb steht es
+  hier und nicht bei „Spielen & Verdienen". Über `WIRT_GEWINN` lässt sich das drehen.
+  Eine falsche Zwischensumme kostet wie überall fünf Gold und zeigt die Lösung; die
+  Runde läuft mit dem richtigen Stand weiter.
+
 - **Burg bauen** – Mauern, Tor, Fenster, Flagge und Wappen kosten unterschiedlich viel
   Gold und werden auf einem Raster platziert. Eine vollständige Burg wird belohnt.
 - **Drachenhöhle** – für 500 Gold gibt es ein Drachenei, jede Fütterung kostet 80 Gold.
@@ -382,6 +410,16 @@ Den Fortschritt steuern `FORT_ANZAHL` (wie viele Stufen ein Spiel hat),
 `HORT_STUFEN20` und `HORT_STUFEN10`, die der Rechenmauer in `mStufen()` samt
 `MAUER_GOLD`. Ein Spiel aus dem Fortschritt zu nehmen heißt: den Eintrag aus
 `FORT_ANZAHL` streichen und die `fort…`-Aufrufe in seinem Abschnitt entfernen.
+
+Das Wirtshaus steuern `WIRT_ZIEL` (die 21), `WIRT_EINSAETZE` (die drei Beträge),
+`WIRT_RUNDEN_LEICHT`/`WIRT_RUNDEN_SCHWER` (wie viele Runden mit einem bzw. zwei
+Würfeln), `WIRT_STEHT` (ab wann der Wirt stehen bleibt), `WIRT_GEWINN` (Auszahlung
+bei Sieg) und `WIRT_DENKZEIT` (die Pause vor dem vorgerechneten Schlusswurf).
+
+Eine Besonderheit dort ist `wirtSpaeter()`: Alle Zeitgeber des Wirtshauses merken
+sich, zu welchem Besuch sie gehören. Ohne das würfelte der Wirt weiter, nachdem das
+Kind mitten in der Runde auf „Auswahl" getippt hat – und schrieb Gold gut, während
+längst der Startbildschirm zu sehen war.
 
 Den Burggraben steuern `GRABEN_RUNDEN` und `GRABEN_JE_RUNDE` (Länge eines
 Durchgangs), `GRABEN_SCHRITTE` (welche Teilschritte auf welcher Stufe gefragt
