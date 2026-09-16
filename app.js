@@ -598,8 +598,8 @@
   /* Eine Rechenkette bekommt zwei Reihen – eine je Schritt, mit dem Schritt
      darüber geschrieben. Genau das ist ja die Schwierigkeit: dass man das
      Zwischenergebnis behalten muss. Der Tipp nimmt es einem ab. */
-  function bauePunkte(elId,n){
-    const feld = $(elId), gross = opt.max===10 ? 10 : 20;
+  function bauePunkte(elId,n,max){
+    const feld = $(elId), gross = max || (opt.max===10 ? 10 : 20);
     feld.innerHTML = "";
     feld.classList.remove("zahlenfeldpunkte");
     feld.classList.add("punktefeld");
@@ -3277,18 +3277,7 @@
      weggenommen, bis die blanke Aufgabe dasteht. */
   const GRABEN_SCHRITTE = [[0,1,2],[0,2],[2]];
   const GRABEN_FELD = ["e1","e2","ergebnis"];
-  /* Augenstellung der Wuerfelbilder als [Zeile, Spalte]. In Lesereihenfolge,
-     damit sich beim Zerlegen nichts verschiebt. */
-  const WUERFEL_AUGEN = {
-    1:[[2,2]],
-    2:[[1,1],[3,3]],
-    3:[[1,1],[2,2],[3,3]],
-    4:[[1,1],[1,3],[3,1],[3,3]],
-    5:[[1,1],[1,3],[2,2],[3,1],[3,3]],
-    6:[[1,1],[2,1],[3,1],[1,3],[2,3],[3,3]]
-  };
-
-  const graben = { gestellt:0, stufe:0, schritt:0, stand:0,
+  const graben = { gestellt:0, stufe:0, schritt:0, stand:0, boegen:[],
                    richtig:0, falsch:0, serie:0, beste:0,
                    aufgabe:null, bekannt:null, gesperrt:false };
 
@@ -3344,22 +3333,62 @@
     if(sofort){ void r.offsetWidth; r.classList.remove("ohne-weg"); }
   }
   function grabenSpringen(ziel, dann){
+    graben.boegen.push({ von: graben.stand, bis: ziel });
+    grabenBoegenZeichnen();
     bewege($("graben-ritter"), "springt", 560);
     grabenRitterSetzen(ziel, false);
     setTimeout(dann, 600);
   }
 
-  function grabenWuerfelZeichnen(){
-    const n = graben.aufgabe, el = $("graben-wuerfel");
-    el.innerHTML = "";
-    const hin = graben.bekannt.e1 ? n.e1 : 0;
-    (WUERFEL_AUGEN[n.b]||[]).forEach((pos,i) => {
-      const auge = document.createElement("i");
-      if(i < hin) auge.className = "hin";
-      auge.style.gridRow = pos[0];
-      auge.style.gridColumn = pos[1];
-      el.appendChild(auge);
+  /* Die Boegen sind die Rechenschritte. Sie entstehen, wenn der Ritter
+     springt, und bleiben bis zum Ende der Aufgabe stehen - am Schluss steht
+     der ganze Weg als Bild da: ein Bogen "+2" auf die Zehn, einer "+3"
+     weiter. Genau so steht es im Heft. */
+  const GRABEN_LINIE = 38;     /* Hoehe der Linie in der viewBox */
+  const GRABEN_SVG_H = 74;     /* Hoehe der Bogenflaeche in Pixeln (siehe CSS) */
+  /* Ein kurzer Sprung bekommt einen flachen Bogen, ein langer einen hohen -
+     sonst steht ueber "+2" eine duenne hohe Schlaufe, die nichts erzaehlt. */
+  const grabenBogenHoehe = weite => Math.max(11, 6 + weite*0.45);
+  function grabenBoegenZeichnen(){
+    const svg = $("graben-boegen"), zahlen = $("graben-bogenzahlen");
+    svg.innerHTML = ""; zahlen.innerHTML = "";
+    graben.boegen.forEach(b => {
+      const x1 = b.von/GRABEN_MAX*100, x2 = b.bis/GRABEN_MAX*100;
+      const h = grabenBogenHoehe(Math.abs(x2-x1));
+      const pfad = document.createElementNS("http://www.w3.org/2000/svg","path");
+      /* Der Scheitel einer quadratischen Kurve liegt auf halber Hoehe des
+         Stuetzpunkts, deshalb 2*h. */
+      pfad.setAttribute("d","M"+x1+" "+GRABEN_LINIE+" Q"+((x1+x2)/2)+" "+(GRABEN_LINIE-2*h)+
+                            " "+x2+" "+GRABEN_LINIE);
+      pfad.setAttribute("class","graben-bogen");
+      pfad.setAttribute("vector-effect","non-scaling-stroke");
+      svg.appendChild(pfad);
+      const wert = document.createElement("span");
+      wert.className = "graben-bogen-wert";
+      wert.style.left = ((x1+x2)/2)+"%";
+      wert.style.bottom = (((40-GRABEN_LINIE)+h)/40*GRABEN_SVG_H + 3) + "px";
+      wert.textContent = (graben.aufgabe.op==="+" ? "+" : "−") + Math.abs(b.bis-b.von);
+      zahlen.appendChild(wert);
     });
+  }
+
+  /* Beschriftet wird nur, was das Kind schon weiss. Ohne Zahlen war der Strahl
+     nicht zu lesen; mit allen Zahlen haette man die Antwort abgelesen. */
+  function grabenMarkenZeichnen(){
+    const n = graben.aufgabe, el = $("graben-marken");
+    el.innerHTML = "";
+    const setze = (p, text, cls) => {
+      const m = document.createElement("span");
+      m.className = "graben-marke" + (cls ? " "+cls : "");
+      m.style.left = (p/GRABEN_MAX*100)+"%";
+      m.textContent = text;
+      el.appendChild(m);
+    };
+    setze(0, "0", "rand");
+    setze(GRABEN_MAX, String(GRABEN_MAX), "rand");
+    setze(10, "10", "zehner");
+    setze(n.a, String(n.a), "start");
+    if(graben.bekannt.ergebnis) setze(n.ergebnis, String(n.ergebnis), "ziel");
   }
 
   /* Die Aufgabe oben, der Rechenweg darunter. Was noch niemand weiss, steht
@@ -3387,7 +3416,7 @@
   function grabenFrageZeigen(){
     const feld = GRABEN_FELD[grabenSchritte()[graben.schritt]];
     grabenTafelZeichnen(feld);
-    grabenWuerfelZeichnen();
+    grabenMarkenZeichnen();
     sagen("graben-rueckmeldung",
       feld==="e1" ? tr("graben.frage.stein")
       : feld==="e2" ? tr("graben.frage.rest")
@@ -3398,10 +3427,16 @@
     graben.aufgabe = grabenAufgabe();
     graben.bekannt = { e1:false, e2:false, ergebnis:false };
     graben.schritt = 0;
+    graben.boegen = [];
+    grabenBoegenZeichnen();
     $("graben-ritter").classList.toggle("nach-links", graben.aufgabe.op==="-");
     grabenRitterSetzen(graben.aufgabe.a, true);
     grabenFrageZeigen();
     grabenKopf();
+    /* Zwanzigerfeld als zweite Darstellung: Der Umbruch nach zehn Punkten ist
+       derselbe Zehneruebergang, nur anders gezeichnet. Immer bis 20, auch wenn
+       auf der Startseite "bis 10" steht. */
+    bauePunkte("graben-punkte", graben.aufgabe, GRABEN_MAX);
     $("graben-tipp").classList.remove("is-offen");
     graben.gesperrt = false;
     freigeben("graben-zahlen");
@@ -3453,7 +3488,7 @@
     const laufen = () => {
       grabenAufdecken(feld);
       grabenTafelZeichnen(null);
-      grabenWuerfelZeichnen();
+      grabenMarkenZeichnen();
       if(feld==="e1") grabenSpringen(10, weiter);
       else            grabenNachziehen(weiter);
     };

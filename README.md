@@ -120,18 +120,29 @@ sobald sie über der ersten liegt. Gespeichert wird das pro Kind unter dem Schl�
 
   Der Zahlenstrahl von 0 bis 20 ist ein Burggraben, in seiner Mitte steht der
   **Zehnerstein**. In einem Satz kommt der Ritter nicht hinüber, er muss dort
-  zwischenlanden. Beschriftet sind nur **0, 10 und 20** – stünden alle Zahlen da,
-  läse das Kind die Antwort vom Strahl ab, statt zu rechnen.
+  zwischenlanden.
 
-  Die Sprungkraft steht als **Würfelbild** daneben und zerfällt nach dem ersten
-  Schritt sichtbar in zwei Teile: bei `8 + 5` werden zwei der fünf Augen golden,
-  drei bleiben rot. Das ist der eigentliche Grund für das Bild – die Zerlegung der
-  5 in 2 und 3 ist der Schritt, an dem Kinder scheitern, und ohne das Bild passiert
-  sie unsichtbar: Das Kind zählt den Restsprung am Bogen ab, statt `5 − 2` zu
-  denken. Weil ein Würfelbild bis 6 auf einen Blick erkannt wird, bleibt der zweite
-  Teil immer bei höchstens 6. Das ist keine Einschränkung, sondern die
-  Tauschaufgabe: Von `4 + 9` steht die 9 vorne, weil man vom größeren Teil aus
-  weiterrechnet.
+  Gezeichnet wird das als **Rechenstrich mit Bögen** – die Darstellung, mit der der
+  Zehnerübergang in der Schule eingeführt wird. Jede beantwortete Teilaufgabe zieht
+  einen Bogen: von der 8 einer mit `+2` auf die Zehn, von dort einer mit `+3` auf
+  die 13. Am Ende steht der ganze Weg als Bild da. Die Bögen liegen **vor** der
+  Figur, nicht dahinter, und ein kurzer Sprung bekommt einen flacheren Bogen als ein
+  langer (`grabenBogenHoehe`, mit einer Untergrenze, damit ein `+1` nicht hinter dem
+  Ritter verschwindet).
+
+  **Beschriftet wird nur, was das Kind schon weiß**: die Startzahl (blau), der Zehner
+  am Stein (gold) und – erst nach der Antwort – das Ergebnis (grün). Mit allen Zahlen
+  läse man die Antwort vom Strahl ab; ganz ohne Zahlen war der Strahl nicht zu lesen,
+  und dann fragt man sich nur, warum der Ritter so wenig weit hüpft. Die beiden
+  Zeilen unter dem Strich halten „wo bin ich" und „wo ist der Zehner" auseinander,
+  sonst kleben bei `11 − 2` die 10 und die 11 ineinander.
+
+  Der zweite Teil der Aufgabe bleibt immer bei höchstens 6. Das ist keine
+  Einschränkung, sondern die Tauschaufgabe: Von `4 + 9` steht die 9 vorne, weil man
+  vom größeren Teil aus weiterrechnet.
+
+  Der **Tipp** zeigt das Zwanzigerfeld – die andere Darstellung aus der Schule. Der
+  Zeilenumbruch nach zehn Punkten ist derselbe Zehnerübergang, nur anders gezeichnet.
 
   Unter der Aufgabe wächst der Rechenweg mit: `8 + ▢ + ▢`, dann `8 + 2 + 3`, dann
   `8 + 2 + 3 = 13`. Diese Zeile ist das eigentliche Lernergebnis und bleibt nach
@@ -350,8 +361,11 @@ Durchgangs), `GRABEN_SCHRITTE` (welche Teilschritte auf welcher Stufe gefragt
 werden), `GRABEN_GOLD` (Gold je Schritt – auf der ersten Stufe sind drei Schritte
 nötig, auf der letzten einer, deshalb bringt jede Aufgabe gleich viel),
 `GRABEN_LESEZEIT` (wie lange der fertige Rechenweg stehen bleibt) und
-`WUERFEL_AUGEN` (die Augenstellung der Würfelbilder, in Lesereihenfolge – daran
-hängt, welche Augen beim Zerlegen golden werden).
+`grabenBogenHoehe` (wie hoch ein Bogen über dem Strich steht).
+
+`bauePunkte()` und `baueZahlen()` nehmen beide einen zusätzlichen `max`-Parameter,
+den nur der Burggraben benutzt: Ohne Zehner gibt es keinen Zehnerübergang, also
+rechnet er immer bis 20 – auch wenn auf der Startseite „bis 10" eingestellt ist.
 
 Für den Drachenturm gibt es `TURM_ANZAHL` (Türme je Durchgang), `TURM_SPROSSEN`
 (Sprossen je Turm, also eine Aufgabe weniger hinauf und ebenso viele hinunter) und

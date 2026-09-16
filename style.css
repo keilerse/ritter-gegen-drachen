@@ -982,7 +982,7 @@ body::after{
 /* ---------- Burggraben ---------- */
 .graben-buehne{position:relative;margin:4px 0 10px}
 .graben{
-  position:relative;height:142px;overflow:hidden;
+  position:relative;height:168px;overflow:hidden;
   border:3px solid var(--gold-tief);border-radius:var(--r-gross);
   background:linear-gradient(#1b2748 0 42%,#123057 42%,#0a1b38 100%);
 }
@@ -999,18 +999,12 @@ body::after{
 
 /* Der Rand haelt den Ritter an den Enden im Bild: 0 % ist die Mitte seiner
    Figur, nicht der Bildrand. */
-.graben-feld{position:absolute;left:26px;right:26px;bottom:24px;height:92px}
+.graben-feld{position:absolute;left:26px;right:26px;bottom:32px;height:112px}
 .graben-steg{
   position:absolute;left:-29px;right:-29px;bottom:0;height:14px;
   background:linear-gradient(#8a7c62,#544a38 60%,#3a3226);
   border-top:2px solid #a89a7f;box-sizing:border-box;
 }
-/* Die beiden Ufer: Ohne sie sieht der Steg aus wie ein Brett im Nichts. */
-.graben-ufer{position:absolute;bottom:0;width:26px;height:34px;
-  background:linear-gradient(#7d7058,#4a4234 60%,#332d23);border-top:2px solid #a89a7f;
-  box-sizing:border-box}
-.graben-ufer--links{left:-29px;border-radius:0 4px 0 0}
-.graben-ufer--rechts{right:-29px;border-radius:4px 0 0 0}
 .graben-strahl{position:absolute;left:0;right:0;bottom:0;height:14px}
 .graben-strich{
   position:absolute;bottom:2px;width:2px;height:7px;margin-left:-1px;
@@ -1029,12 +1023,28 @@ body::after{
   position:absolute;top:-17px;left:50%;margin-left:-8px;font-size:.95rem;line-height:1;
   animation:fackelFlacker .38s ease-in-out infinite;
 }
-.graben-marken{position:absolute;left:0;right:0;bottom:-21px;height:18px;
-  font-family:var(--schrift-display);font-size:.82rem;color:var(--gold)}
-.graben-marken span{position:absolute;transform:translateX(-50%)}
-.graben-marken .m0{left:0}
-.graben-marken .m10{left:50%}
-.graben-marken .m20{left:100%}
+.graben-marken{position:absolute;left:0;right:0;bottom:-30px;height:28px;
+  font-family:var(--schrift-display);font-size:.84rem;line-height:1}
+.graben-marke{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.graben-marke.start,.graben-marke.ziel{bottom:14px}
+.graben-marke.rand,.graben-marke.zehner{bottom:0}
+.graben-marke.rand{color:rgba(247,232,200,.42);font-size:.72rem}
+.graben-marke.zehner{color:var(--gold)}
+.graben-marke.start{color:#9ecbff}
+.graben-marke.ziel{color:var(--drache)}
+
+/* Die Rechenboegen. Waagrecht gedehnt (preserveAspectRatio="none"), damit sie
+   auf jeder Bildschirmbreite bis zur richtigen Zahl reichen; die Strichstaerke
+   macht das ueber vector-effect nicht mit. */
+.graben-boegen{position:absolute;left:0;right:0;bottom:14px;height:74px;
+  width:100%;overflow:visible;pointer-events:none;z-index:3}
+.graben-bogen{fill:none;stroke:var(--gold);stroke-width:3;stroke-linecap:round;
+  filter:drop-shadow(0 0 4px rgba(245,181,60,.5))}
+.graben-bogenzahlen{position:absolute;left:0;right:0;bottom:14px;height:74px;
+  font-family:var(--schrift-display);font-size:1rem;line-height:1;color:var(--gold);
+  pointer-events:none;z-index:4}
+.graben-bogen-wert{position:absolute;transform:translateX(-50%);white-space:nowrap;
+  text-shadow:0 2px 4px rgba(0,0,0,.7)}
 
 /* Der Ritter: aussen die Strecke, innen der Bogen. Getrennt, weil sonst die
    Sprunganimation die Wegstrecke ueberschreiben wuerde. */
@@ -1044,27 +1054,13 @@ body::after{
 }
 .graben-ritter.ohne-weg{transition:none}
 .graben-ritter .huepfer{display:block;position:relative}
-.graben-ritter img{display:block;height:46px;width:auto;margin-left:-16px;
+.graben-ritter img{display:block;height:34px;width:auto;margin-left:-12px;
   filter:drop-shadow(0 4px 5px rgba(0,0,0,.55))}
 .graben-ritter.nach-links img{transform:scaleX(-1)}
 .graben-ritter.springt .huepfer{animation:grabenSprung .55s ease-in-out}
-@keyframes grabenSprung{0%{transform:translateY(0)}45%{transform:translateY(-34px)}100%{transform:translateY(0)}}
+@keyframes grabenSprung{0%{transform:translateY(0)}45%{transform:translateY(-42px)}100%{transform:translateY(0)}}
 .graben-ritter.wackelt .huepfer{animation:grabenWackelt .5s ease-in-out}
 @keyframes grabenWackelt{0%,100%{transform:translateX(0)}30%{transform:translateX(-6px)}65%{transform:translateX(5px)}}
-
-/* Aufgabe und Wuerfelbild nebeneinander: die 5 steht als Zahl und als Bild da. */
-.graben-zeile{display:flex;align-items:center;justify-content:center;gap:14px}
-.graben-zeile .aufgabe{margin:0}
-.wuerfel{
-  display:grid;grid-template-columns:repeat(3,10px);grid-template-rows:repeat(3,10px);
-  gap:3px;padding:7px;flex-shrink:0;
-  background:linear-gradient(#fffdf5,#e8dcc0);border:3px solid var(--tinte);
-  border-radius:9px;box-shadow:0 3px 0 rgba(0,0,0,.3);
-}
-.wuerfel i{width:10px;height:10px;border-radius:50%;background:var(--feuer);
-  border:1px solid #b23c1f;box-sizing:border-box;transition:background .25s,border-color .25s}
-/* Verbraucht: was den Ritter schon zum Stein gebracht hat. */
-.wuerfel i.hin{background:var(--gold);border-color:var(--gold-tief)}
 
 /* Der Rechenweg unter der Aufgabe - das eigentliche Lernergebnis. */
 .graben-weg{

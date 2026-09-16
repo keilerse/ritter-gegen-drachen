@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=32">
+<link rel="stylesheet" href="style.css?v=33">
 </head>
 <body>
 <div id="app">
@@ -696,13 +696,17 @@
              Der Rand haelt den Ritter an den Enden im Bild. -->
         <div class="graben-feld">
           <i class="graben-steg"></i>
-          <i class="graben-ufer graben-ufer--links"></i>
-          <i class="graben-ufer graben-ufer--rechts"></i>
           <div class="graben-strahl" id="graben-strahl"></div>
           <i class="graben-stein"><span class="graben-fackel">🔥</span></i>
-          <div class="graben-marken">
-            <span class="m0">0</span><span class="m10">10</span><span class="m20">20</span>
-          </div>
+          <!-- Die Boegen sind die Rechenschritte: von 8 ein Bogen "+2" auf die
+               10, von dort "+3" auf die 13. Sie werden gezeichnet, wenn der
+               Ritter springt. -->
+          <svg class="graben-boegen" id="graben-boegen" viewBox="0 0 100 40"
+               preserveAspectRatio="none" aria-hidden="true" focusable="false"></svg>
+          <div class="graben-bogenzahlen" id="graben-bogenzahlen"></div>
+          <!-- Beschriftet wird nur, was das Kind schon weiss: Startzahl, der
+               Zehner am Stein und am Ende das Ergebnis. -->
+          <div class="graben-marken" id="graben-marken"></div>
           <div class="graben-ritter" id="graben-ritter">
             <span class="huepfer"><img src="images/ritter.svg?v=3" alt=""></span>
           </div>
@@ -712,13 +716,11 @@
     </div>
 
     <div class="tafel aufgabe-tafel">
-      <div class="graben-zeile">
-        <div class="aufgabe" id="graben-aufgabe">8 + 5 = ?</div>
-        <div class="wuerfel" id="graben-wuerfel"></div>
-      </div>
+      <div class="aufgabe" id="graben-aufgabe">8 + 5 = ?</div>
       <div class="graben-weg" id="graben-weg"></div>
       <div class="rueckmeldung" id="graben-rueckmeldung">Wie weit ist es bis zum Stein?</div>
       <div class="tipp-feld" id="graben-tipp">
+        <div class="zahlenfeldpunkte" id="graben-punkte"></div>
         <div class="uhr-tipptext" data-i18n="graben.tipp">Erst bis zum Zehnerstein, dann den Rest springen.</div>
       </div>
     </div>
@@ -971,6 +973,6 @@
 </div>
 
 <script src="strings.js?v=22"></script>
-<script src="app.js?v=33"></script>
+<script src="app.js?v=34"></script>
 </body>
 </html>

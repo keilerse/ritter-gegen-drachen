@@ -14,7 +14,13 @@ Gold ausgeben lässt. Stand: 30. August 2026.
 - ✅ **Hunger** – der Drache will gefüttert werden, ohne dass er je etwas verliert.
 - ✅ **Zehnerübergang** als eigenes Spiel: der **Burggraben** (siehe README).
   Schrittweise über den Zehner, mit dem Zehnerstein als Zwischenlandung und dem
-  Würfelbild, das die Zerlegung sichtbar macht.
+  Rechenstrich mit Bögen als Bild.
+
+  Das Würfelbild, das zuerst die Zerlegung zeigen sollte, ist wieder raus: Beim
+  Spielen mit Kindern war es nur ein zweites Ding, auf das man schauen muss. Und
+  der unbeschriftete Zahlenstrahl mit einer wandernden Figur darauf hat niemand
+  verstanden – die Frage war „warum hüpft der so wenig weit?". Erst die
+  beschrifteten Bögen (`+2`, `+3`) machen aus der Wanderung eine Rechnung.
 
 ---
 
