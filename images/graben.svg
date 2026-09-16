@@ -1,21 +1,29 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 48" width="52" height="48" role="img" aria-label="Burggraben">
   <title>Burggraben</title>
   <defs>
-    <linearGradient id="gGrabenStein" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#9a8c72"/><stop offset="1" stop-color="#4a4234"/>
-    </linearGradient>
     <linearGradient id="gGrabenWasser" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#2d5b96"/><stop offset="1" stop-color="#12305a"/>
+      <stop offset="0" stop-color="#5b9ad8"/><stop offset=".5" stop-color="#2a63a8"/>
+      <stop offset="1" stop-color="#143a6b"/>
+    </linearGradient>
+    <linearGradient id="gGrabenUfer" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#93dd9e"/><stop offset=".4" stop-color="#4fa863"/>
+      <stop offset="1" stop-color="#246036"/>
+    </linearGradient>
+    <linearGradient id="gGrabenStein" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e2dcce"/><stop offset=".45" stop-color="#a49a88"/>
+      <stop offset="1" stop-color="#5d5647"/>
     </linearGradient>
   </defs>
-  <!-- Wasser und Steg -->
-  <rect x="1" y="41" width="50" height="5" rx="2.5" fill="url(#gGrabenWasser)"/>
-  <rect x="1" y="37" width="50" height="5" rx="2" fill="#2a1c0e"/>
-  <!-- Die zwei Rechenboegen: hin zum Zehnerstein, dann weiter -->
-  <path d="M6 37Q12.5 11 19 37" fill="none" stroke="#ef5a35" stroke-width="4.4" stroke-linecap="round"/>
-  <path d="M33 37Q39.5 11 46 37" fill="none" stroke="#ef5a35" stroke-width="4.4" stroke-linecap="round"/>
-  <!-- Der Zehnerstein -->
-  <rect x="19" y="17" width="14" height="20" rx="3" fill="url(#gGrabenStein)" stroke="#2a1c0e" stroke-width="2.5"/>
-  <text x="26" y="32" text-anchor="middle" font-family="Verdana,DejaVu Sans,sans-serif"
-        font-size="12" font-weight="bold" fill="#fff8e6">10</text>
+  <!-- Wasser mit hellem Streifen an der Oberflaeche -->
+  <rect x="0" y="32" width="52" height="14" rx="3" fill="url(#gGrabenWasser)"/>
+  <rect x="0" y="32" width="52" height="2" rx="1" fill="#a9d4f5" opacity=".55"/>
+  <!-- Die beiden gruenen Ufer, auf denen die Bruecke aufsitzt -->
+  <path d="M0 26q8 0 13 6v14H3a3 3 0 0 1-3-3z" fill="url(#gGrabenUfer)"/>
+  <path d="M52 26q-8 0-13 6v14h9a3 3 0 0 0 3-3z" fill="url(#gGrabenUfer)"/>
+  <!-- Steinbruecke mit zwei Rundboegen; die Oeffnungen bleiben frei, damit
+       Wasser und Hintergrund durchscheinen. -->
+  <path d="M5 42V21Q26 14 47 21v21h-4V32a7 7 0 0 0-14 0v10h-6V32a7 7 0 0 0-14 0v10z"
+        fill="url(#gGrabenStein)" stroke="#2a1c0e" stroke-width="2" stroke-linejoin="round"/>
+  <!-- Lichtkante auf der Fahrbahn -->
+  <path d="M5 21Q26 14 47 21v4Q26 18 5 25z" fill="#f4efe2" opacity=".6"/>
 </svg>

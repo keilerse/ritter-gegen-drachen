@@ -153,9 +153,14 @@ sobald sie über der ersten liegt. Gespeichert wird das pro Kind unter dem Schl�
   jede Ergänzung von 1 bis 5 gleich oft dran, und der Vorrat wächst von 15 auf 30
   Aufgaben je Rechenart.
 
-  Das Symbol auf der Spielkarte ist `images/graben.svg`: zwei Bögen, die auf dem
-  Zehnerstein zusammentreffen. Ein Emoji gab das nicht her – 🌉 ist auf jedem
-  Gerät die Golden Gate Bridge und hat im Mittelalter nichts verloren.
+  Das Symbol auf der Spielkarte ist `images/graben.svg`: eine steinerne Brücke mit
+  zwei Rundbögen über dem Wasser, links und rechts das grüne Ufer. Die beiden Bögen
+  und der Pfeiler dazwischen sind nebenbei genau das, was das Spiel übt – zwei
+  Sprünge mit einer Landung in der Mitte. Ein Emoji gab das nicht her: 🌉 ist auf
+  jedem Gerät die Golden Gate Bridge und hat im Mittelalter nichts verloren, 🏰
+  gehört der Burg und 🐲 den Drachen. Die Bogenöffnungen sind echte Löcher im Pfad,
+  keine eingefärbten Flächen – dadurch scheinen Wasser und Kartenhintergrund
+  durch, und das Symbol passt auf hellem wie auf dunklem Grund.
 
   Der **Tipp** zeigt das Zwanzigerfeld – die andere Darstellung aus der Schule. Der
   Zeilenumbruch nach zehn Punkten ist derselbe Zehnerübergang, nur anders gezeichnet.
