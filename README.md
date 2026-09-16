@@ -125,7 +125,15 @@ sobald sie über der ersten liegt. Gespeichert wird das pro Kind unter dem Schl�
   Gezeichnet wird das als **Rechenstrich mit Bögen** – die Darstellung, mit der der
   Zehnerübergang in der Schule eingeführt wird. Jede beantwortete Teilaufgabe zieht
   einen Bogen: von der 8 einer mit `+2` auf die Zehn, von dort einer mit `+3` auf
-  die 13. Am Ende steht der ganze Weg als Bild da. Die Bögen liegen **vor** der
+  die 13. Am Ende steht der ganze Weg als Bild da.
+
+  Der Sprung, der **gerade dran ist**, steht schon vorher da – gestrichelt und mit
+  einem roten `?` statt einer Zahl. Sonst muss ein Kind erst raten, was überhaupt
+  von ihm verlangt wird; mit der Vorschau ist die Frage ein Bild. Der erste
+  Vorschaubogen darf bis zum Stein durchgezogen werden, sein Ziel steht ja fest.
+  Der zweite endet **im Nichts**, auf halbem Bogen mit dem `?` in der Luft: Wohin
+  er führt, ist genau die Antwort. Auf Stufe 3 gibt es keine Vorschau, die ist
+  ohne Hilfe. Die Bögen liegen **vor** der
   Figur, nicht dahinter, und ein kurzer Sprung bekommt einen flacheren Bogen als ein
   langer (`grabenBogenHoehe`, mit einer Untergrenze, damit ein `+1` nicht hinter dem
   Ritter verschwindet).

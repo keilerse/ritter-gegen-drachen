@@ -1040,6 +1040,10 @@ body::after{
   width:100%;overflow:visible;pointer-events:none;z-index:3}
 .graben-bogen{fill:none;stroke:var(--gold);stroke-width:3;stroke-linecap:round;
   filter:drop-shadow(0 0 4px rgba(245,181,60,.5))}
+/* Der Sprung, der gerade dran ist: gestrichelt und ohne Zahl. */
+.graben-bogen.offen{stroke:rgba(247,232,200,.62);stroke-dasharray:5 6;filter:none}
+.graben-bogen-wert.offen{color:var(--feuer);font-size:1.25rem;
+  text-shadow:0 2px 5px rgba(0,0,0,.85)}
 .graben-bogenzahlen{position:absolute;left:0;right:0;bottom:14px;height:74px;
   font-family:var(--schrift-display);font-size:1rem;line-height:1;color:var(--gold);
   pointer-events:none;z-index:4}

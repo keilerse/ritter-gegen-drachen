@@ -3334,9 +3334,11 @@
   }
   function grabenSpringen(ziel, dann){
     graben.boegen.push({ von: graben.stand, bis: ziel });
-    grabenBoegenZeichnen();
     bewege($("graben-ritter"), "springt", 560);
+    /* Erst die Figur setzen, dann zeichnen: Die Vorschau haengt daran, wo der
+       Ritter steht, und soll nicht noch einmal ueber dem fertigen Bogen liegen. */
     grabenRitterSetzen(ziel, false);
+    grabenBoegenZeichnen();
     setTimeout(dann, 600);
   }
 
@@ -3349,27 +3351,58 @@
   /* Ein kurzer Sprung bekommt einen flachen Bogen, ein langer einen hohen -
      sonst steht ueber "+2" eine duenne hohe Schlaufe, die nichts erzaehlt. */
   const grabenBogenHoehe = weite => Math.max(11, 6 + weite*0.45);
+  /* Wie breit der offene Vorschaubogen gezeichnet wird, in Zahlen. Er endet
+     bewusst im Nichts: Wo der Sprung hinfuehrt, ist ja die Frage. */
+  const GRABEN_VORSCHAU = 3;
+  /* Ganzer Bogen von x1 nach x2, oder nur die erste Haelfte bis zum Scheitel.
+     Der Scheitel einer quadratischen Kurve liegt auf halber Hoehe des
+     Stuetzpunkts, deshalb 2*h; die halbe Kurve hat denselben Scheitel und
+     kommt mit dem Stuetzpunkt auf Scheitelhoehe aus. */
+  function grabenBogenPfad(x1, x2, h, halb){
+    const xm = (x1+x2)/2, gipfel = GRABEN_LINIE-h;
+    return halb
+      ? "M"+x1+" "+GRABEN_LINIE+" Q"+((x1+xm)/2)+" "+gipfel+" "+xm+" "+gipfel
+      : "M"+x1+" "+GRABEN_LINIE+" Q"+xm+" "+(GRABEN_LINIE-2*h)+" "+x2+" "+GRABEN_LINIE;
+  }
   function grabenBoegenZeichnen(){
     const svg = $("graben-boegen"), zahlen = $("graben-bogenzahlen");
     svg.innerHTML = ""; zahlen.innerHTML = "";
-    graben.boegen.forEach(b => {
-      const x1 = b.von/GRABEN_MAX*100, x2 = b.bis/GRABEN_MAX*100;
-      const h = grabenBogenHoehe(Math.abs(x2-x1));
+    const n = graben.aufgabe;
+    if(!n) return;
+    const px = p => p/GRABEN_MAX*100;
+    const male = (x1, x2, halb, text, cls) => {
+      const h = grabenBogenHoehe(Math.abs(x2-x1) * (halb ? 1 : 1));
       const pfad = document.createElementNS("http://www.w3.org/2000/svg","path");
-      /* Der Scheitel einer quadratischen Kurve liegt auf halber Hoehe des
-         Stuetzpunkts, deshalb 2*h. */
-      pfad.setAttribute("d","M"+x1+" "+GRABEN_LINIE+" Q"+((x1+x2)/2)+" "+(GRABEN_LINIE-2*h)+
-                            " "+x2+" "+GRABEN_LINIE);
-      pfad.setAttribute("class","graben-bogen");
+      pfad.setAttribute("d", grabenBogenPfad(x1, x2, h, halb));
+      pfad.setAttribute("class", "graben-bogen"+(cls ? " "+cls : ""));
       pfad.setAttribute("vector-effect","non-scaling-stroke");
       svg.appendChild(pfad);
       const wert = document.createElement("span");
-      wert.className = "graben-bogen-wert";
+      wert.className = "graben-bogen-wert"+(cls ? " "+cls : "");
       wert.style.left = ((x1+x2)/2)+"%";
       wert.style.bottom = (((40-GRABEN_LINIE)+h)/40*GRABEN_SVG_H + 3) + "px";
-      wert.textContent = (graben.aufgabe.op==="+" ? "+" : "−") + Math.abs(b.bis-b.von);
+      wert.textContent = text;
       zahlen.appendChild(wert);
-    });
+    };
+    graben.boegen.forEach(b =>
+      male(px(b.von), px(b.bis), false,
+           (n.op==="+" ? "+" : "−") + Math.abs(b.bis-b.von)));
+
+    /* Vorschau: Der Sprung, der gerade dran ist, steht als gestrichelter Bogen
+       mit einem Fragezeichen da - sonst muss ein Kind erst raten, was ueberhaupt
+       von ihm verlangt wird. Auf der letzten Stufe gibt es sie nicht, die ist
+       ohne Hilfe.
+
+       Der erste Bogen darf ganz gezeichnet werden, sein Ziel ist der Stein.
+       Der zweite endet im Nichts: Wo er hinfuehrt, ist die Antwort. */
+    if(grabenBlock() >= GRABEN_SCHRITTE.length-1) return;
+    if(graben.stand === n.ergebnis) return;
+    if(graben.stand !== 10){
+      male(px(graben.stand), px(10), false, "?", "offen");
+    }else{
+      const weit = n.op==="+" ? GRABEN_VORSCHAU : -GRABEN_VORSCHAU;
+      male(px(10), px(10+weit), true, "?", "offen");
+    }
   }
 
   /* Beschriftet wird nur, was das Kind schon weiss. Ohne Zahlen war der Strahl
@@ -3417,6 +3450,7 @@
     const feld = GRABEN_FELD[grabenSchritte()[graben.schritt]];
     grabenTafelZeichnen(feld);
     grabenMarkenZeichnen();
+    grabenBoegenZeichnen();
     sagen("graben-rueckmeldung",
       feld==="e1" ? tr("graben.frage.stein")
       : feld==="e2" ? tr("graben.frage.rest")
@@ -3428,7 +3462,6 @@
     graben.bekannt = { e1:false, e2:false, ergebnis:false };
     graben.schritt = 0;
     graben.boegen = [];
-    grabenBoegenZeichnen();
     $("graben-ritter").classList.toggle("nach-links", graben.aufgabe.op==="-");
     grabenRitterSetzen(graben.aufgabe.a, true);
     grabenFrageZeigen();
