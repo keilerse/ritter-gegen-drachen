@@ -3287,21 +3287,27 @@
   const grabenRunde = () =>
     Math.min(GRABEN_RUNDEN, Math.floor(graben.gestellt/GRABEN_JE_RUNDE)+1);
 
-  /* Nur Aufgaben, die wirklich ueber den Zehner fuehren. Der zweite Teil
-     bleibt bei hoechstens 6, damit er als Wuerfelbild darstellbar ist. Das
-     ist keine Einschraenkung, sondern die Tauschaufgabe: von 4 + 9 steht die
-     9 vorne, weil man vom groesseren Teil aus weiterrechnet. */
+  /* Nur Aufgaben, die wirklich ueber den Zehner fuehren.
+
+     Gezogen wird erst die Startzahl, dann der Sprung - nicht gleichverteilt
+     aus allen Paaren. Aus dem Topf aller Paare kommt die 9 fuenfmal so oft
+     wie die 5, weil sie in fuenfmal so vielen Aufgaben steckt: 60 % aller
+     Aufgaben begannen bei 9 oder 8. Dann ist der erste Teilschritt fast
+     immer 1 oder 2 - und genau der, die Ergaenzung auf zehn, ist das, was
+     hier geuebt werden soll. So kommt jede Ergaenzung von 1 bis 5 gleich
+     oft dran. */
   function grabenAufgabe(){
     const plus = !opt.minus || Math.random() < .5;
-    const paare = [];
-    for(let b=2;b<=6;b++){
-      if(plus){ for(let a=11-b; a<=9;    a++) paare.push([a,b]); }
-      else    { for(let a=11;   a<=9+b;  a++) paare.push([a,b]); }
+    if(plus){
+      const a = zufall(5, 9);
+      /* Mindestens so gross, dass es ueber den Zehner geht, hoechstens so
+         gross, dass es im Zahlenraum bleibt. */
+      const b = zufall(11-a, Math.min(9, GRABEN_MAX-a));
+      return { op:"+", a:a, b:b, e1:10-a, e2:b-(10-a), ergebnis:a+b };
     }
-    const paar = waehle(paare), a = paar[0], b = paar[1];
-    const e1 = plus ? 10-a : a-10;
-    return { op: plus?"+":"-", a:a, b:b, e1:e1, e2:b-e1,
-             ergebnis: plus ? a+b : a-b };
+    const a = zufall(11, 15);
+    const b = zufall(a-9, 9);
+    return { op:"-", a:a, b:b, e1:a-10, e2:b-(a-10), ergebnis:a-b };
   }
 
   function grabenKopf(){

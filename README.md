@@ -145,9 +145,13 @@ sobald sie über der ersten liegt. Gespeichert wird das pro Kind unter dem Schl�
   Zeilen unter dem Strich halten „wo bin ich" und „wo ist der Zehner" auseinander,
   sonst kleben bei `11 − 2` die 10 und die 11 ineinander.
 
-  Der zweite Teil der Aufgabe bleibt immer bei höchstens 6. Das ist keine
-  Einschränkung, sondern die Tauschaufgabe: Von `4 + 9` steht die 9 vorne, weil man
-  vom größeren Teil aus weiterrechnet.
+  **Gezogen wird erst die Startzahl, dann der Sprung** – und das ist wichtiger, als
+  es klingt. Zieht man gleichverteilt aus allen Aufgabenpaaren, kommt die 9 fünfmal
+  so oft wie die 5, weil sie in fünfmal so vielen Aufgaben steckt: 60 % aller
+  Aufgaben begannen bei 9 oder 8. Damit ist der erste Teilschritt fast immer 1 oder
+  2 – und genau der, die Ergänzung auf zehn, ist das, was hier geübt wird. So kommt
+  jede Ergänzung von 1 bis 5 gleich oft dran, und der Vorrat wächst von 15 auf 30
+  Aufgaben je Rechenart.
 
   Das Symbol auf der Spielkarte ist `images/graben.svg`: zwei Bögen, die auf dem
   Zehnerstein zusammentreffen. Ein Emoji gab das nicht her – 🌉 ist auf jedem
