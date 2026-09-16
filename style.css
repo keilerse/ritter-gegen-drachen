@@ -979,6 +979,102 @@ body::after{
 .waage-sym{font-family:var(--schrift-text);font-weight:700;font-size:2.1rem;line-height:1}
 .waage-antwort--zeichen .waage-wort{font-size:.72rem;opacity:.7;font-weight:600}
 
+/* ---------- Burggraben ---------- */
+.graben-buehne{position:relative;margin:4px 0 10px}
+.graben{
+  position:relative;height:142px;overflow:hidden;
+  border:3px solid var(--gold-tief);border-radius:var(--r-gross);
+  background:linear-gradient(#1b2748 0 42%,#123057 42%,#0a1b38 100%);
+}
+/* Deko, damit klar ist, wovon der Graben der Graben ist. */
+.graben-burg{position:absolute;top:6px;right:10px;font-size:1.5rem;line-height:1;opacity:.85;
+  filter:drop-shadow(0 3px 4px rgba(0,0,0,.6));font-style:normal}
+/* Wasserglanz: zwei flache Streifen, die langsam wandern. */
+.graben-wasser{
+  position:absolute;left:-20%;right:-20%;top:42%;bottom:0;
+  background:repeating-linear-gradient(-72deg,rgba(255,255,255,.055) 0 3px,transparent 3px 22px);
+  animation:grabenWasser 7s linear infinite;
+}
+@keyframes grabenWasser{to{transform:translateX(22px)}}
+
+/* Der Rand haelt den Ritter an den Enden im Bild: 0 % ist die Mitte seiner
+   Figur, nicht der Bildrand. */
+.graben-feld{position:absolute;left:26px;right:26px;bottom:24px;height:92px}
+.graben-steg{
+  position:absolute;left:-29px;right:-29px;bottom:0;height:14px;
+  background:linear-gradient(#8a7c62,#544a38 60%,#3a3226);
+  border-top:2px solid #a89a7f;box-sizing:border-box;
+}
+/* Die beiden Ufer: Ohne sie sieht der Steg aus wie ein Brett im Nichts. */
+.graben-ufer{position:absolute;bottom:0;width:26px;height:34px;
+  background:linear-gradient(#7d7058,#4a4234 60%,#332d23);border-top:2px solid #a89a7f;
+  box-sizing:border-box}
+.graben-ufer--links{left:-29px;border-radius:0 4px 0 0}
+.graben-ufer--rechts{right:-29px;border-radius:4px 0 0 0}
+.graben-strahl{position:absolute;left:0;right:0;bottom:0;height:14px}
+.graben-strich{
+  position:absolute;bottom:2px;width:2px;height:7px;margin-left:-1px;
+  background:rgba(255,235,190,.45);border-radius:1px;
+}
+.graben-strich.mittel{height:10px;background:rgba(255,235,190,.65)}
+.graben-strich.gross{height:12px;width:3px;margin-left:-1.5px;background:var(--gold)}
+/* Der Zehnerstein steht hinter dem Ritter, damit er davor landen kann. */
+.graben-stein{
+  position:absolute;left:50%;bottom:12px;width:19px;height:40px;margin-left:-9.5px;
+  background:linear-gradient(#b3a488,#7b6e56 55%,#4e4636);
+  border:2px solid #2f291f;border-radius:5px 5px 2px 2px;box-sizing:border-box;
+  box-shadow:inset 0 -6px 10px rgba(0,0,0,.35),0 0 14px rgba(255,180,80,.35);
+}
+.graben-fackel{
+  position:absolute;top:-17px;left:50%;margin-left:-8px;font-size:.95rem;line-height:1;
+  animation:fackelFlacker .38s ease-in-out infinite;
+}
+.graben-marken{position:absolute;left:0;right:0;bottom:-21px;height:18px;
+  font-family:var(--schrift-display);font-size:.82rem;color:var(--gold)}
+.graben-marken span{position:absolute;transform:translateX(-50%)}
+.graben-marken .m0{left:0}
+.graben-marken .m10{left:50%}
+.graben-marken .m20{left:100%}
+
+/* Der Ritter: aussen die Strecke, innen der Bogen. Getrennt, weil sonst die
+   Sprunganimation die Wegstrecke ueberschreiben wuerde. */
+.graben-ritter{
+  position:absolute;left:0;bottom:12px;width:0;z-index:2;
+  transition:left .55s cubic-bezier(.45,0,.5,1);
+}
+.graben-ritter.ohne-weg{transition:none}
+.graben-ritter .huepfer{display:block;position:relative}
+.graben-ritter img{display:block;height:46px;width:auto;margin-left:-16px;
+  filter:drop-shadow(0 4px 5px rgba(0,0,0,.55))}
+.graben-ritter.nach-links img{transform:scaleX(-1)}
+.graben-ritter.springt .huepfer{animation:grabenSprung .55s ease-in-out}
+@keyframes grabenSprung{0%{transform:translateY(0)}45%{transform:translateY(-34px)}100%{transform:translateY(0)}}
+.graben-ritter.wackelt .huepfer{animation:grabenWackelt .5s ease-in-out}
+@keyframes grabenWackelt{0%,100%{transform:translateX(0)}30%{transform:translateX(-6px)}65%{transform:translateX(5px)}}
+
+/* Aufgabe und Wuerfelbild nebeneinander: die 5 steht als Zahl und als Bild da. */
+.graben-zeile{display:flex;align-items:center;justify-content:center;gap:14px}
+.graben-zeile .aufgabe{margin:0}
+.wuerfel{
+  display:grid;grid-template-columns:repeat(3,10px);grid-template-rows:repeat(3,10px);
+  gap:3px;padding:7px;flex-shrink:0;
+  background:linear-gradient(#fffdf5,#e8dcc0);border:3px solid var(--tinte);
+  border-radius:9px;box-shadow:0 3px 0 rgba(0,0,0,.3);
+}
+.wuerfel i{width:10px;height:10px;border-radius:50%;background:var(--feuer);
+  border:1px solid #b23c1f;box-sizing:border-box;transition:background .25s,border-color .25s}
+/* Verbraucht: was den Ritter schon zum Stein gebracht hat. */
+.wuerfel i.hin{background:var(--gold);border-color:var(--gold-tief)}
+
+/* Der Rechenweg unter der Aufgabe - das eigentliche Lernergebnis. */
+.graben-weg{
+  font-family:var(--schrift-display);font-size:clamp(1.3rem,6vw,1.75rem);line-height:1.2;
+  text-align:center;color:var(--tinte);min-height:1.25em;margin-top:6px;letter-spacing:1px;
+}
+.graben-weg .luecke{border-bottom:4px solid var(--feuer);display:inline-block;min-width:.9em}
+.graben-weg .luecke{color:var(--feuer)}
+.graben-weg .offen{opacity:.4}
+
 /* ---------- Hunger-Hinweis ---------- */
 .hunger-banner{
   display:flex;align-items:center;gap:12px;width:100%;margin-bottom:12px;

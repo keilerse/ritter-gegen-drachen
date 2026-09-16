@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=31">
+<link rel="stylesheet" href="style.css?v=32">
 </head>
 <body>
 <div id="app">
@@ -120,6 +120,16 @@
         <span>
           <h3 data-i18n="karte.turm.titel">Drachenturm</h3>
           <p data-i18n="karte.turm.text">Steig die Leiter hinauf zum Schatz – und wieder hinunter.</p>
+        </span>
+        <span class="badge badge--verdienen" data-i18n="badge.verdienen">Verdienen</span>
+      </button>
+
+      <button class="spielkarte" id="karte-graben" type="button">
+        <span class="bild">🌉</span>
+        <span>
+          <h3 data-i18n="karte.graben.titel">Burggraben</h3>
+          <p data-i18n="karte.graben.text">Spring über den Graben – nur der Zehnerstein trägt dich.</p>
+          <span class="karte-fort" id="fort-graben" hidden></span>
         </span>
         <span class="badge badge--verdienen" data-i18n="badge.verdienen">Verdienen</span>
       </button>
@@ -659,6 +669,70 @@
     </div>
   </section>
 
+  <!-- ============ SPIEL 11: BURGGRABEN ============ -->
+  <section class="screen" id="screen-graben">
+    <div class="hort-kopf">
+      <div class="anzeige">
+        <div class="kopf" data-i18n="gold">Gold</div>
+        <div class="wert"><span class="goldbox js-goldbox"><span class="js-gold">0</span></span></div>
+      </div>
+      <div class="anzeige anzeige--serie aus" id="graben-serie">
+        <div class="kopf" data-i18n="serie">Serie</div>
+        <div class="wert" id="graben-serie-wert">×1</div>
+      </div>
+      <div class="anzeige">
+        <div class="kopf" data-i18n="graben">Runde</div>
+        <div class="wert" id="graben-runden">1/3</div>
+      </div>
+    </div>
+
+    <div class="rang-chip"><span class="js-rang-emoji">🪙</span><span class="js-rang">Knappe</span></div>
+
+    <div class="graben-buehne">
+      <div class="graben" id="graben-bild" data-i18n-aria="aria.graben" aria-label="Burggraben">
+        <i class="graben-wasser"></i>
+        <i class="graben-burg">🏰</i>
+        <!-- Alles Bewegliche sitzt in diesem Feld: 0 ganz links, 20 ganz rechts.
+             Der Rand haelt den Ritter an den Enden im Bild. -->
+        <div class="graben-feld">
+          <i class="graben-steg"></i>
+          <i class="graben-ufer graben-ufer--links"></i>
+          <i class="graben-ufer graben-ufer--rechts"></i>
+          <div class="graben-strahl" id="graben-strahl"></div>
+          <i class="graben-stein"><span class="graben-fackel">🔥</span></i>
+          <div class="graben-marken">
+            <span class="m0">0</span><span class="m10">10</span><span class="m20">20</span>
+          </div>
+          <div class="graben-ritter" id="graben-ritter">
+            <span class="huepfer"><img src="images/ritter.svg?v=3" alt=""></span>
+          </div>
+        </div>
+      </div>
+      <div class="funken" id="graben-funken"></div>
+    </div>
+
+    <div class="tafel aufgabe-tafel">
+      <div class="graben-zeile">
+        <div class="aufgabe" id="graben-aufgabe">8 + 5 = ?</div>
+        <div class="wuerfel" id="graben-wuerfel"></div>
+      </div>
+      <div class="graben-weg" id="graben-weg"></div>
+      <div class="rueckmeldung" id="graben-rueckmeldung">Wie weit ist es bis zum Stein?</div>
+      <div class="tipp-feld" id="graben-tipp">
+        <div class="uhr-tipptext" data-i18n="graben.tipp">Erst bis zum Zehnerstein, dann den Rest springen.</div>
+      </div>
+    </div>
+
+    <div class="zahlenfeld" id="graben-zahlen"></div>
+
+    <div class="fusszeile">
+      <button class="mini" data-tipp="graben" data-i18n="tipp">💡 Tipp</button>
+      <button class="mini" data-kammer data-i18n="kammer">🗝️ Schatzkammer</button>
+      <button class="mini" data-ton>🔊 Ton</button>
+      <button class="mini" data-heim data-i18n="heim">🏠 Auswahl</button>
+    </div>
+  </section>
+
   <!-- ============ SPIEL 7: RITTER-TURNIER ============ -->
   <section class="screen" id="screen-turnier">
     <div class="hort-kopf">
@@ -832,6 +906,17 @@
 </div>
 
 <!-- ============ BURGWAAGE ERGEBNIS ============ -->
+<div class="overlay" id="ov-graben">
+  <div class="overlay-karte">
+    <div class="belohnung">🌉</div>
+    <h2 data-i18n="graben.titel">Alle Sprünge geschafft!</h2>
+    <p id="graben-ziel-text"></p>
+    <p class="gold-plus" data-i18n="ziel.bonus">+100 Bonus-Gold</p>
+    <button class="knopf" id="btn-graben-weiter" data-i18n="graben.weiter">Noch einmal springen</button>
+    <button class="mini" data-heim data-i18n="heim">🏠 Auswahl</button>
+  </div>
+</div>
+
 <div class="overlay" id="ov-waage">
   <div class="overlay-karte">
     <div class="belohnung">⚖️</div>
@@ -885,7 +970,7 @@
   </div>
 </div>
 
-<script src="strings.js?v=21"></script>
-<script src="app.js?v=32"></script>
+<script src="strings.js?v=22"></script>
+<script src="app.js?v=33"></script>
 </body>
 </html>

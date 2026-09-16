@@ -12,6 +12,25 @@ Gold ausgeben lässt. Stand: 30. August 2026.
 - ✅ **Drachenfarben** – sechs Farben, freigeschaltet durch fehlerfreie Türme.
 - ✅ **Überschrift bei der Namensvergabe** in der Drachenhöhle.
 - ✅ **Hunger** – der Drache will gefüttert werden, ohne dass er je etwas verliert.
+- ✅ **Zehnerübergang** als eigenes Spiel: der **Burggraben** (siehe README).
+  Schrittweise über den Zehner, mit dem Zehnerstein als Zwischenlandung und dem
+  Würfelbild, das die Zerlegung sichtbar macht.
+
+---
+
+## Als Nächstes zu prüfen: Zahlzerlegung als eigenes Spiel
+
+Die systematische **Zahlzerlegung bis 10** – alle Paare, die zusammen 7 ergeben –
+kommt nirgends vor. Sie ist die Voraussetzung für den Zehnerübergang *und* fürs
+Minusrechnen. Das klassische Bild dafür ist die Schüttelbox: sieben Goldmünzen im
+Beutel, vier rollen heraus, wie viele sind noch drin? Der versteckte Teil ist das
+Interessante.
+
+**Noch nicht gebaut, und zwar mit Absicht.** Der erste Schritt im Burggraben
+(„wie weit ist es bis zum Stein?") übt die Ergänzung auf zehn ohnehin nebenbei –
+vielleicht genügt das. Außerdem sind es mit dem Burggraben schon acht Rechenspiele und
+die Startseite wird lang. Erst zuschauen, wie die Kinder den Graben spielen,
+dann entscheiden.
 
 ---
 

@@ -184,7 +184,7 @@
      stand ist immer die Stufe, mit der das nächste Spiel BEGINNT: beim
      Drachenkampf der Drache, beim Turnier der Gegner, bei Schatzjagd und
      Rechenmauer der Schwierigkeitsblock, in dem die Runde 1 startet. */
-  const FORT_ANZAHL = { kampf:5, turnier:4, hort:4, mauer:4, uhr:2, waage:2, turm:1 };
+  const FORT_ANZAHL = { kampf:5, turnier:4, hort:4, mauer:4, graben:3, uhr:2, waage:2, turm:1 };
   const fort = {};
   function fortLaden(){
     Object.keys(FORT_ANZAHL).forEach(s =>
@@ -629,11 +629,14 @@
   }
 
   /* ================= Zahlenfeld ================= */
-  function baueZahlen(elId,handler){
-    const feld = $(elId);
+  /* max ueberschreibt den eingestellten Zahlenraum. Braucht nur der
+     Burggraben: ohne Zehner gibt es keinen Zehneruebergang, dort wird also
+     immer bis 20 gerechnet. */
+  function baueZahlen(elId,handler,max){
+    const feld = $(elId), gross = max || opt.max;
     feld.innerHTML = "";
-    feld.classList.toggle("zahlenfeld--klein", opt.max===10);
-    for(let i=0;i<=opt.max;i++){
+    feld.classList.toggle("zahlenfeld--klein", gross===10);
+    for(let i=0;i<=gross;i++){
       const b = document.createElement("button");
       b.className = "zahl"; b.type = "button";
       b.textContent = i; b.dataset.wert = i;
@@ -3242,6 +3245,277 @@
     waageStart();
   }
 
+  /* ================= SPIEL 11: BURGGRABEN =================
+     Der Zehneruebergang - das, was die anderen Spiele als Stufe 3 abfragen,
+     ohne es je zu zeigen. Gerechnet wird schrittweise ueber den Zehner:
+     8 + 5 heisst erst 8 + 2 = 10, dann 10 + 3 = 13.
+
+     Der Zahlenstrahl von 0 bis 20 ist ein Burggraben, in seiner Mitte steht
+     der Zehnerstein. In einem Satz kommt der Ritter nicht hinueber, er muss
+     dort zwischenlanden. Beschriftet sind nur 0, 10 und 20 - stuenden alle
+     Zahlen da, laese das Kind die Antwort vom Strahl ab, statt zu rechnen.
+
+     Die Sprungkraft steht als Wuerfelbild daneben und zerfaellt nach dem
+     ersten Schritt sichtbar in zwei Teile (2 verbraucht, 3 uebrig). Die
+     Zerlegung ist der Schritt, an dem Kinder scheitern; ohne dieses Bild
+     passiert sie unsichtbar und das Kind zaehlt den Restsprung einfach ab.
+
+     Der Zahlenraum der Startseite gilt hier nicht - ohne Zehner gibt es
+     keinen Zehneruebergang. "Nur Plus" gilt dagegen sehr wohl. */
+  const GRABEN_RUNDEN = 3, GRABEN_JE_RUNDE = 4;
+  const GRABEN_MAX = 20;
+  /* Gold je Schritt. Auf der ersten Stufe sind drei Schritte je Aufgabe
+     noetig, auf der letzten nur einer - so bringt jede Aufgabe gleich viel. */
+  const GRABEN_GOLD = [6, 9, 18];
+  const GRABEN_ZIEL_GOLD = 100;
+  /* Am Ende einer Aufgabe steht der ganze Rechenweg da (8 + 5 = 8 + 2 + 3 = 13).
+     Der ist das eigentliche Lernergebnis - er bleibt stehen, bis man ihn
+     gelesen hat, und nicht nur einen Wimpernschlag. */
+  const GRABEN_LESEZEIT = 1700;
+  /* Welche Schritte auf welcher Stufe gefragt werden. 0 = bis zum Stein,
+     1 = der Rest, 2 = das Ergebnis. Die Hilfe wird Stufe fuer Stufe
+     weggenommen, bis die blanke Aufgabe dasteht. */
+  const GRABEN_SCHRITTE = [[0,1,2],[0,2],[2]];
+  const GRABEN_FELD = ["e1","e2","ergebnis"];
+  /* Augenstellung der Wuerfelbilder als [Zeile, Spalte]. In Lesereihenfolge,
+     damit sich beim Zerlegen nichts verschiebt. */
+  const WUERFEL_AUGEN = {
+    1:[[2,2]],
+    2:[[1,1],[3,3]],
+    3:[[1,1],[2,2],[3,3]],
+    4:[[1,1],[1,3],[3,1],[3,3]],
+    5:[[1,1],[1,3],[2,2],[3,1],[3,3]],
+    6:[[1,1],[2,1],[3,1],[1,3],[2,3],[3,3]]
+  };
+
+  const graben = { gestellt:0, stufe:0, schritt:0, stand:0,
+                   richtig:0, falsch:0, serie:0, beste:0,
+                   aufgabe:null, bekannt:null, gesperrt:false };
+
+  const grabenBlock = () =>
+    Math.min(GRABEN_SCHRITTE.length-1, graben.stufe + Math.floor(graben.gestellt/GRABEN_JE_RUNDE));
+  const grabenSchritte = () => GRABEN_SCHRITTE[grabenBlock()];
+  const grabenRunde = () =>
+    Math.min(GRABEN_RUNDEN, Math.floor(graben.gestellt/GRABEN_JE_RUNDE)+1);
+
+  /* Nur Aufgaben, die wirklich ueber den Zehner fuehren. Der zweite Teil
+     bleibt bei hoechstens 6, damit er als Wuerfelbild darstellbar ist. Das
+     ist keine Einschraenkung, sondern die Tauschaufgabe: von 4 + 9 steht die
+     9 vorne, weil man vom groesseren Teil aus weiterrechnet. */
+  function grabenAufgabe(){
+    const plus = !opt.minus || Math.random() < .5;
+    const paare = [];
+    for(let b=2;b<=6;b++){
+      if(plus){ for(let a=11-b; a<=9;    a++) paare.push([a,b]); }
+      else    { for(let a=11;   a<=9+b;  a++) paare.push([a,b]); }
+    }
+    const paar = waehle(paare), a = paar[0], b = paar[1];
+    const e1 = plus ? 10-a : a-10;
+    return { op: plus?"+":"-", a:a, b:b, e1:e1, e2:b-e1,
+             ergebnis: plus ? a+b : a-b };
+  }
+
+  function grabenKopf(){
+    const mult = multiplikator(graben.serie);
+    $("graben-serie-wert").textContent = "×"+mult;
+    $("graben-serie").classList.toggle("aus", mult===1);
+    $("graben-runden").textContent = grabenRunde()+"/"+GRABEN_RUNDEN;
+    schatzZeichnen();
+  }
+
+  function grabenStrahlBauen(){
+    const el = $("graben-strahl");
+    el.innerHTML = "";
+    for(let i=0;i<=GRABEN_MAX;i++){
+      const t = document.createElement("i");
+      t.className = "graben-strich" + (i%10===0 ? " gross" : i%5===0 ? " mittel" : "");
+      t.style.left = (i/GRABEN_MAX*100)+"%";
+      el.appendChild(t);
+    }
+  }
+
+  /* sofort: beim Aufgabenwechsel soll der Ritter nicht quer durchs Bild
+     fahren, sondern am Start stehen. */
+  function grabenRitterSetzen(p, sofort){
+    const r = $("graben-ritter");
+    graben.stand = p;
+    if(sofort) r.classList.add("ohne-weg");
+    r.style.left = (p/GRABEN_MAX*100)+"%";
+    if(sofort){ void r.offsetWidth; r.classList.remove("ohne-weg"); }
+  }
+  function grabenSpringen(ziel, dann){
+    bewege($("graben-ritter"), "springt", 560);
+    grabenRitterSetzen(ziel, false);
+    setTimeout(dann, 600);
+  }
+
+  function grabenWuerfelZeichnen(){
+    const n = graben.aufgabe, el = $("graben-wuerfel");
+    el.innerHTML = "";
+    const hin = graben.bekannt.e1 ? n.e1 : 0;
+    (WUERFEL_AUGEN[n.b]||[]).forEach((pos,i) => {
+      const auge = document.createElement("i");
+      if(i < hin) auge.className = "hin";
+      auge.style.gridRow = pos[0];
+      auge.style.gridColumn = pos[1];
+      el.appendChild(auge);
+    });
+  }
+
+  /* Die Aufgabe oben, der Rechenweg darunter. Was noch niemand weiss, steht
+     als Punkt da; was gerade gefragt ist, als rotes Fragezeichen. */
+  function grabenTafelZeichnen(frage){
+    const n = graben.aufgabe;
+    $("graben-aufgabe").innerHTML = n.a+" "+n.op+" "+n.b+" = " +
+      (graben.bekannt.ergebnis ? n.ergebnis : '<span class="luecke">?</span>');
+    const weg = $("graben-weg");
+    /* Auf der letzten Stufe steht die blanke Aufgabe da; der Weg kommt erst
+       nach der Antwort - als Probe, nicht als Hilfe. */
+    if(grabenBlock()===GRABEN_SCHRITTE.length-1 && !graben.bekannt.ergebnis){
+      weg.innerHTML = "";
+      return;
+    }
+    const teil = (feld, wert) =>
+      graben.bekannt[feld] ? wert
+      : frage===feld ? '<span class="luecke">?</span>'
+      : '<span class="offen">▢</span>';
+    weg.innerHTML = n.a+" "+n.op+" "+teil("e1",n.e1)+" "+n.op+" "+teil("e2",n.e2)+
+      (graben.bekannt.ergebnis ? " = "+n.ergebnis
+       : frage==="ergebnis" ? ' = <span class="luecke">?</span>' : "");
+  }
+
+  function grabenFrageZeigen(){
+    const feld = GRABEN_FELD[grabenSchritte()[graben.schritt]];
+    grabenTafelZeichnen(feld);
+    grabenWuerfelZeichnen();
+    sagen("graben-rueckmeldung",
+      feld==="e1" ? tr("graben.frage.stein")
+      : feld==="e2" ? tr("graben.frage.rest")
+      : graben.bekannt.e1 ? tr("graben.frage.ziel") : tr("graben.frage.ganz"), "");
+  }
+
+  function grabenNeueAufgabe(){
+    graben.aufgabe = grabenAufgabe();
+    graben.bekannt = { e1:false, e2:false, ergebnis:false };
+    graben.schritt = 0;
+    $("graben-ritter").classList.toggle("nach-links", graben.aufgabe.op==="-");
+    grabenRitterSetzen(graben.aufgabe.a, true);
+    grabenFrageZeigen();
+    grabenKopf();
+    $("graben-tipp").classList.remove("is-offen");
+    graben.gesperrt = false;
+    freigeben("graben-zahlen");
+  }
+
+  /* Was nach einer beantworteten Frage sichtbar wird. Auf Stufe 2 ergibt sich
+     der Rest von selbst, sobald der Weg bis zum Stein bekannt ist; auf Stufe 3
+     wird nach der Antwort der ganze Weg aufgedeckt. */
+  function grabenAufdecken(feld){
+    graben.bekannt[feld] = true;
+    if(feld==="e1" && grabenSchritte().indexOf(1) < 0) graben.bekannt.e2 = true;
+    if(feld==="ergebnis"){ graben.bekannt.e1 = true; graben.bekannt.e2 = true; }
+  }
+
+  /* Der Ritter springt dorthin, wo er nach diesem Schritt stehen muss - notfalls
+     in zwei Saetzen, wenn er von der Aufgabe direkt ans Ziel gefragt wurde. */
+  function grabenNachziehen(dann){
+    const n = graben.aufgabe;
+    if(graben.stand === n.ergebnis){ setTimeout(dann, 200); return; }
+    if(graben.stand === 10){ grabenSpringen(n.ergebnis, dann); return; }
+    grabenSpringen(10, ()=> grabenSpringen(n.ergebnis, dann));
+  }
+
+  function grabenAntwort(wert,knopf){
+    if(graben.gesperrt) return;
+    graben.gesperrt = true; sperren("graben-zahlen");
+    const schritte = grabenSchritte();
+    const feld = GRABEN_FELD[schritte[graben.schritt]];
+    const loesung = graben.aufgabe[feld];
+    const letzter = graben.schritt >= schritte.length-1;
+
+    const weiter = () => {
+      if(!letzter){
+        graben.schritt++;
+        grabenFrageZeigen();
+        graben.gesperrt = false;
+        freigeben("graben-zahlen");
+        return;
+      }
+      graben.gestellt++;
+      grabenKopf();
+      if(graben.gestellt >= GRABEN_RUNDEN*GRABEN_JE_RUNDE)
+        setTimeout(grabenFertig, GRABEN_LESEZEIT);
+      else setTimeout(grabenNeueAufgabe, GRABEN_LESEZEIT);
+    };
+    /* Nach dem Aufdecken laeuft der Ritter in beiden Faellen dieselbe Strecke:
+       Der Weg ueber den Stein soll auch dann zu sehen sein, wenn die Antwort
+       daneben lag - er ist ja das, was geuebt wird. */
+    const laufen = () => {
+      grabenAufdecken(feld);
+      grabenTafelZeichnen(null);
+      grabenWuerfelZeichnen();
+      if(feld==="e1") grabenSpringen(10, weiter);
+      else            grabenNachziehen(weiter);
+    };
+
+    if(wert===loesung){
+      knopf.classList.add("richtig");
+      graben.richtig++; graben.serie++;
+      graben.beste = Math.max(graben.beste, graben.serie);
+      problemGeloest();
+      const mult = multiplikator(graben.serie);
+      const gewinn = goldDazu(GRABEN_GOLD[grabenBlock()]*mult);
+      kRichtig(); kMuenze();
+      sagen("graben-rueckmeldung",
+        (feld==="e1" ? tr("graben.stein")
+         : feld==="ergebnis" ? tr("graben.geschafft")
+         : tr(waehle(lobWorte))) + "  " + tr("gold.plus",{n:gewinn}), "gut");
+      funken("graben-funken","🪙",mult*4);
+      grabenKopf();
+      setTimeout(laufen, 320);
+    }else{
+      knopf.classList.add("falsch");
+      zeigeLoesung("graben-zahlen", loesung);
+      graben.falsch++; graben.serie = 0;
+      const weg = goldWeg();
+      kFalsch();
+      bewege($("graben-ritter"), "wackelt", 520);
+      sagen("graben-rueckmeldung", weg
+        ? tr("graben.falsch.gold", { n: loesung, a: weg })
+        : tr("graben.falsch", { n: loesung }), "schlecht");
+      $("graben-tipp").classList.add("is-offen");
+      grabenKopf();
+      setTimeout(laufen, 2200);
+    }
+  }
+
+  function grabenFertig(){
+    kSieg();
+    goldDazu(beuteFuer("graben", graben.stufe, GRABEN_ZIEL_GOLD));
+    const hoch = graben.falsch*3 <= graben.richtig;
+    const vorher = fort.graben.stand;
+    if(hoch) fortGeschafft("graben", graben.stufe); else fortZurueck("graben");
+    $("graben-ziel-text").textContent =
+      trp("graben.ziel.basis", graben.richtig, { b: graben.beste }) + " " +
+      (graben.falsch===0 ? tr("h.ziel.sauber") : tr("h.weiterso")) + " " +
+      fortSatz("graben", vorher, hoch);
+    $("ov-graben").classList.add("is-offen");
+    grabenKopf();
+  }
+
+  function grabenStart(){
+    graben.gestellt=0; graben.stufe=fort.graben.stand;
+    graben.richtig=0; graben.falsch=0; graben.serie=0; graben.beste=0;
+    baueZahlen("graben-zahlen", grabenAntwort, GRABEN_MAX);
+    grabenStrahlBauen();
+    zeigeScreen("screen-graben");
+    grabenNeueAufgabe();
+  }
+  function grabenWeiter(){
+    $("ov-graben").classList.remove("is-offen");
+    grabenStart();
+  }
+
   /* ================= Auswahl & Bedienung ================= */
   function wahlSetzen(gruppeId,wert){
     alle("#"+gruppeId+" button").forEach(b =>
@@ -3476,6 +3750,8 @@
 
   $("karte-turm").addEventListener("click", turmStart);
   $("karte-uhr").addEventListener("click", ()=>uhrStart(false));
+  $("karte-graben").addEventListener("click", grabenStart);
+  $("btn-graben-weiter").addEventListener("click", grabenWeiter);
   $("karte-waage").addEventListener("click", waageStart);
   $("btn-waage-weiter").addEventListener("click", waageWeiter);
   $("btn-uhr-weiter").addEventListener("click", uhrWeiter);

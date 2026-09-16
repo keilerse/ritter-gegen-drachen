@@ -113,6 +113,49 @@ sobald sie über der ersten liegt. Gespeichert wird das pro Kind unter dem Schl�
   Eine falsche Antwort lässt den Ritter eine Sprosse abrutschen. Drei Türme pro
   Durchgang; jeder fehlerfreie Turm schaltet eine Drachenfarbe frei.
 
+- **Burggraben** – der **Zehnerübergang**, und zwar nicht als Abfrage, sondern als
+  Verfahren. Die anderen Spiele stellen `8 + 5` als Stufe 3 und warten auf die 13;
+  wer es nicht kann, zählt. Hier wird schrittweise gerechnet: erst `8 + 2 = 10`,
+  dann `10 + 3 = 13`.
+
+  Der Zahlenstrahl von 0 bis 20 ist ein Burggraben, in seiner Mitte steht der
+  **Zehnerstein**. In einem Satz kommt der Ritter nicht hinüber, er muss dort
+  zwischenlanden. Beschriftet sind nur **0, 10 und 20** – stünden alle Zahlen da,
+  läse das Kind die Antwort vom Strahl ab, statt zu rechnen.
+
+  Die Sprungkraft steht als **Würfelbild** daneben und zerfällt nach dem ersten
+  Schritt sichtbar in zwei Teile: bei `8 + 5` werden zwei der fünf Augen golden,
+  drei bleiben rot. Das ist der eigentliche Grund für das Bild – die Zerlegung der
+  5 in 2 und 3 ist der Schritt, an dem Kinder scheitern, und ohne das Bild passiert
+  sie unsichtbar: Das Kind zählt den Restsprung am Bogen ab, statt `5 − 2` zu
+  denken. Weil ein Würfelbild bis 6 auf einen Blick erkannt wird, bleibt der zweite
+  Teil immer bei höchstens 6. Das ist keine Einschränkung, sondern die
+  Tauschaufgabe: Von `4 + 9` steht die 9 vorne, weil man vom größeren Teil aus
+  weiterrechnet.
+
+  Unter der Aufgabe wächst der Rechenweg mit: `8 + ▢ + ▢`, dann `8 + 2 + 3`, dann
+  `8 + 2 + 3 = 13`. Diese Zeile ist das eigentliche Lernergebnis und bleibt nach
+  jeder Aufgabe stehen, bis man sie gelesen hat.
+
+  **Drei Stufen nehmen die Hilfe weg** (Runde für Runde, und der Fortschritt
+  verschiebt den Einstieg):
+
+  | Stufe | gefragt wird |
+  |---|---|
+  | 1 | alle drei Schritte: bis zum Stein, der Rest, das Ergebnis |
+  | 2 | nur bis zum Stein – der Rest deckt sich auf – und das Ergebnis |
+  | 3 | nur `8 + 5 = ?`; der Weg kommt danach als Probe |
+
+  Auf Stufe 3 ist es genau die Aufgabe, die auch die anderen Spiele stellen: Der
+  Übergang ins normale Spiel ist eingebaut. Minus geht rückwärts über denselben
+  Stein (`13 − 3 = 10`, `10 − 2 = 8`), der Ritter schaut dann nach links.
+
+  Der eingestellte **Zahlenraum gilt hier nicht**: Ohne Zehner gibt es keinen
+  Zehnerübergang, also rechnet der Graben immer bis 20 und sein Zahlenfeld reicht
+  auch dann bis 20, wenn „bis 10" eingestellt ist. „Nur Plus" gilt dagegen sehr wohl.
+  Eine falsche Antwort zeigt die Lösung und kostet Gold – der Ritter springt danach
+  trotzdem über den Stein, denn der Weg ist ja das, was geübt wird.
+
 - **Uhrturm** – die Uhr lesen, nach dem Lehrplan der 1. Klasse Volksschule: volle
   und halbe Stunden. Die Turmuhr zeigt eine Zeit, auf der Tafel steht der Satz mit
   einer Lücke (`halb ▢`), getippt wird die Zahl auf einem Feld von 1 bis 12. In der
@@ -301,6 +344,14 @@ Den Fortschritt steuern `FORT_ANZAHL` (wie viele Stufen ein Spiel hat),
 `HORT_STUFEN20` und `HORT_STUFEN10`, die der Rechenmauer in `mStufen()` samt
 `MAUER_GOLD`. Ein Spiel aus dem Fortschritt zu nehmen heißt: den Eintrag aus
 `FORT_ANZAHL` streichen und die `fort…`-Aufrufe in seinem Abschnitt entfernen.
+
+Den Burggraben steuern `GRABEN_RUNDEN` und `GRABEN_JE_RUNDE` (Länge eines
+Durchgangs), `GRABEN_SCHRITTE` (welche Teilschritte auf welcher Stufe gefragt
+werden), `GRABEN_GOLD` (Gold je Schritt – auf der ersten Stufe sind drei Schritte
+nötig, auf der letzten einer, deshalb bringt jede Aufgabe gleich viel),
+`GRABEN_LESEZEIT` (wie lange der fertige Rechenweg stehen bleibt) und
+`WUERFEL_AUGEN` (die Augenstellung der Würfelbilder, in Lesereihenfolge – daran
+hängt, welche Augen beim Zerlegen golden werden).
 
 Für den Drachenturm gibt es `TURM_ANZAHL` (Türme je Durchgang), `TURM_SPROSSEN`
 (Sprossen je Turm, also eine Aufgabe weniger hinauf und ebenso viele hinunter) und
