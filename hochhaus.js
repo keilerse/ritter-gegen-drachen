@@ -37,6 +37,13 @@
   const STUFEN = [1,2,3,4];
   const MODI = ["plus","minus"];
 
+  const BELOHNUNGEN = [
+    { punkte: 300,  zeichen:"😘", nameKey:"hh.lohn.bussi"  },
+    { punkte: 1000, zeichen:"🍬", nameKey:"hh.lohn.suess"  },
+    { punkte: 2500, zeichen:"🎮", nameKey:"hh.lohn.switch" }
+  ];
+  const LOHN_MAX = BELOHNUNGEN[BELOHNUNGEN.length-1].punkte;
+
   /* ================= Konto =================
      Nur gelesen: Die Kinder behalten Namen, Bild und Sprache aus dem
      Rechen-Ritter, weil beide Seiten von derselben Adresse kommen.
@@ -57,7 +64,7 @@
 
   /* Sterne je Stufe und Richtung, dazu das Punktekonto. */
   function standLaden(){
-    const leer = { plus:{}, minus:{}, punkte:0 };
+    const leer = { plus:{}, minus:{}, punkte:0, lohn:0 };
     MODI.forEach(m => STUFEN.forEach(s => leer[m][s] = 0));
     try{
       const d = JSON.parse(localStorage.getItem(standKey()) || "{}");
@@ -69,6 +76,7 @@
         if(n >= 0 && n <= 3) leer[m][s] = n;
       }));
       leer.punkte = Math.max(0, Number(d.punkte) || 0);
+      leer.lohn = Math.min(LOHN_MAX, Math.max(0, Number(d.lohn) || 0));
     }catch(e){}
     return leer;
   }
@@ -84,6 +92,26 @@
   const PUNKTE_PRO = 10;
   const PUNKTE_BONUS = { 3:60, 2:30, 1:0 };
   const malNehmer = serie => serie >= 6 ? 3 : serie >= 3 ? 2 : 1;
+
+  /* ================= Belohnungen =================
+     Drei Stufen auf einem Balken. Eine saubere Lieferung bringt 350 Punkte -
+     das Bussi ist also nach der ersten Lieferung dran, die Suessigkeit nach
+     dreien, die Switch-Zeit nach siebenen. Beim Erreichen der letzten Stufe
+     faengt der Balken von vorn an, der Rest wird mitgenommen.
+
+     Eingeloest wird nicht in der App: Wer ein Bussi bekommt, merkt das auch so. */
+  /* Traegt Punkte ein und gibt zurueck, welche Stufen dabei erreicht wurden. */
+  function punkteDazu(n){
+    if(!n) return [];
+    const vorher = stand.lohn;
+    stand.punkte += n;
+    stand.lohn += n;
+    const erreicht = BELOHNUNGEN.filter(b => vorher < b.punkte && stand.lohn >= b.punkte);
+    if(stand.lohn >= LOHN_MAX) stand.lohn -= LOHN_MAX;
+    standSichern();
+    balkenZeichnen();
+    return erreicht;
+  }
 
   /* ================= Klang =================
      Drei kurze Toene aus der Web Audio API, keine Dateien. */
@@ -264,6 +292,58 @@
       for(let f = 0; f < FENSTER; f++) fensterEl[s][f].classList.remove("an");
   }
 
+  /* Beide Balken - auf der Auswahl und im Spiel - zeigen denselben Stand. */
+  function balkenZeichnen(){
+    const anteil = Math.min(100, stand.lohn / LOHN_MAX * 100);
+    ["lohn-fuell","lohn-fuell-spiel"].forEach(id => {
+      const el = $(id); if(el) el.style.width = anteil + "%";
+    });
+    ["lohn-balken","lohn-balken-spiel"].forEach(id => {
+      const bal = $(id); if(!bal) return;
+      bal.querySelectorAll(".lohn-marke").forEach(m => {
+        m.classList.toggle("erreicht", stand.lohn >= Number(m.dataset.punkte));
+      });
+    });
+    const p = $("lohn-punkte");
+    if(p) p.textContent = stand.punkte;
+    const n = $("lohn-naechste");
+    if(n){
+      const naechste = BELOHNUNGEN.filter(b => stand.lohn < b.punkte)[0];
+      n.textContent = naechste
+        ? tr("hh.lohn.noch", { n: naechste.punkte - stand.lohn, name: tr(naechste.nameKey) })
+        : tr("hh.lohn.alles");
+    }
+  }
+
+  function balkenBauen(balkenId){
+    const bal = $(balkenId);
+    if(!bal) return;
+    BELOHNUNGEN.forEach(b => {
+      const m = document.createElement("i");
+      m.className = "lohn-marke";
+      m.dataset.punkte = b.punkte;
+      m.style.left = (b.punkte / LOHN_MAX * 100) + "%";
+      m.textContent = b.zeichen;
+      bal.appendChild(m);
+    });
+  }
+
+  /* Kurze Einblendung ueber dem Haus, wenn eine Stufe erreicht ist. */
+  function lohnMelden(liste){
+    liste.forEach((b, i) => {
+      setTimeout(()=>{
+        const el = document.createElement("div");
+        el.className = "lohn-ruf";
+        el.innerHTML = '<span class="lohn-ruf-zeichen">' + b.zeichen + '</span>' +
+                       '<span>' + tr("hh.lohn.verdient", { name: tr(b.nameKey) }) + '</span>';
+        $("app").appendChild(el);
+        [523,659,784,1047,1319].forEach((h,k)=>ton(h,.2,"triangle",k*.09,.13));
+        setTimeout(()=>el.classList.add("weg"), 2400);
+        setTimeout(()=>el.remove(), 3000);
+      }, i*700);
+    });
+  }
+
   /* ================= Das Haus ================= */
   const fensterEl = [];              /* [stock][fenster] */
   function hausBauen(){
@@ -361,7 +441,7 @@
       b.addEventListener("click", ()=>{ spiel.modus = m; modiZeichnen(); stufenZeichnen(); });
       box.appendChild(b);
     });
-    $("punktestand").textContent = tr("hh.punkte.gesamt", { n: stand.punkte });
+    balkenZeichnen();
   }
 
   function stufenZeichnen(){
@@ -485,6 +565,7 @@
       const mal = malNehmer(spiel.serie);
       gewinn = PUNKTE_PRO * mal;
       spiel.punkte += gewinn;
+      lohnMelden(punkteDazu(gewinn));
       klangGut();
       kopfZeichnen();
       bewege($("spiel-punkte"), "puls", 450);
@@ -544,8 +625,8 @@
     const bonus = PUNKTE_BONUS[sterne] || 0;
     spiel.punkte += bonus;
     if(sterne > stand[spiel.modus][spiel.stufe]) stand[spiel.modus][spiel.stufe] = sterne;
-    stand.punkte += spiel.punkte;
     standSichern();
+    lohnMelden(punkteDazu(bonus));
     kopfZeichnen();
     klangFertig();
     $("fertig-text").textContent = tr("hh.fertig.text", { n: spiel.richtig, m: PAKETE });
@@ -625,10 +706,13 @@
     const n = spiel.stufe + 1;
     if(n <= STUFEN.length) lieferungStarten(n, spiel.modus); else zurAuswahl();
   });
+  balkenBauen("lohn-balken");
+  balkenBauen("lohn-balken-spiel");
   modiZeichnen();
   stufenZeichnen();
+  balkenZeichnen();
 
   /* Fuer die Testlaeufe sichtbar machen, sonst nichts nach aussen. */
   window.HOCHHAUS = { spiel:spiel, stand:stand, lieferungBauen:lieferungBauen,
-                      familien:FAMILIEN };
+                      familien:FAMILIEN, belohnungen:BELOHNUNGEN, punkteDazu:punkteDazu };
 })();

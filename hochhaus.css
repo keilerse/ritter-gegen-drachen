@@ -83,7 +83,49 @@ body{
 .modus.gewaehlt{background:linear-gradient(var(--licht),var(--warm));border-color:#fff2cf;
   color:var(--tinte);box-shadow:0 5px 0 #a4650f}
 .modus.gewaehlt .modus-zeichen{color:var(--tinte)}
-.punktestand{text-align:center;font-weight:600;font-size:.86rem;opacity:.72;margin:0 0 12px}
+
+/* ---------- Belohnungsbalken ---------- */
+.lohn{margin:0 0 14px}
+.lohn-kopf{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+.lohn-titel{font-family:var(--schrift-display);font-size:.85rem;letter-spacing:1px;color:var(--licht)}
+.lohn-punkte{font-family:var(--schrift-display);font-size:1.1rem;color:var(--gruen)}
+.lohn-balken{
+  position:relative;height:16px;border-radius:999px;margin:16px 14px 0;
+  background:rgba(0,0,0,.45);border:2px solid rgba(255,211,110,.3);
+}
+.lohn-fuell{
+  display:block;height:100%;width:0;border-radius:999px;
+  background:linear-gradient(90deg,var(--gruen),var(--licht));
+  transition:width .6s cubic-bezier(.3,0,.3,1);
+}
+/* Die drei Stufen sitzen auf dem Balken; erreicht wird gross und bunt. */
+.lohn-marke{
+  position:absolute;top:50%;transform:translate(-50%,-50%) scale(.82);
+  font-size:1.1rem;line-height:1;font-style:normal;
+  filter:grayscale(1) brightness(.75);transition:transform .3s,filter .3s;
+}
+.lohn-marke.erreicht{filter:none;transform:translate(-50%,-50%) scale(1.25)}
+.lohn-naechste{text-align:center;font-weight:600;font-size:.8rem;opacity:.72;margin-top:9px}
+
+/* Im Spiel derselbe Balken, nur schmal. */
+.lohn-balken--klein{height:9px;margin:0 12px 9px}
+.lohn-balken--klein .lohn-marke{font-size:.82rem}
+
+/* Einblendung, wenn eine Stufe erreicht ist. */
+.lohn-ruf{
+  position:fixed;left:50%;top:14%;transform:translateX(-50%);z-index:30;
+  display:flex;align-items:center;gap:10px;max-width:min(92vw,380px);
+  background:linear-gradient(var(--licht),var(--warm));color:var(--tinte);
+  border:3px solid #fff2cf;border-radius:var(--r-gross);padding:11px 16px;
+  box-shadow:0 10px 26px rgba(0,0,0,.6);
+  font-family:var(--schrift-display);font-size:1.05rem;line-height:1.2;
+  animation:lohnRein .45s cubic-bezier(.2,1.4,.5,1);
+}
+.lohn-ruf-zeichen{font-size:1.8rem;line-height:1}
+.lohn-ruf.weg{animation:lohnRaus .55s ease-in forwards}
+@keyframes lohnRein{from{opacity:0;transform:translate(-50%,-26px) scale(.8)}
+                    to{opacity:1;transform:translate(-50%,0) scale(1)}}
+@keyframes lohnRaus{to{opacity:0;transform:translate(-50%,-22px) scale(.9)}}
 
 /* ---------- Kopfzeile im Spiel ---------- */
 .kopf{display:flex;justify-content:space-between;align-items:baseline;gap:10px;

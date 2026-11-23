@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="hochhaus.css?v=2">
+<link rel="stylesheet" href="hochhaus.css?v=3">
 </head>
 <body>
 <div id="app">
@@ -33,7 +33,15 @@
 
     <div class="wahl-frage" data-i18n="hh.modus.frage">Was rechnest du?</div>
     <div class="modi" id="modi"></div>
-    <div class="punktestand" id="punktestand"></div>
+    <!-- Der Belohnungsbalken: drei Stufen, am Ende faengt er von vorn an. -->
+    <div class="lohn">
+      <div class="lohn-kopf">
+        <span class="lohn-titel" data-i18n="hh.lohn.titel">Belohnungen</span>
+        <span class="lohn-punkte" id="lohn-punkte">0</span>
+      </div>
+      <div class="lohn-balken" id="lohn-balken"><i class="lohn-fuell" id="lohn-fuell"></i></div>
+      <div class="lohn-naechste" id="lohn-naechste"></div>
+    </div>
 
     <div class="wahl-frage" data-i18n="hh.start.frage">Welche Lieferung nimmst du?</div>
     <div class="stufen" id="stufen"></div>
@@ -50,6 +58,10 @@
         <span class="kopf-punkte" id="spiel-punkte">0</span>
       </span>
       <span class="kopf-fortschritt" id="spiel-fortschritt">Paket 1 von 12</span>
+    </div>
+
+    <div class="lohn-balken lohn-balken--klein" id="lohn-balken-spiel">
+      <i class="lohn-fuell" id="lohn-fuell-spiel"></i>
     </div>
 
     <!-- Das Haus ist die Hundertertafel: Stockwerk = Zehner, Fenster = Einer.
@@ -100,7 +112,7 @@
 </div>
 
 <script src="strings.js?v=23"></script>
-<script src="hochhaus-texte.js?v=2"></script>
-<script src="hochhaus.js?v=2"></script>
+<script src="hochhaus-texte.js?v=3"></script>
+<script src="hochhaus.js?v=3"></script>
 </body>
 </html>

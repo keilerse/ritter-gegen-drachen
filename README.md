@@ -87,8 +87,22 @@ sitzt der Stellenwert, der Zehnerübergang im Hunderterraum kommt später.
 **Punkte:** zehn je zugestelltem Paket, ab drei richtigen in Folge doppelt, ab
 sechs dreifach – dieselbe Rechnung wie das Serien-Gold im Rechen-Ritter, die die
 Kinder schon kennen. Dazu ein Sauber-Bonus von 60 Punkten für eine fehlerfreie
-Lieferung. Ein sauberer Durchgang bringt also 350 Punkte. Der Punktestand wächst
-über alle Lieferungen hinweg und steht auf dem Auswahlbildschirm.
+Lieferung. Ein sauberer Durchgang bringt also 350 Punkte.
+
+**Der Belohnungsbalken** macht daraus etwas Greifbares. Drei Stufen, auf dem
+Auswahlbildschirm und schmal auch während des Spiels:
+
+| | | |
+|---|---|---|
+| 😘 | **300 Punkte** | ein Bussi – nach der ersten sauberen Lieferung |
+| 🍬 | **1000 Punkte** | eine Süßigkeit – nach etwa drei |
+| 🎮 | **2500 Punkte** | 15 Minuten extra Switch – nach etwa sieben |
+
+Wird eine Stufe erreicht, blendet sich das kurz über dem Haus ein. Nach der
+obersten fängt der Balken von vorn an und nimmt den Rest mit; der Punktestand
+daneben zählt dagegen alles mit, was je verdient wurde. Eingelöst wird nichts in
+der App – wer ein Bussi bekommt, merkt das auch so. Die Beträge stehen als
+`BELOHNUNGEN` in `hochhaus.js`.
 
 Namen, Bild und Sprache liest das Hochhaus aus den Konten des Rechen-Ritters –
 beide Seiten kommen von derselben Adresse. Geschrieben wird nur der eigene
