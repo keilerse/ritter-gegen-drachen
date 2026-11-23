@@ -54,6 +54,38 @@ und wer besiegt wird, fällt eine Stufe zurück – nicht auf null.
   Der Drache wächst vom Ei bis zum Hausdrachen und fliegt als Begleiter im
   Drachenkampf mit.
 
+## Das Hochhaus – ein zweites Spiel
+
+Eigene Seite, eigenes Aussehen, eigener Zahlenraum: **https://keilerse.github.io/ritter-gegen-drachen/hochhaus.html**
+
+Für die zweite Klasse, Plus bis 100. Das Haus hat zehn Stockwerke zu je zehn
+Fenstern – das ist die Hundertertafel als Gebäude: **Stockwerk = Zehner, Fenster =
+Einer**. Wer 30 dazuzählt, fährt drei Stockwerke hoch und bleibt beim selben
+Fenster; wer 3 dazuzählt, geht drei Fenster weiter und bleibt im selben Stock.
+Nach demselben Gedanken ist die Eingabe gebaut: Das Kind tippt keine Zahl von 0
+bis 99, sondern wählt **Stock und Fenster getrennt** – es setzt die Antwort aus
+Zehnern und Einern zusammen.
+
+Vier Lieferungen zu je zwölf Paketen, jede schaltet die nächste frei:
+
+| | | |
+|---|---|---|
+| 1 | **Nachbarn** | `21+3, 21+4, 21+5` |
+| 2 | **Gleiches Fenster** | `21+4, 11+4, 1+4` |
+| 3 | **Ganze Stockwerke** | `25+10, 25+20, 25+30` |
+| 4 | **Durcheinander** | alles gemischt, einzeln |
+
+Die Aufgaben kommen in **Familien zu dritt** und stehen untereinander wie im
+Schulheft. Es geht nicht ums Ausrechnen einzelner Aufgaben, sondern darum, aus
+einer bekannten eine neue zu machen – zufällig gewürfelte Einzelaufgaben würden
+genau das verfehlen. Erst die vierte Stufe stellt sie einzeln; das ist der
+Übertrag. **Keine Aufgabe überschreitet den Zehner**, so wie im Heft auch: Erst
+sitzt der Stellenwert, der Zehnerübergang im Hunderterraum kommt später.
+
+Namen, Bild und Sprache liest das Hochhaus aus den Konten des Rechen-Ritters –
+beide Seiten kommen von derselben Adresse. Geschrieben wird nur der eigene
+Schlüssel `…​.hochhaus` mit den Sternen je Stufe.
+
 ### Schatzkammer, Truhen und Ränge
 
 Alle Spiele zahlen in dieselbe Schatzkammer ein. Nach fünf richtigen Antworten öffnet

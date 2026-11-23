@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Das Hochhaus – Rechnen bis 100</title>
+<link rel="icon" href="favicon.svg?v=1" type="image/svg+xml">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#101a2e">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="hochhaus.css?v=1">
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ AUSWAHL ============ -->
+  <section class="schirm is-active" id="schirm-wahl">
+    <h1 class="titel">
+      <span class="zeile1" data-i18n="hh.name">Das Hochhaus</span>
+      <span class="zeile2" data-i18n="hh.untertitel">Pakete austragen, Stockwerk für Stockwerk</span>
+    </h1>
+
+    <div class="bote-leiste">
+      <span class="bote-bild" id="wahl-avatar">🙂</span>
+      <span class="bote-info">
+        <span class="bote-kopf" data-i18n="hh.wer">Wer trägt aus?</span>
+        <span class="bote-name" id="wahl-name"></span>
+      </span>
+    </div>
+
+    <div class="wahl-frage" data-i18n="hh.start.frage">Welche Lieferung nimmst du?</div>
+    <div class="stufen" id="stufen"></div>
+
+    <a class="mini" href="index.html" data-i18n="hh.ritter">Zum Rechen-Ritter</a>
+  </section>
+
+  <!-- ============ SPIEL ============ -->
+  <section class="schirm" id="schirm-spiel">
+    <div class="kopf">
+      <span class="kopf-stufe" id="spiel-stufe">Nachbarn</span>
+      <span class="kopf-fortschritt" id="spiel-fortschritt">Paket 1 von 12</span>
+    </div>
+
+    <!-- Das Haus ist die Hundertertafel: Stockwerk = Zehner, Fenster = Einer.
+         Beschriftet sind nur die Stockwerke und die bekannten Wohnungen. -->
+    <div class="haus">
+      <div class="haus-dach"></div>
+      <div class="haus-gitter" id="haus-gitter"></div>
+      <div class="haus-boden"></div>
+    </div>
+
+    <div class="tafel">
+      <div class="liste" id="liste"></div>
+      <div class="meldung" id="meldung"></div>
+    </div>
+
+    <div class="eingabe">
+      <div class="reihe-block">
+        <span class="reihe-titel" data-i18n="hh.stock">Stock</span>
+        <div class="reihe" id="reihe-stock"></div>
+      </div>
+      <div class="reihe-block">
+        <span class="reihe-titel" data-i18n="hh.fenster">Fenster</span>
+        <div class="reihe" id="reihe-fenster"></div>
+      </div>
+      <button class="knopf" id="btn-klingeln" type="button" disabled>
+        <span data-i18n="hh.klingeln">Klingeln!</span>
+        <span class="knopf-zahl" id="knopf-zahl"></span>
+      </button>
+    </div>
+
+    <button class="mini" id="btn-abbrechen" type="button" data-i18n="hh.zurueck">Zur Auswahl</button>
+  </section>
+
+</div>
+
+<!-- ============ ABSCHLUSS ============ -->
+<div class="overlay" id="ov-fertig">
+  <div class="overlay-karte">
+    <div class="sterne" id="fertig-sterne">⭐⭐⭐</div>
+    <h2 data-i18n="hh.fertig.titel">Alle Pakete zugestellt!</h2>
+    <p id="fertig-text"></p>
+    <p class="lob" id="fertig-lob"></p>
+    <button class="knopf" id="btn-weiter" type="button" data-i18n="hh.weiter">Nächste Lieferung</button>
+    <button class="mini" id="btn-fertig-zurueck" type="button" data-i18n="hh.zurueck">Zur Auswahl</button>
+  </div>
+</div>
+
+<script src="strings.js?v=23"></script>
+<script src="hochhaus-texte.js?v=1"></script>
+<script src="hochhaus.js?v=1"></script>
+</body>
+</html>

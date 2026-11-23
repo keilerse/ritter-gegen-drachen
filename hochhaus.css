@@ -1,0 +1,186 @@
+/* =====================================================================
+   hochhaus.css – eigenes Aussehen, bewusst nicht das des Rechen-Ritters:
+   Nachtstadt statt Pergament. Geteilt werden nur die beiden Schriften,
+   die der Browser ohnehin schon geladen hat.
+   ===================================================================== */
+:root{
+  --nacht:#101a2e;
+  --nacht-tief:#070d1a;
+  --haus:#32456b;
+  --haus-tief:#223050;
+  --fenster:#1a2740;
+  --licht:#ffd36e;
+  --warm:#ff9f2e;
+  --papier:#f6efe2;
+  --papier-tief:#e3d7c0;
+  --tinte:#231a10;
+  --gruen:#5ac77f;
+  --rot:#ef5a35;
+  --schrift-display:"Luckiest Guy","Trebuchet MS",Verdana,sans-serif;
+  --schrift-text:"Fredoka","Trebuchet MS",Verdana,sans-serif;
+  --r-gross:20px;
+  --r-klein:11px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:linear-gradient(var(--nacht),var(--nacht-tief) 70%);
+  min-height:100vh;color:var(--papier);font-family:var(--schrift-text);
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+#app{max-width:430px;margin:0 auto;padding:12px 14px 28px}
+.schirm{display:none}
+.schirm.is-active{display:block}
+
+/* ---------- Auswahl ---------- */
+.titel{text-align:center;margin:6px 0 14px}
+.titel .zeile1{display:block;font-family:var(--schrift-display);
+  font-size:clamp(2rem,10vw,2.8rem);color:var(--licht);letter-spacing:1px;line-height:1.05;
+  text-shadow:0 0 18px rgba(255,180,60,.35)}
+.titel .zeile2{display:block;font-size:.9rem;font-weight:500;opacity:.75;margin-top:4px}
+
+.bote-leiste{
+  display:flex;align-items:center;gap:12px;width:100%;margin-bottom:14px;padding:9px 13px;
+  background:rgba(255,255,255,.06);border:2px solid rgba(255,211,110,.35);border-radius:var(--r-gross);
+}
+.bote-bild{font-size:1.9rem;line-height:1}
+.bote-info{display:flex;flex-direction:column;line-height:1.2}
+.bote-kopf{font-size:.7rem;letter-spacing:1px;text-transform:uppercase;opacity:.6}
+.bote-name{font-family:var(--schrift-display);font-size:1.2rem;color:var(--licht)}
+
+.wahl-frage{font-family:var(--schrift-display);font-size:1.05rem;letter-spacing:.5px;
+  text-align:center;color:var(--licht);margin:4px 0 10px}
+.stufen{display:grid;gap:10px}
+.stufe{
+  display:flex;align-items:center;gap:12px;text-align:left;cursor:pointer;width:100%;
+  background:linear-gradient(var(--haus),var(--haus-tief));color:var(--papier);
+  border:3px solid rgba(255,211,110,.45);border-radius:var(--r-gross);padding:12px 14px;
+  box-shadow:0 6px 0 rgba(0,0,0,.45);transition:transform .08s,box-shadow .08s;
+  font-family:var(--schrift-text);
+}
+.stufe:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,.45)}
+.stufe-nr{font-family:var(--schrift-display);font-size:1.7rem;color:var(--licht);
+  min-width:1.4em;text-align:center;line-height:1}
+.stufe-text{flex:1;min-width:0}
+.stufe-name{display:block;font-family:var(--schrift-display);font-size:1.15rem;line-height:1.1}
+.stufe-info{display:block;font-size:.82rem;opacity:.75;line-height:1.25;margin-top:2px}
+.stufe-sterne{font-size:.95rem;letter-spacing:-1px;white-space:nowrap}
+.stufe[disabled]{opacity:.45;cursor:default;box-shadow:0 6px 0 rgba(0,0,0,.25)}
+.stufe[disabled] .stufe-info{font-style:italic}
+
+/* ---------- Kopfzeile im Spiel ---------- */
+.kopf{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+  margin-bottom:8px;padding:0 2px}
+.kopf-stufe{font-family:var(--schrift-display);font-size:1.15rem;color:var(--licht)}
+.kopf-fortschritt{font-size:.82rem;opacity:.7}
+
+/* ---------- Das Haus ---------- */
+.haus{margin-bottom:10px}
+.haus-dach{height:10px;border-radius:6px 6px 0 0;
+  background:linear-gradient(#4a5f8c,#32456b);border:2px solid rgba(0,0,0,.45);border-bottom:none}
+.haus-boden{height:9px;border-radius:0 0 6px 6px;background:#17203a;border:2px solid rgba(0,0,0,.45);border-top:none}
+.haus-gitter{
+  position:relative;display:grid;grid-template-columns:34px repeat(10,minmax(0,1fr));gap:3px;
+  padding:6px 7px;background:linear-gradient(var(--haus),var(--haus-tief));
+  border:2px solid rgba(0,0,0,.45);
+}
+/* Die Stockwerksnummer links ist der Bezugspunkt - sie verraet nichts,
+   solange die Fenster unbeschriftet bleiben. */
+.stock-schild{
+  font-family:var(--schrift-display);font-size:.72rem;color:rgba(255,211,110,.75);
+  display:flex;align-items:center;justify-content:flex-end;padding-right:4px;line-height:1;
+}
+.fenster{
+  aspect-ratio:3/2;border-radius:2px;background:var(--fenster);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.56rem;font-weight:700;color:transparent;transition:background .25s,color .25s;
+}
+/* Nur bekannte Wohnungen leuchten und zeigen ihre Nummer. */
+.fenster.hell{background:var(--licht);color:var(--tinte);
+  box-shadow:0 0 9px rgba(255,211,110,.75)}
+.fenster.ziel{background:var(--gruen);color:#06240f;box-shadow:0 0 11px rgba(90,199,127,.8)}
+.fenster.daneben{background:var(--rot);color:#2a0b03;box-shadow:0 0 11px rgba(239,90,53,.8)}
+/* Die ganze Zeile und die ganze Spalte des Starts bleiben gedaempft sichtbar:
+   So sieht man, dass Zehner senkrecht und Einer waagrecht wandern. */
+.fenster.spur{background:#28395c}
+
+.bote{
+  position:absolute;width:20px;height:20px;margin-left:-10px;margin-top:-10px;
+  font-size:1.05rem;line-height:20px;text-align:center;pointer-events:none;z-index:2;
+  filter:drop-shadow(0 2px 3px rgba(0,0,0,.8));
+  transition:top .45s cubic-bezier(.45,0,.5,1),left .45s cubic-bezier(.45,0,.5,1);
+}
+.paket{position:absolute;font-size:.95rem;line-height:1;pointer-events:none;z-index:3;
+  margin-left:-7px;margin-top:-4px;animation:paketAn .4s ease-out}
+@keyframes paketAn{from{transform:scale(0) rotate(-30deg)}to{transform:scale(1) rotate(0)}}
+
+/* ---------- Aufgaben ---------- */
+.tafel{
+  background:linear-gradient(var(--papier),var(--papier-tief));color:var(--tinte);
+  border:3px solid rgba(255,211,110,.5);border-radius:var(--r-gross);
+  padding:10px 12px;margin-bottom:10px;
+}
+.liste{display:grid;gap:2px}
+.zeile{font-family:var(--schrift-display);font-size:1.3rem;line-height:1.25;
+  text-align:center;opacity:.42;letter-spacing:1px}
+.zeile.jetzt{opacity:1;font-size:1.75rem}
+.zeile .luecke{display:inline-block;min-width:1.5em;border-bottom:5px solid var(--rot);color:var(--rot)}
+.meldung{text-align:center;font-weight:600;font-size:.92rem;min-height:1.3em;margin-top:5px;opacity:.85}
+.meldung.gut{color:#1d7a3f}
+.meldung.schlecht{color:#b43415}
+
+/* ---------- Eingabe: Stock und Fenster getrennt ---------- */
+.eingabe{display:grid;gap:7px;margin-bottom:10px}
+.reihe-block{display:flex;align-items:center;gap:8px}
+.reihe-titel{font-family:var(--schrift-display);font-size:.8rem;letter-spacing:1px;
+  color:var(--licht);width:4.4em;flex-shrink:0}
+.reihe{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;flex:1;min-width:0}
+.taste{
+  font-family:var(--schrift-text);font-weight:700;font-size:1.05rem;
+  height:42px;color:var(--tinte);background:linear-gradient(var(--papier),var(--papier-tief));
+  border:2px solid rgba(255,211,110,.5);border-radius:var(--r-klein);
+  box-shadow:0 3px 0 rgba(0,0,0,.45);cursor:pointer;padding:0;
+  transition:transform .07s,box-shadow .07s,background .15s;
+}
+.taste:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.45)}
+.taste.gewaehlt{background:linear-gradient(var(--licht),var(--warm));border-color:#fff2cf}
+.reihe.gesperrt .taste{opacity:.55;pointer-events:none}
+
+.knopf{
+  font-family:var(--schrift-display);font-size:1.3rem;letter-spacing:.5px;color:var(--tinte);
+  background:linear-gradient(var(--licht),var(--warm));border:3px solid #c97d14;
+  border-radius:var(--r-gross);padding:12px 20px;cursor:pointer;width:100%;
+  box-shadow:0 5px 0 #a4650f;transition:transform .08s,box-shadow .08s,opacity .15s;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+}
+.knopf:active{transform:translateY(3px);box-shadow:0 2px 0 #a4650f}
+.knopf[disabled]{opacity:.42;cursor:default}
+.knopf-zahl{font-size:1.5rem;color:#6b3d00}
+
+.mini{
+  display:block;margin:0 auto;font-family:var(--schrift-text);font-weight:600;font-size:.86rem;
+  color:var(--papier);background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.18);
+  border-radius:999px;padding:8px 18px;cursor:pointer;text-decoration:none;text-align:center;width:max-content;
+}
+
+/* ---------- Abschluss ---------- */
+.overlay{
+  position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:20px;
+  background:rgba(7,13,26,.88);z-index:20;
+}
+.overlay.is-offen{display:flex}
+.overlay-karte{
+  width:100%;max-width:340px;text-align:center;display:grid;gap:12px;
+  background:linear-gradient(var(--haus),var(--haus-tief));
+  border:3px solid rgba(255,211,110,.55);border-radius:var(--r-gross);padding:22px 18px;
+}
+.overlay-karte h2{font-family:var(--schrift-display);font-size:1.6rem;color:var(--licht);font-weight:400}
+.overlay-karte p{font-size:.95rem;line-height:1.35}
+.sterne{font-size:2.6rem;line-height:1;letter-spacing:2px;animation:sterneAn .5s ease-out}
+@keyframes sterneAn{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+.lob{color:var(--licht);font-weight:600}
+
+@media (min-width:520px){
+  #app{max-width:480px}
+  .taste{height:48px;font-size:1.2rem}
+}
