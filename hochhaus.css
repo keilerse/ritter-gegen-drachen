@@ -67,11 +67,34 @@ body{
 .stufe[disabled]{opacity:.45;cursor:default;box-shadow:0 6px 0 rgba(0,0,0,.25)}
 .stufe[disabled] .stufe-info{font-style:italic}
 
+/* ---------- Plus oder Minus ---------- */
+.modi{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px}
+.modus{
+  display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;
+  background:linear-gradient(var(--haus),var(--haus-tief));color:var(--papier);
+  border:3px solid rgba(255,211,110,.3);border-radius:var(--r-gross);padding:11px 8px;
+  box-shadow:0 5px 0 rgba(0,0,0,.45);font-family:var(--schrift-text);
+  transition:transform .08s,box-shadow .08s,border-color .15s,background .15s;
+}
+.modus:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.45)}
+.modus-zeichen{font-family:var(--schrift-text);font-weight:700;font-size:1.7rem;line-height:1;
+  color:var(--licht)}
+.modus-wort{font-family:var(--schrift-display);font-size:1.15rem;line-height:1}
+.modus.gewaehlt{background:linear-gradient(var(--licht),var(--warm));border-color:#fff2cf;
+  color:var(--tinte);box-shadow:0 5px 0 #a4650f}
+.modus.gewaehlt .modus-zeichen{color:var(--tinte)}
+.punktestand{text-align:center;font-weight:600;font-size:.86rem;opacity:.72;margin:0 0 12px}
+
 /* ---------- Kopfzeile im Spiel ---------- */
 .kopf{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
   margin-bottom:8px;padding:0 2px}
 .kopf-stufe{font-family:var(--schrift-display);font-size:1.15rem;color:var(--licht)}
 .kopf-fortschritt{font-size:.82rem;opacity:.7}
+.kopf-punktebox{display:flex;align-items:baseline;gap:5px;margin-left:auto;margin-right:10px}
+.kopf-punkte{font-family:var(--schrift-display);font-size:1.25rem;color:var(--gruen);
+  display:inline-block}
+.kopf-serie{font-family:var(--schrift-display);font-size:.9rem;color:var(--warm)}
+.kopf-serie.aus{display:none}
 
 /* ---------- Das Haus ---------- */
 .haus{margin-bottom:10px}
@@ -113,6 +136,39 @@ body{
 .paket{position:absolute;font-size:.95rem;line-height:1;pointer-events:none;z-index:3;
   margin-left:-7px;margin-top:-4px;animation:paketAn .4s ease-out}
 @keyframes paketAn{from{transform:scale(0) rotate(-30deg)}to{transform:scale(1) rotate(0)}}
+
+/* ---------- Punkte, Funken, Lichter ---------- */
+.punkte-flug{
+  position:absolute;transform:translateX(-50%);pointer-events:none;z-index:4;
+  font-family:var(--schrift-display);font-size:1.05rem;color:var(--gruen);
+  text-shadow:0 2px 5px rgba(0,0,0,.85);animation:punkteFlug 1.1s ease-out forwards;
+}
+@keyframes punkteFlug{
+  0%{opacity:0;transform:translate(-50%,6px) scale(.7)}
+  25%{opacity:1;transform:translate(-50%,-6px) scale(1.15)}
+  100%{opacity:0;transform:translate(-50%,-40px) scale(1)}
+}
+.funke{
+  position:absolute;pointer-events:none;z-index:4;font-size:.8rem;line-height:1;
+  animation:funkeWeg 1.1s ease-out forwards;
+}
+@keyframes funkeWeg{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}
+  25%{opacity:1}
+  100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1.2) rotate(140deg)}
+}
+/* Zum Abschluss geht im ganzen Haus das Licht an. */
+.fenster.an{background:#5d6f9e;box-shadow:inset 0 0 0 1px rgba(255,211,110,.3)}
+.fenster.hell.an{background:var(--licht)}
+.fenster.ziel.an{background:var(--gruen)}
+.fenster.daneben.an{background:var(--rot)}
+.fenster.wackelt{animation:fensterWackelt .5s ease-in-out}
+@keyframes fensterWackelt{
+  0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}
+  50%{transform:translateX(3px)}75%{transform:translateX(-2px)}
+}
+.kopf-punkte.puls{animation:punktePuls .45s ease-out}
+@keyframes punktePuls{0%{transform:scale(1)}40%{transform:scale(1.3);color:var(--gruen)}100%{transform:scale(1)}}
 
 /* ---------- Aufgaben ---------- */
 .tafel{
@@ -176,8 +232,17 @@ body{
 }
 .overlay-karte h2{font-family:var(--schrift-display);font-size:1.6rem;color:var(--licht);font-weight:400}
 .overlay-karte p{font-size:.95rem;line-height:1.35}
-.sterne{font-size:2.6rem;line-height:1;letter-spacing:2px;animation:sterneAn .5s ease-out}
-@keyframes sterneAn{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+.sterne{font-size:2.6rem;line-height:1;letter-spacing:2px;min-height:1em}
+.sterne .stern{display:inline-block;animation:sternAn .45s ease-out}
+.sterne .stern.voll{filter:drop-shadow(0 0 10px rgba(255,211,110,.8))}
+@keyframes sternAn{
+  0%{transform:scale(.2) rotate(-40deg)}
+  70%{transform:scale(1.25) rotate(8deg)}
+  100%{transform:scale(1) rotate(0)}
+}
+.punkte-zeile{font-family:var(--schrift-display);font-size:1.25rem;color:var(--gruen)}
+.punkte-bonus{font-weight:600;color:var(--warm);font-size:.9rem}
+.punkte-bonus:empty{display:none}
 .lob{color:var(--licht);font-weight:600}
 
 @media (min-width:520px){

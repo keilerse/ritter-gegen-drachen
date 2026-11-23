@@ -35,6 +35,7 @@
   const STOCKWERKE = 10, FENSTER = 10;
   const PAKETE = 12;                 /* Aufgaben je Lieferung */
   const STUFEN = [1,2,3,4];
+  const MODI = ["plus","minus"];
 
   /* ================= Konto =================
      Nur gelesen: Die Kinder behalten Namen, Bild und Sprache aus dem
@@ -54,15 +55,20 @@
   const konto = kontoLesen();
   const standKey = () => "rechenritter." + ((konto && konto.id) || "gast") + ".hochhaus";
 
-  /* Sterne je Stufe, 0 = noch nicht geschafft. */
+  /* Sterne je Stufe und Richtung, dazu das Punktekonto. */
   function standLaden(){
-    const leer = {};
-    STUFEN.forEach(s => leer[s] = 0);
+    const leer = { plus:{}, minus:{}, punkte:0 };
+    MODI.forEach(m => STUFEN.forEach(s => leer[m][s] = 0));
     try{
       const d = JSON.parse(localStorage.getItem(standKey()) || "{}");
-      STUFEN.forEach(s => {
-        const n = Number(d[s]); if(n >= 0 && n <= 3) leer[s] = n;
-      });
+      /* Die erste Fassung kannte nur Plus und speicherte die Sterne flach.
+         Solche Spielstaende werden als Plus uebernommen. */
+      const quelle = (d.plus || d.minus) ? d : { plus:d };
+      MODI.forEach(m => STUFEN.forEach(s => {
+        const n = Number((quelle[m] || {})[s]);
+        if(n >= 0 && n <= 3) leer[m][s] = n;
+      }));
+      leer.punkte = Math.max(0, Number(d.punkte) || 0);
     }catch(e){}
     return leer;
   }
@@ -70,7 +76,14 @@
     try{ localStorage.setItem(standKey(), JSON.stringify(stand)); }catch(e){}
   }
   const stand = standLaden();
-  const offen = s => s === 1 || stand[s-1] > 0;
+  const offen = (m, s) => s === 1 || stand[m][s-1] > 0;
+
+  /* ================= Punkte =================
+     Zehn Punkte je zugestelltem Paket, und wer eine Serie schafft, bekommt
+     mehr - dieselbe Rechnung wie im Rechen-Ritter, die die Kinder kennen. */
+  const PUNKTE_PRO = 10;
+  const PUNKTE_BONUS = { 3:60, 2:30, 1:0 };
+  const malNehmer = serie => serie >= 6 ? 3 : serie >= 3 ? 2 : 1;
 
   /* ================= Klang =================
      Drei kurze Toene aus der Web Audio API, keine Dateien. */
@@ -96,9 +109,10 @@
   /* ================= Aufgaben =================
      Jede Aufgabe traegt ihr Ergebnis in Stockwerk und Fenster zerlegt mit -
      danach wird gefragt. */
-  function aufgabe(a, b){
-    const e = a + b;
-    return { a:a, b:b, ergebnis:e, stock:Math.floor(e/10), fenster:e%10 };
+  function aufgabe(a, b, op){
+    const e = op === "-" ? a - b : a + b;
+    return { a:a, b:b, op:op || "+", ergebnis:e,
+             stock:Math.floor(e/10), fenster:e%10 };
   }
 
   /* Stufe 1 - Nachbaraufgaben: entweder wandert der zweite Summand
@@ -114,6 +128,41 @@
     const b = zufall(1, 9-e);
     const a = zufall(1,9)*10 + e;
     return [0,1,2].map(i => aufgabe(a-i, b));
+  }
+
+  /* Dieselben drei Formen rueckwaerts. Beim Minus wandert der Bote nach unten
+     und nach links, sonst aendert sich nichts - auch hier bleibt jede Rechnung
+     im Stockwerk. */
+  function familieNachbarnMinus(){
+    if(Math.random() < .5){
+      /* 25-2, 25-3, 25-4: der Subtrahend wandert */
+      const e = zufall(3,9);
+      const b = zufall(1, e-2);
+      const a = zufall(1,9)*10 + e;
+      return [0,1,2].map(i => aufgabe(a, b+i, "-"));
+    }
+    /* 47-2, 48-2, 49-2: der Minuend wandert */
+    const b = zufall(1,7);
+    const e = zufall(b, 7);
+    const a = zufall(1,9)*10 + e;
+    return [0,1,2].map(i => aufgabe(a+i, b, "-"));
+  }
+
+  function familieFensterMinus(){
+    const e = zufall(1,9);
+    const b = zufall(1, e);
+    const z = zufall(2,9);
+    return [z,1,0].map(k => aufgabe(k*10 + e, b, "-"));
+  }
+
+  function familieStockwerkeMinus(){
+    const z = zufall(3,9), e = zufall(0,9);
+    const a = z*10 + e;
+    const moeglich = [];
+    for(let t = 1; t <= z; t++) moeglich.push(t*10);
+    const drei = mische(moeglich).slice(0,3);
+    if(Math.random() < .5) drei.sort((x,y) => y-x);
+    return drei.map(t => aufgabe(a, t, "-"));
   }
 
   /* Stufe 2 - gleiche Einerrechnung, anderes Stockwerk. Reihenfolge wie im
@@ -137,21 +186,25 @@
     return drei.map(t => aufgabe(a, t));
   }
 
-  const FAMILIEN = { 1:familieNachbarn, 2:familieFenster, 3:familieStockwerke };
+  const FAMILIEN = {
+    plus:  { 1:familieNachbarn,      2:familieFenster,      3:familieStockwerke },
+    minus: { 1:familieNachbarnMinus, 2:familieFensterMinus, 3:familieStockwerkeMinus }
+  };
 
   /* Stufe 4 - dieselben drei Formen, aber einzeln und ohne sichtbaren
      Zusammenhang. Das ist der Schritt vom Muster zum Koennen. */
-  function einzelAufgabe(){
-    return waehle(waehle([familieNachbarn, familieFenster, familieStockwerke])());
+  function einzelAufgabe(modus){
+    const f = FAMILIEN[modus];
+    return waehle(waehle([f[1], f[2], f[3]])());
   }
 
-  function lieferungBauen(stufe){
+  function lieferungBauen(stufe, modus){
     const aus = [];
     if(stufe === 4){
       let letzte = "";
       while(aus.length < PAKETE){
-        const n = einzelAufgabe();
-        const schl = n.a + "+" + n.b;
+        const n = einzelAufgabe(modus);
+        const schl = n.a + n.op + n.b;
         if(schl === letzte) continue;
         letzte = schl;
         aus.push({ n:n, familie:[n], platz:0 });
@@ -159,10 +212,56 @@
       return aus;
     }
     while(aus.length < PAKETE){
-      const fam = FAMILIEN[stufe]();
+      const fam = FAMILIEN[modus][stufe]();
       fam.forEach((n,i) => aus.push({ n:n, familie:fam, platz:i }));
     }
     return aus.slice(0, PAKETE);
+  }
+
+  /* ================= Kleine Bewegungen =================
+     Nichts davon traegt Bedeutung - sie machen nur sichtbar, dass etwas
+     passiert ist. Deshalb raeumen sie sich alle selbst wieder weg. */
+  function bewege(el, klasse, dauer){
+    if(!el) return;
+    el.classList.remove(klasse); void el.offsetWidth; el.classList.add(klasse);
+    setTimeout(()=>el.classList.remove(klasse), dauer);
+  }
+  function punkteFliegen(el, text){
+    const p = document.createElement("div");
+    p.className = "punkte-flug";
+    p.textContent = text;
+    p.style.left = (el.offsetLeft + el.offsetWidth/2) + "px";
+    p.style.top  = (el.offsetTop) + "px";
+    $("haus-gitter").appendChild(p);
+    setTimeout(()=>p.remove(), 1100);
+  }
+  function funkeln(el, anzahl){
+    for(let i = 0; i < anzahl; i++){
+      const f = document.createElement("div");
+      f.className = "funke";
+      f.textContent = waehle(["✨","⭐","💫"]);
+      f.style.left = (el.offsetLeft + el.offsetWidth/2) + "px";
+      f.style.top  = (el.offsetTop + el.offsetHeight/2) + "px";
+      f.style.setProperty("--dx", zufall(-46,46) + "px");
+      f.style.setProperty("--dy", zufall(-54,-14) + "px");
+      f.style.animationDelay = (i*45) + "ms";
+      $("haus-gitter").appendChild(f);
+      setTimeout(()=>f.remove(), 1200 + i*45);
+    }
+  }
+  /* Zum Abschluss geht im ganzen Haus das Licht an, Stockwerk für Stockwerk. */
+  function hausAnzuenden(dann){
+    for(let s = 0; s < STOCKWERKE; s++){
+      for(let f = 0; f < FENSTER; f++){
+        const el = fensterEl[s][f];
+        setTimeout(()=>el.classList.add("an"), s*70 + zufall(0,120));
+      }
+    }
+    setTimeout(dann, STOCKWERKE*70 + 450);
+  }
+  function hausAusmachen(){
+    for(let s = 0; s < STOCKWERKE; s++)
+      for(let f = 0; f < FENSTER; f++) fensterEl[s][f].classList.remove("an");
   }
 
   /* ================= Das Haus ================= */
@@ -236,8 +335,9 @@
   }
 
   /* ================= Ablauf ================= */
-  const spiel = { stufe:1, pakete:[], nr:0, richtig:0, fehler:0,
-                  stock:null, fenster:null, gesperrt:false, lauf:0 };
+  const spiel = { modus:"plus", stufe:1, pakete:[], nr:0, richtig:0, fehler:0,
+                  punkte:0, serie:0, stock:null, fenster:null,
+                  gesperrt:false, lauf:0 };
 
   /* Wer mitten in der Zustellung auf "Zur Auswahl" tippt, laesst sonst die
      Zeitgeber laufen: Der Bote faehrt weiter, markiert Wohnungen und blaettert
@@ -248,17 +348,34 @@
     setTimeout(()=>{ if(lauf === spiel.lauf) fn(); }, ms);
   }
 
+  function modiZeichnen(){
+    const box = $("modi");
+    box.innerHTML = "";
+    MODI.forEach(m => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "modus" + (m === spiel.modus ? " gewaehlt" : "");
+      b.dataset.modus = m;
+      b.innerHTML = '<span class="modus-zeichen">' + (m === "plus" ? "+" : "−") + '</span>' +
+                    '<span class="modus-wort">' + tr("hh." + m) + '</span>';
+      b.addEventListener("click", ()=>{ spiel.modus = m; modiZeichnen(); stufenZeichnen(); });
+      box.appendChild(b);
+    });
+    $("punktestand").textContent = tr("hh.punkte.gesamt", { n: stand.punkte });
+  }
+
   function stufenZeichnen(){
     const box = $("stufen");
     box.innerHTML = "";
+    const m = spiel.modus;
     STUFEN.forEach(s => {
-      const frei = offen(s);
+      const frei = offen(m, s);
       const b = document.createElement("button");
       b.type = "button";
       b.className = "stufe";
       b.dataset.stufe = s;
       b.disabled = !frei;
-      const sterne = stand[s] ? "⭐".repeat(stand[s]) : "";
+      const sterne = stand[m][s] ? "⭐".repeat(stand[m][s]) : "";
       b.innerHTML =
         '<span class="stufe-nr">' + s + '</span>' +
         '<span class="stufe-text">' +
@@ -266,7 +383,7 @@
           '<span class="stufe-info">' + (frei ? tr("hh.stufe"+s+".text") : tr("hh.gesperrt")) + '</span>' +
         '</span>' +
         '<span class="stufe-sterne">' + (frei ? sterne : "🔒") + '</span>';
-      if(frei) b.addEventListener("click", ()=>lieferungStarten(s));
+      if(frei) b.addEventListener("click", ()=>lieferungStarten(s, m));
       box.appendChild(b);
     });
   }
@@ -302,7 +419,7 @@
       const z = document.createElement("div");
       const fertig = i < p.platz;
       z.className = "zeile" + (i === p.platz ? " jetzt" : "");
-      z.innerHTML = n.a + " + " + n.b + " = " +
+      z.innerHTML = n.a + " " + (n.op === "-" ? "−" : "+") + " " + n.b + " = " +
         (fertig ? n.ergebnis
                 : i === p.platz ? '<span class="luecke">?</span>'
                 : "▢");
@@ -326,9 +443,17 @@
     $("haus-gitter").appendChild(p);
   }
 
+  function kopfZeichnen(){
+    $("spiel-punkte").textContent = spiel.punkte;
+    const mal = malNehmer(spiel.serie);
+    $("spiel-serie").textContent = mal > 1 ? "×" + mal : "";
+    $("spiel-serie").classList.toggle("aus", mal === 1);
+  }
+
   function aufgabeZeigen(){
     const p = spiel.pakete[spiel.nr];
     $("spiel-fortschritt").textContent = tr("hh.lieferung", { n: spiel.nr+1, m: PAKETE });
+    kopfZeichnen();
     hausStart(p.n.a);
     listeZeichnen();
     sagen(tr("hh.waehle"), "");
@@ -353,13 +478,23 @@
     const richtig = spiel.stock === n.stock && spiel.fenster === n.fenster;
     const vonS = Math.floor(n.a/10), vonF = n.a%10;
 
+    let gewinn = 0;
     if(richtig){
       spiel.richtig++;
+      spiel.serie++;
+      const mal = malNehmer(spiel.serie);
+      gewinn = PUNKTE_PRO * mal;
+      spiel.punkte += gewinn;
       klangGut();
-      sagen(tr("hh.richtig"), "gut");
+      kopfZeichnen();
+      bewege($("spiel-punkte"), "puls", 450);
+      sagen(spiel.serie === 3 || spiel.serie === 6
+            ? tr("hh.serie.neu", { n: mal }) : tr("hh.richtig"), "gut");
     }else{
       spiel.fehler++;
+      spiel.serie = 0;
       klangDaneben();
+      kopfZeichnen();
       sagen(tr("hh.falsch", { n: n.ergebnis }), "schlecht");
       /* Die falsche Wohnung kurz zeigen, dann den richtigen Weg gehen -
          gelernt wird am Weg, nicht an der Strafe. */
@@ -367,6 +502,7 @@
       if(fal !== fensterEl[n.stock][n.fenster]){
         fal.className = "fenster daneben";
         fal.textContent = spiel.stock*10 + spiel.fenster;
+        bewege(fal, "wackelt", 500);
       }
     }
 
@@ -376,6 +512,10 @@
         ziel.className = "fenster ziel";
         ziel.textContent = n.ergebnis;
         paketZeigen(n.stock, n.fenster);
+        if(gewinn){
+          punkteFliegen(ziel, "+" + gewinn);
+          funkeln(ziel, gewinn >= 30 ? 7 : gewinn >= 20 ? 5 : 3);
+        }
         listeZeichnenErledigt();
         spaeter(weiter, 1200);
       });
@@ -388,7 +528,7 @@
     const p = spiel.pakete[spiel.nr];
     const zeilen = $("liste").children;
     if(zeilen[p.platz]) zeilen[p.platz].innerHTML =
-      p.n.a + " + " + p.n.b + " = " + p.n.ergebnis;
+      p.n.a + " " + (p.n.op === "-" ? "−" : "+") + " " + p.n.b + " = " + p.n.ergebnis;
   }
 
   function weiter(){
@@ -401,22 +541,44 @@
 
   function lieferungFertig(){
     const sterne = sterneFuer(spiel.fehler);
-    if(sterne > stand[spiel.stufe]){ stand[spiel.stufe] = sterne; standSichern(); }
+    const bonus = PUNKTE_BONUS[sterne] || 0;
+    spiel.punkte += bonus;
+    if(sterne > stand[spiel.modus][spiel.stufe]) stand[spiel.modus][spiel.stufe] = sterne;
+    stand.punkte += spiel.punkte;
+    standSichern();
+    kopfZeichnen();
     klangFertig();
-    $("fertig-sterne").textContent = "⭐".repeat(sterne) + "☆".repeat(3-sterne);
     $("fertig-text").textContent = tr("hh.fertig.text", { n: spiel.richtig, m: PAKETE });
+    $("fertig-punkte").textContent = tr("hh.fertig.punkte", { n: spiel.punkte });
+    $("fertig-bonus").textContent = bonus ? tr("hh.bonus", { n: bonus }) : "";
     $("fertig-lob").textContent = tr("hh.sterne" + sterne);
     const naechste = spiel.stufe + 1;
     $("btn-weiter").hidden = naechste > STUFEN.length;
     $("btn-weiter").textContent = tr("hh.weiter");
-    $("ov-fertig").classList.add("is-offen");
+    /* Erst geht im Haus das Licht an, dann kommt das Fenster. */
+    hausAnzuenden(()=>{
+      $("fertig-sterne").innerHTML = "";
+      $("ov-fertig").classList.add("is-offen");
+      for(let i = 0; i < 3; i++){
+        spaeter(()=>{
+          const st = document.createElement("span");
+          st.className = "stern" + (i < sterne ? " voll" : "");
+          st.textContent = i < sterne ? "⭐" : "☆";
+          $("fertig-sterne").appendChild(st);
+          if(i < sterne) ton(660 + i*220, .16, "triangle", 0, .12);
+        }, i*260);
+      }
+    });
   }
 
-  function lieferungStarten(stufe){
+  function lieferungStarten(stufe, modus){
     spiel.lauf++;
     spiel.stufe = stufe;
-    spiel.pakete = lieferungBauen(stufe);
+    if(modus) spiel.modus = modus;
+    spiel.pakete = lieferungBauen(stufe, spiel.modus);
     spiel.nr = 0; spiel.richtig = 0; spiel.fehler = 0;
+    spiel.punkte = 0; spiel.serie = 0;
+    hausAusmachen();
     $("spiel-stufe").textContent = tr("hh.stufe"+stufe+".name");
     $("ov-fertig").classList.remove("is-offen");
     zeigeSchirm("schirm-spiel");
@@ -432,6 +594,8 @@
   function zurAuswahl(){
     spiel.lauf++;                       /* laufende Zustellung entwerten */
     $("ov-fertig").classList.remove("is-offen");
+    hausAusmachen();
+    modiZeichnen();
     stufenZeichnen();
     zeigeSchirm("schirm-wahl");
   }
@@ -459,12 +623,12 @@
   $("btn-fertig-zurueck").addEventListener("click", zurAuswahl);
   $("btn-weiter").addEventListener("click", ()=>{
     const n = spiel.stufe + 1;
-    if(n <= STUFEN.length) lieferungStarten(n); else zurAuswahl();
+    if(n <= STUFEN.length) lieferungStarten(n, spiel.modus); else zurAuswahl();
   });
+  modiZeichnen();
   stufenZeichnen();
 
   /* Fuer die Testlaeufe sichtbar machen, sonst nichts nach aussen. */
   window.HOCHHAUS = { spiel:spiel, stand:stand, lieferungBauen:lieferungBauen,
-                      familien:{ 1:familieNachbarn, 2:familieFenster, 3:familieStockwerke,
-                                 4:einzelAufgabe } };
+                      familien:FAMILIEN };
 })();

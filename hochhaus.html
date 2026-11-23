@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="hochhaus.css?v=1">
+<link rel="stylesheet" href="hochhaus.css?v=2">
 </head>
 <body>
 <div id="app">
@@ -31,6 +31,10 @@
       </span>
     </div>
 
+    <div class="wahl-frage" data-i18n="hh.modus.frage">Was rechnest du?</div>
+    <div class="modi" id="modi"></div>
+    <div class="punktestand" id="punktestand"></div>
+
     <div class="wahl-frage" data-i18n="hh.start.frage">Welche Lieferung nimmst du?</div>
     <div class="stufen" id="stufen"></div>
 
@@ -41,6 +45,10 @@
   <section class="schirm" id="schirm-spiel">
     <div class="kopf">
       <span class="kopf-stufe" id="spiel-stufe">Nachbarn</span>
+      <span class="kopf-punktebox">
+        <span class="kopf-serie aus" id="spiel-serie"></span>
+        <span class="kopf-punkte" id="spiel-punkte">0</span>
+      </span>
       <span class="kopf-fortschritt" id="spiel-fortschritt">Paket 1 von 12</span>
     </div>
 
@@ -83,6 +91,8 @@
     <div class="sterne" id="fertig-sterne">⭐⭐⭐</div>
     <h2 data-i18n="hh.fertig.titel">Alle Pakete zugestellt!</h2>
     <p id="fertig-text"></p>
+    <p class="punkte-zeile" id="fertig-punkte"></p>
+    <p class="punkte-bonus" id="fertig-bonus"></p>
     <p class="lob" id="fertig-lob"></p>
     <button class="knopf" id="btn-weiter" type="button" data-i18n="hh.weiter">Nächste Lieferung</button>
     <button class="mini" id="btn-fertig-zurueck" type="button" data-i18n="hh.zurueck">Zur Auswahl</button>
@@ -90,7 +100,7 @@
 </div>
 
 <script src="strings.js?v=23"></script>
-<script src="hochhaus-texte.js?v=1"></script>
-<script src="hochhaus.js?v=1"></script>
+<script src="hochhaus-texte.js?v=2"></script>
+<script src="hochhaus.js?v=2"></script>
 </body>
 </html>

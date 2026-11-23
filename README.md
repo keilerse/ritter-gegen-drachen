@@ -58,7 +58,9 @@ und wer besiegt wird, fällt eine Stufe zurück – nicht auf null.
 
 Eigene Seite, eigenes Aussehen, eigener Zahlenraum: **https://keilerse.github.io/ritter-gegen-drachen/hochhaus.html**
 
-Für die zweite Klasse, Plus bis 100. Das Haus hat zehn Stockwerke zu je zehn
+Für die zweite Klasse, Plus und Minus bis 100. Vorneweg wird gewählt, welche
+Richtung geübt wird – beide haben ihre eigenen vier Lieferungen und ihre eigenen
+Sterne. Das Haus hat zehn Stockwerke zu je zehn
 Fenstern – das ist die Hundertertafel als Gebäude: **Stockwerk = Zehner, Fenster =
 Einer**. Wer 30 dazuzählt, fährt drei Stockwerke hoch und bleibt beim selben
 Fenster; wer 3 dazuzählt, geht drei Fenster weiter und bleibt im selben Stock.
@@ -70,9 +72,9 @@ Vier Lieferungen zu je zwölf Paketen, jede schaltet die nächste frei:
 
 | | | |
 |---|---|---|
-| 1 | **Nachbarn** | `21+3, 21+4, 21+5` |
-| 2 | **Gleiches Fenster** | `21+4, 11+4, 1+4` |
-| 3 | **Ganze Stockwerke** | `25+10, 25+20, 25+30` |
+| 1 | **Nachbarn** | `21+3, 21+4, 21+5` · `25−2, 25−3, 25−4` |
+| 2 | **Gleiches Fenster** | `21+4, 11+4, 1+4` · `24−3, 14−3, 4−3` |
+| 3 | **Ganze Stockwerke** | `25+10, 25+20, 25+30` · `43−10, 43−20, 43−30` |
 | 4 | **Durcheinander** | alles gemischt, einzeln |
 
 Die Aufgaben kommen in **Familien zu dritt** und stehen untereinander wie im
@@ -82,9 +84,16 @@ genau das verfehlen. Erst die vierte Stufe stellt sie einzeln; das ist der
 Übertrag. **Keine Aufgabe überschreitet den Zehner**, so wie im Heft auch: Erst
 sitzt der Stellenwert, der Zehnerübergang im Hunderterraum kommt später.
 
+**Punkte:** zehn je zugestelltem Paket, ab drei richtigen in Folge doppelt, ab
+sechs dreifach – dieselbe Rechnung wie das Serien-Gold im Rechen-Ritter, die die
+Kinder schon kennen. Dazu ein Sauber-Bonus von 60 Punkten für eine fehlerfreie
+Lieferung. Ein sauberer Durchgang bringt also 350 Punkte. Der Punktestand wächst
+über alle Lieferungen hinweg und steht auf dem Auswahlbildschirm.
+
 Namen, Bild und Sprache liest das Hochhaus aus den Konten des Rechen-Ritters –
 beide Seiten kommen von derselben Adresse. Geschrieben wird nur der eigene
-Schlüssel `…​.hochhaus` mit den Sternen je Stufe.
+Schlüssel `…​.hochhaus` mit den Sternen je Richtung und dem Punktestand. Alte
+Spielstände aus der Nur-Plus-Fassung werden als Plus übernommen.
 
 ### Schatzkammer, Truhen und Ränge
 
