@@ -105,7 +105,8 @@ der App – wer ein Bussi bekommt, merkt das auch so. Die Beträge stehen als
 `BELOHNUNGEN` in `hochhaus.js`.
 
 Namen, Bild und Sprache liest das Hochhaus aus den Konten des Rechen-Ritters –
-beide Seiten kommen von derselben Adresse. Geschrieben wird nur der eigene
+beide Seiten kommen von derselben Adresse. Über die Leiste ganz oben lässt sich
+das Kind wechseln; angelegt werden Konten weiterhin nur im Rechen-Ritter. Geschrieben wird nur der eigene
 Schlüssel `…​.hochhaus` mit den Sternen je Richtung und dem Punktestand. Alte
 Spielstände aus der Nur-Plus-Fassung werden als Plus übernommen.
 

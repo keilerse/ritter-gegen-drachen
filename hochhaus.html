@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="hochhaus.css?v=3">
+<link rel="stylesheet" href="hochhaus.css?v=4">
 </head>
 <body>
 <div id="app">
@@ -23,13 +23,14 @@
       <span class="zeile2" data-i18n="hh.untertitel">Pakete austragen, Stockwerk für Stockwerk</span>
     </h1>
 
-    <div class="bote-leiste">
+    <button class="bote-leiste" id="btn-spieler" type="button">
       <span class="bote-bild" id="wahl-avatar">🙂</span>
       <span class="bote-info">
         <span class="bote-kopf" data-i18n="hh.wer">Wer trägt aus?</span>
         <span class="bote-name" id="wahl-name"></span>
       </span>
-    </div>
+      <span class="bote-pfeil">›</span>
+    </button>
 
     <div class="wahl-frage" data-i18n="hh.modus.frage">Was rechnest du?</div>
     <div class="modi" id="modi"></div>
@@ -97,6 +98,16 @@
 
 </div>
 
+<!-- ============ SPIELERWAHL ============ -->
+<div class="overlay" id="ov-konto">
+  <div class="overlay-karte">
+    <h2 data-i18n="wer.spielt">Wer spielt?</h2>
+    <div class="konto-gitter" id="konto-gitter"></div>
+    <p class="hinweis" data-i18n="hh.konto.neu">Neue Spieler legst du im Rechen-Ritter an.</p>
+    <button class="mini" id="btn-konto-zu" type="button" data-i18n="zurueck">Zurück</button>
+  </div>
+</div>
+
 <!-- ============ ABSCHLUSS ============ -->
 <div class="overlay" id="ov-fertig">
   <div class="overlay-karte">
@@ -112,7 +123,7 @@
 </div>
 
 <script src="strings.js?v=23"></script>
-<script src="hochhaus-texte.js?v=3"></script>
-<script src="hochhaus.js?v=3"></script>
+<script src="hochhaus-texte.js?v=4"></script>
+<script src="hochhaus.js?v=4"></script>
 </body>
 </html>

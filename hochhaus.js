@@ -49,17 +49,22 @@
      Rechen-Ritter, weil beide Seiten von derselben Adresse kommen.
      Geschrieben wird ausschliesslich der eigene Schluessel ".hochhaus" -
      an den Daten des anderen Spiels ruehrt hier nichts. */
+  function kontoListe(){
+    try{
+      const liste = JSON.parse(localStorage.getItem("rechenritter.konten") || "[]");
+      return Array.isArray(liste) ? liste.filter(x => x && x.id) : [];
+    }catch(e){ return []; }
+  }
   function kontoLesen(){
+    const liste = kontoListe();
     try{
       const id = localStorage.getItem("rechenritter.aktiv");
-      const liste = JSON.parse(localStorage.getItem("rechenritter.konten") || "[]");
-      const k = liste.filter(x => x && x.id === id)[0];
+      const k = liste.filter(x => x.id === id)[0];
       if(k) return k;
-      if(liste.length) return liste[0];
     }catch(e){}
-    return null;
+    return liste.length ? liste[0] : null;
   }
-  const konto = kontoLesen();
+  let konto = kontoLesen();
   const standKey = () => "rechenritter." + ((konto && konto.id) || "gast") + ".hochhaus";
 
   /* Sterne je Stufe und Richtung, dazu das Punktekonto. */
@@ -83,7 +88,7 @@
   function standSichern(){
     try{ localStorage.setItem(standKey(), JSON.stringify(stand)); }catch(e){}
   }
-  const stand = standLaden();
+  let stand = standLaden();
   const offen = (m, s) => s === 1 || stand[m][s-1] > 0;
 
   /* ================= Punkte =================
@@ -681,11 +686,59 @@
     zeigeSchirm("schirm-wahl");
   }
 
+  /* Der Spielerwechsel: Die Konten gehoeren dem Rechen-Ritter, das Hochhaus
+     liest sie nur. Geschrieben wird einzig, WER gerade dran ist - genau das,
+     was ein Wechsel bedeutet, und derselbe Schluessel, den der Ritter dafuer
+     benutzt. Der Spielstand haengt am Konto und wird mitgetauscht. */
+  function kontoGitterZeichnen(){
+    const box = $("konto-gitter");
+    box.innerHTML = "";
+    const liste = kontoListe();
+    if(!liste.length){
+      const leer = document.createElement("p");
+      leer.className = "hinweis";
+      leer.textContent = tr("hh.konto.leer");
+      box.appendChild(leer);
+      return;
+    }
+    liste.forEach(k => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "konto-knopf" + (konto && k.id === konto.id ? " aktiv" : "");
+      b.dataset.konto = k.id;
+      b.innerHTML = '<span class="konto-bild">' + (k.bild || "🙂") + '</span>' +
+                    '<span class="konto-name">' + (k.name || "?") + '</span>' +
+                    (konto && k.id === konto.id
+                       ? '<span class="konto-dran">' + tr("konto.du.bist.dran") + '</span>' : "");
+      b.addEventListener("click", ()=>kontoWechseln(k.id));
+      box.appendChild(b);
+    });
+  }
+
+  function kontoWechseln(id){
+    if(konto && konto.id === id){ $("ov-konto").classList.remove("is-offen"); return; }
+    try{ localStorage.setItem("rechenritter.aktiv", id); }catch(e){}
+    spiel.lauf++;                       /* laufende Zustellung entwerten */
+    konto = kontoLesen();
+    stand = standLaden();               /* der Spielstand haengt am Konto */
+    spiel.modus = "plus";
+    $("ov-konto").classList.remove("is-offen");
+    spracheSetzen();
+    hausBauen();                        /* der Bote traegt das neue Bild */
+    hausAusmachen();
+    modiZeichnen();
+    stufenZeichnen();
+    balkenZeichnen();
+    zeigeSchirm("schirm-wahl");
+  }
+
   function spracheSetzen(){
     setLang((konto && konto.sprache) || browserSprache());
     document.title = tr("hh.title");
     $("wahl-avatar").textContent = (konto && konto.bild) || "🙂";
     $("wahl-name").textContent = (konto && konto.name) || "";
+    const bote = $("bote");
+    if(bote) bote.textContent = (konto && konto.bild) || "🙂";
   }
 
   /* ================= Start ================= */
@@ -699,6 +752,11 @@
     if(spiel.gesperrt) return;
     spiel.fenster = w; wahlSetzen("reihe-fenster", w); knopfPruefen();
   });
+  $("btn-spieler").addEventListener("click", ()=>{
+    kontoGitterZeichnen();
+    $("ov-konto").classList.add("is-offen");
+  });
+  $("btn-konto-zu").addEventListener("click", ()=>$("ov-konto").classList.remove("is-offen"));
   $("btn-klingeln").addEventListener("click", klingeln);
   $("btn-abbrechen").addEventListener("click", zurAuswahl);
   $("btn-fertig-zurueck").addEventListener("click", zurAuswahl);
@@ -714,5 +772,6 @@
 
   /* Fuer die Testlaeufe sichtbar machen, sonst nichts nach aussen. */
   window.HOCHHAUS = { spiel:spiel, stand:stand, lieferungBauen:lieferungBauen,
-                      familien:FAMILIEN, belohnungen:BELOHNUNGEN, punkteDazu:punkteDazu };
+                      familien:FAMILIEN, belohnungen:BELOHNUNGEN, punkteDazu:punkteDazu,
+                      konto:()=>konto, standJetzt:()=>stand };
 })();
